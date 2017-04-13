@@ -1,0 +1,6 @@
+{
+  "name": "Virtuallab",
+  "tagline": "alpha1",
+  "body": "### Welcome to Virtual Lab.\r\n* <a href=\"Straightness.html\">导轨直线度误差</a>\r\n* <a href=\"GearBox.html\">减速箱拆装</a>\r\n* <a href=\"SignalGenerator.html\">典型信号的波形与频谱分析</a>\r\n* <a href=\"ImageProcessing.html\">图像采集与分析</a>\r\n* <a href=\"ControlCharacteristic.html\">典型环节控制特性分析</a>\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}

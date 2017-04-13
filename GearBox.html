@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>减速箱拆装</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <!--<style>-->
+    <!--body {-->
+    <!--font-family: Monospace;-->
+    <!--background-color: #f0f0f0;-->
+    <!--margin: 0px;-->
+    <!--overflow: hidden;-->
+    <!--}-->
+    <!--</style>-->
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<canvas id="mainCanvas" width="100%" height="100%"></canvas>
+<div id="loadingDiv" class="loading-div">
+    <img class="loading-img" src="img/loading.gif" alt="loading">
+</div>
+<script src="js/three/three.js"></script>
+
+<script src="js/three/controls/TrackballControls.js"></script>
+
+<script src="js/three/MTLLoader.js"></script>
+
+<script src="js/three/OBJLoader.js"></script>
+
+<script>
+    var loadingDiv = document.getElementById('loadingDiv');
+
+    var mainCanvas = document.getElementById('mainCanvas');
+    var camera, controls, scene, renderer;
+    var objects = [];
+    var plane = new THREE.Plane();
+    var raycaster = new THREE.Raycaster();
+    var mouse = new THREE.Vector2(),
+            offset = new THREE.Vector3(),
+            intersection = new THREE.Vector3(),
+            INTERSECTED, SELECTED;
+
+    init();
+
+    function init() {
+
+
+        camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 10000);
+        camera.position.z = 800;
+
+        controls = new THREE.TrackballControls(camera);
+        controls.rotateSpeed = 4.0;
+        controls.zoomSpeed = 1.2;
+        controls.panSpeed = 0.8;
+        controls.noZoom = false;
+        controls.noPan = false;
+        controls.staticMoving = true;
+        controls.dynamicDampingFactor = 0.3;
+
+        scene = new THREE.Scene();
+
+
+        var light = new THREE.AmbientLight(0x555555, 1);
+        scene.add(light);
+
+        var light1 = new THREE.PointLight(0xffffff, 1);
+        light1.position.set(4000, 4000, 4000);
+        scene.add(light1);
+        var light2 = new THREE.PointLight(0xffffff, 1);
+        light2.position.set(-4000, -4000, -4000);
+        scene.add(light2);
+
+        var mtlLoader = new THREE.MTLLoader();
+
+        loadingDiv.style.display = 'flex';
+        mtlLoader.load('assets/GearBox/GearBox3.mtl', function (materials) {
+
+            materials.preload();
+
+            var objLoader = new THREE.OBJLoader();
+            objLoader.setMaterials(materials);
+            objLoader.load('assets/GearBox/GearBox3.obj', function (a) {
+                a.traverse(function (child) {
+                    if (child instanceof THREE.Mesh) {
+
+                        child.material.side = THREE.DoubleSide;
+                    }
+                });
+                loadingDiv.style.display = 'none';
+                scene.add(a);
+                objects.push(a);
+            });
+        });
+
+        renderer = new THREE.WebGLRenderer({
+            canvas: mainCanvas,
+            antialias: true
+        });
+        renderer.setClearColor(0xf0f0f0);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.sortObjects = false;
+
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFShadowMap;
+
+//        mainCanvas.appendChild(renderer.domElement);
+
+//        var info = document.createElement( 'div' );
+//        info.style.position = 'absolute';
+//        info.style.top = '10px';
+//        info.style.width = '100%';
+//        info.style.textAlign = 'center';
+//        info.innerHTML = '<a href="http://threejs.org" target="_blank">three.js</a> webgl - draggable cubes';
+//        mainCanvas.appendChild( info );
+//
+//        stats = new Stats();
+//        mainCanvas.appendChild( stats.dom );
+
+        renderer.domElement.addEventListener('mousemove', onDocumentMouseMove, false);
+        renderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
+        renderer.domElement.addEventListener('mouseup', onDocumentMouseUp, false);
+
+        window.addEventListener('resize', onWindowResize, false);
+
+        animate();
+    }
+
+    function onWindowResize() {
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+    }
+
+    function onDocumentMouseMove(event) {
+
+        event.preventDefault();
+
+        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = -( event.clientY / window.innerHeight ) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+
+        if (SELECTED) {
+
+            if (raycaster.ray.intersectPlane(plane, intersection)) {
+
+                SELECTED.position.copy(intersection.sub(offset));
+
+            }
+
+            return;
+
+        }
+
+        var intersects = raycaster.intersectObjects(objects, true);
+
+        if (intersects.length > 0) {
+
+            if (INTERSECTED != intersects[0].object) {
+
+                if (INTERSECTED) INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
+
+                INTERSECTED = intersects[0].object;
+                INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+
+                plane.setFromNormalAndCoplanarPoint(
+                        camera.getWorldDirection(plane.normal),
+                        INTERSECTED.position);
+
+            }
+
+            mainCanvas.style.cursor = 'pointer';
+
+        } else {
+
+            if (INTERSECTED) INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
+
+            INTERSECTED = null;
+
+            mainCanvas.style.cursor = 'auto';
+
+        }
+
+    }
+
+    function onDocumentMouseDown(event) {
+
+        event.preventDefault();
+
+        raycaster.setFromCamera(mouse, camera);
+
+        var intersects = raycaster.intersectObjects(objects, true);
+
+        if (intersects.length > 0) {
+
+            controls.enabled = false;
+
+            SELECTED = intersects[0].object;
+
+            if (raycaster.ray.intersectPlane(plane, intersection)) {
+
+                offset.copy(intersection).sub(SELECTED.position);
+
+            }
+
+            mainCanvas.style.cursor = 'move';
+
+        }
+
+    }
+
+    function onDocumentMouseUp(event) {
+
+        event.preventDefault();
+        controls.enabled = true;
+
+        if (INTERSECTED)
+            SELECTED = null;
+
+        mainCanvas.style.cursor = 'auto';
+    }
+
+
+    function animate() {
+
+        requestAnimationFrame(animate);
+        render();
+    }
+
+    function render() {
+
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+</script>
+
+</body>
+</html>

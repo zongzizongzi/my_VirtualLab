@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图像采集与二值化分析</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="main-div">
+    <div class="rowFlex-div">
+        <video id="video" width="320" height="240" class="picture-canvas" autoplay="autoplay"></video>
+        <canvas id="captureCanvas" width="320" height="240" class="picture-canvas"></canvas>
+        <canvas id="grayCanvas" width="320" height="240" class="picture-canvas"></canvas>
+        <canvas id="equalizerCanvas" width="320" height="240" class="picture-canvas"></canvas>
+        <canvas id="binaryCanvas" width="320" height="240" class="picture-canvas"></canvas>
+
+        <div id="control-div">
+            <!--<button onclick="openCamera()">开启摄像头</button>-->
+            <div>
+                <button class="normal-btn" onclick="capture()">拍照</button>
+                <button class="normal-btn" onclick="histogramEqualizer()">直方图均衡化</button>
+            </div>
+            <canvas id="knobCanvas" width="128" height="128"></canvas>
+            <span id="grayValue" style="width: 200px">二值化阈值：未设定</span>
+        </div>
+    </div>
+    <canvas id="barCanvas" width="1000" height="320"></canvas>
+    <!--<input type="button" title="视频" value="视频" onclick="getVideo()"/><br/>-->
+    <!--<canvas id="canvas2" width="320" height="240"></canvas>-->
+
+</div>
+<script src="js/VILibrary.js"></script>
+<script src="js/jquery-3.1.1.min.js"></script>
+<script>
+
+    'use strict';
+    let video = $('#video')[0];
+    let captureCanvas = $('#captureCanvas')[0];
+    let grayCanvas = $('#grayCanvas')[0];
+    let equalizerCanvas = $('#equalizerCanvas')[0];
+    let binaryCanvas = $('#binaryCanvas')[0];
+    let barCanvas = $('#barCanvas')[0];
+    let knobCanvas = $('#knobCanvas')[0];
+    let span = $('#grayValue')[0];
+
+    let captureContext = captureCanvas.getContext('2d');
+    let grayContext = grayCanvas.getContext('2d');
+    let equalizerContext = equalizerCanvas.getContext('2d');
+    let binaryContext = binaryCanvas.getContext('2d');
+    let captureWidth = captureCanvas.width;
+    let captureHeight = captureCanvas.height;
+    let bar = new VILibrary.VI.BarVI(barCanvas);
+    let captureFlag = false;
+    let HISTOGRAM = [], EQUALIZER_HIST = [];
+    drawText('原图', captureContext);
+    drawText('灰度图', grayContext);
+    drawText('均衡化图', equalizerContext);
+    drawText('二值化图', binaryContext);
+
+    let knob = new VILibrary.VI.KnobVI(knobCanvas);
+    knob.setDataRange(0, 255, 100);
+
+    knob.attachEvent('mouseMove', function () {
+        if (captureFlag) {
+            let data = knob.getData();
+            let threshold = parseInt(data[data.length - 1]);
+            binary(threshold);
+
+            span.innerText = '二值化阈值：' + threshold;
+        }
+    });
+
+    // Get access to the camera!
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // Not adding `{ audio: true }` since we only want video now
+        navigator.mediaDevices.getUserMedia({video: true, audio: false}).then(function (stream) {
+            video.src = window.URL.createObjectURL(stream);
+            video.play();
+        });
+    } else {
+        $('body').text('您的浏览器已禁用摄像头或不支持调用摄像头');
+    }
+
+    /**
+     * 拍照
+     */
+    function capture() {
+
+        captureFlag = false;
+        let videoRatio = video.videoHeight / video.videoWidth;
+        if (captureCanvas.height / captureCanvas.width > videoRatio) {
+
+            captureHeight = captureCanvas.width * videoRatio;
+            captureWidth = captureCanvas.width;
+        } else {
+
+            captureHeight = captureCanvas.height;
+            captureWidth = captureCanvas.height / videoRatio;
+        }
+        captureContext.drawImage(video, 0, 0, captureWidth, captureHeight); //将video对象内指定的区域捕捉绘制到画布上指定的区域，实现拍照。
+        convertCanvasToImage();
+    }
+
+    let grayImageData = captureContext.createImageData(captureWidth, captureHeight);
+
+    // Converts canvas to an image
+    function convertCanvasToImage() {
+        let rgbImageData = captureContext.getImageData(0, 0, captureWidth, captureHeight);   //rgba格式数组
+        let l = rgbImageData.data.length / 4, R, G, B;
+
+        for (let i = 0; i < l; i++) {
+            R = rgbImageData.data[i * 4];
+            G = rgbImageData.data[i * 4 + 1];
+            B = rgbImageData.data[i * 4 + 2];
+
+            grayImageData.data[i * 4] = grayImageData.data[i * 4 + 1] = grayImageData.data[i * 4 + 2] = (R * 299 + G * 587 + B * 114 + 500) / 1000;
+            grayImageData.data[i * 4 + 3] = rgbImageData.data[i * 4 + 3];
+        }
+        grayContext.putImageData(grayImageData, 0, 0);
+        drawBar(getHistogram(grayImageData));
+    }
+
+    function getHistogram(grayimage) {
+        initHistogram(HISTOGRAM);
+        for (let j = 0; j < grayimage.data.length; j += 4) {
+            HISTOGRAM[grayimage.data[j]]++;
+        }
+        captureFlag = true;
+        return HISTOGRAM;
+    }
+
+    /**
+     *直方图均衡化
+     */
+    function histogramEqualizer() {
+
+        if (!captureFlag) {
+
+            alert('请先照相再进行图像处理操作');
+            return;
+        }
+        let tempHist = [], i;
+        EQUALIZER_HIST[0] = HISTOGRAM[0];
+        initHistogram(tempHist);
+
+        for (i = 1; i < 256; i++)
+            EQUALIZER_HIST[i] = EQUALIZER_HIST[i - 1] + HISTOGRAM[i];
+
+        let total = EQUALIZER_HIST[255];
+
+        for (i = 0; i < 256; i++) {
+            EQUALIZER_HIST[i] = parseInt(255 * EQUALIZER_HIST[i] / total);
+            tempHist[EQUALIZER_HIST[i]] += HISTOGRAM[i];
+        }
+        drawBar(tempHist);
+
+        let tempData = equalizerContext.createImageData(captureWidth, captureHeight);
+        let l = tempData.data.length / 4;
+        for (i = 0; i < l; i++) {
+            tempData.data[i * 4] = tempData.data[i * 4 + 1] = tempData.data[i * 4 + 2] = EQUALIZER_HIST[grayImageData.data[i * 4]];
+            tempData.data[i * 4 + 3] = grayImageData.data[i * 4 + 3];
+        }
+        equalizerContext.putImageData(tempData, 0, 0);
+    }
+
+    /**
+     * 二值化
+     */
+    function binary(threshold) {
+
+        let tempImageData = binaryContext.createImageData(captureWidth, captureHeight);
+        let tempHistogram = [];
+        let zeroCount = 0;
+        for (let i = 0; i < grayImageData.data.length; i += 4) {
+            if (grayImageData.data[i] < threshold) {
+                tempImageData.data[i] = tempImageData.data[i + 1] = tempImageData.data[i + 2] = 0;
+                zeroCount++;
+            }
+            else
+                tempImageData.data[i] = tempImageData.data[i + 1] = tempImageData.data[i + 2] = 255;
+            tempImageData.data[i + 3] = grayImageData.data[i + 3];
+        }
+
+        initHistogram(tempHistogram);
+        tempHistogram[0] = zeroCount;
+        tempHistogram[255] = grayImageData.data.length / 4 - zeroCount;
+        drawBar(tempHistogram);
+        binaryContext.putImageData(tempImageData, 0, 0);
+    }
+
+    /**
+     * 画直方图
+     * @param histogram
+     */
+    function drawBar(histogram) {
+
+        let data = [], xAxis = [];
+        for (let i = 0; i < 256; i++) {
+            data.push(histogram[i] == undefined ? 0 : histogram[i]);
+            xAxis.push(i + 1);
+        }
+        bar.setData(data);
+    }
+
+    function drawText(text, context) {
+
+        context.font = "normal 28px Microsoft YaHei";
+        context.fillText(text, 320 / 2 - 14 * text.length, 240 / 2 + 14);
+    }
+
+    function initHistogram(histogram) {
+
+        for (let i = 0; i < 256; i++) {
+
+            histogram[i] = 0;
+        }
+    }
+
+</script>
+</body>
+</html>

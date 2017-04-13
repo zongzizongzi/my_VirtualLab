@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>齿圈径向跳动实验</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="main-div">
+    <canvas id="mainCanvas" width="1000" height="500"></canvas>
+    <table id="mainTable">
+        <tr>
+        <td>
+            <canvas id="myDial" width="300" height="300"></canvas>
+            <button id="completeBtn"  onclick="setEChartData()" >读数完成</button>
+            <button id="resetBtn"  onclick="reset()">重置</button>
+            <!--<tr>
+                <td><canvas id="myDial" width="350" height="300"></canvas></td>
+            </tr>
+            <tr>
+                <td><button id="completeBtn" onclick="setEChartData()">读数完成</button></td>
+            </tr>-->
+
+        </td>
+        <td rowspan="2"><!--合并行-->
+            <table id="ToothRingTable">
+            <tr>
+                <th>齿序</th>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>4</td>
+                <td>5</td>
+                <td>6</td>
+                <td>7</td>
+                <td>8</td>
+                <td>9</td>
+                <td>10</td>
+            </tr>
+            <tr>
+                <th>读数(μm)</th>
+                <td><input id="data1" type="number" class="data-input"></td>
+                <td><input id="data2" type="number" class="data-input"></td>
+                <td><input id="data3" type="number" class="data-input"></td>
+                <td><input id="data4" type="number" class="data-input"></td>
+                <td><input id="data5" type="number" class="data-input"></td>
+                <td><input id="data6" type="number" class="data-input"></td>
+                <td><input id="data7" type="number" class="data-input"></td>
+                <td><input id="data8" type="number" class="data-input"></td>
+                <td><input id="data9" type="number" class="data-input"></td>
+                <td><input id="data10" type="number" class="data-input"></td>
+            </tr>
+            <tr>
+                <th>齿序</th>
+                <td>11</td>
+                <td>12</td>
+                <td>13</td>
+                <td>14</td>
+                <td>15</td>
+                <td>16</td>
+                <td>17</td>
+                <td>18</td>
+                <td>19</td>
+                <td>20</td>
+            </tr>
+            <tr>
+                <th>读数(μm)</th>
+                <td><input id="data11" type="number" class="data-input"></td>
+                <td><input id="data12" type="number" class="data-input"></td>
+                <td><input id="data13" type="number" class="data-input"></td>
+                <td><input id="data14" type="number" class="data-input"></td>
+                <td><input id="data15" type="number" class="data-input"></td>
+                <td><input id="data16" type="number" class="data-input"></td>
+                <td><input id="data17" type="number" class="data-input"></td>
+                <td><input id="data18" type="number" class="data-input"></td>
+                <td><input id="data19" type="number" class="data-input"></td>
+                <td><input id="data20" type="number" class="data-input"></td>
+
+            </tr>
+            <tr>
+                <th>齿序</th>
+                <td>21</td>
+                <td>22</td>
+                <td>23</td>
+                <td>24</td>
+                <td>25</td>
+                <td>26</td>
+                <td>27</td>
+                <td>28</td>
+                <td>29</td>
+                <td>30</td>
+            </tr>
+            <tr>
+                <th>读数(μm)</th>
+                <td><input id="data21" type="number" class="data-input"></td>
+                <td><input id="data22" type="number" class="data-input"></td>
+                <td><input id="data23" type="number" class="data-input"></td>
+                <td><input id="data24" type="number" class="data-input"></td>
+                <td><input id="data25" type="number" class="data-input"></td>
+                <td><input id="data26" type="number" class="data-input"></td>
+                <td><input id="data27" type="number" class="data-input"></td>
+                <td><input id="data28" type="number" class="data-input"></td>
+                <td><input id="data29" type="number" class="data-input"></td>
+                <td><input id="data30" type="number" class="data-input"></td>
+            </tr>
+            <tr>
+                <th>齿序</th>
+                <td>31</td>
+                <td>32</td>
+                <td>33</td>
+                <td>34</td>
+                <td>35</td>
+                <td>36</td>
+                <td>37</td>
+                <td>38</td>
+                <td>39</td>
+                <td>40</td>
+            </tr>
+            <tr>
+                <th>读数(μm)</th>
+                <td><input id="data31" type="number" class="data-input"></td>
+                <td><input id="data32" type="number" class="data-input"></td>
+                <td><input id="data33" type="number" class="data-input"></td>
+                <td><input id="data34" type="number" class="data-input"></td>
+                <td><input id="data35" type="number" class="data-input"></td>
+                <td><input id="data36" type="number" class="data-input"></td>
+                <td><input id="data37" type="number" class="data-input"></td>
+                <td><input id="data38" type="number" class="data-input"></td>
+                <td><input id="data39" type="number" class="data-input"></td>
+                <td><input id="data40" type="number" class="data-input"></td>
+            </tr>
+            <tr>
+                    <th>测得误差</th>
+                    <td id="error" colspan="10"></td><!--合并列-->
+            </tr>
+        </table>
+        </td>
+        </tr>
+
+    </table>
+   <!-- <div>
+        （表中读数单位为：μm）
+        齿圈径向跳动△Fr=<output id="result" type="number" class="data-output"></output>μm
+    </div>-->
+</div>
+    <!--虚拟仪器库-->
+    <script src="js/VILibrary.js"></script>
+   <!--js简写方法-->
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <!--弹出框-->
+    <script src="js/layui/lay/dest/layui.all.js"></script>
+
+    <!--三维显示库-->
+    <script src="js/three/three.js"></script>
+    <script src="js/three/MTLLoader.js"></script>
+    <script src="js/three/OBJLoader.js"></script>
+    <script src="js/three/controls/OrbitControls.js"></script>
+    <script src="js/three/ObjectControls.js"></script>
+    <script>
+        'use strict';
+        //let layerOpenFlag = false;
+
+        let dialVI = new VILibrary.VI.DialVI($('#myDial'));
+        let rrToothRingVI = new VILibrary.VI.RRToothRingVI($('#mainCanvas'), true);
+        VILibrary.InnerObjects.bindDataLine(rrToothRingVI.id, dialVI.id, 1, 0);
+        dialVI.toggleObserver(true);
+
+        function setEChartData() {
+
+            let data = [],error/*, sumData = [], relativeSumData = [], sum = 0.0*/;
+            for (let i = 1; i <= 5; i++) {
+                let temp = parseFloat(document.getElementById('data' + i).value);
+//            console.log(isNaN(temp)+':'+typeof temp);//type是number但isNaN检测得true？
+                if (isNaN(temp)) {
+                    alert('读数未完成，请检查实验步骤是否正确');
+                    return;
+                }
+                else {
+                    data.push(temp);
+                    /*sum += parseFloat(data[i - 1]);
+                    sumData.push(sum);
+                    relativeSumData.push((sumData[i - 1] - i * data[0]).toFixed(1));
+                    document.getElementById('sumData' + i).innerText = sum.toFixed(1);
+                    document.getElementById('relativeSumData' + i).innerText = relativeSumData[i - 1];*/
+                }
+            }
+            error= Math.max.apply(Math,data)-Math.min.apply(Math,data);
+            document.getElementById('error').innerText = error+"μm";
+        }
+
+        function reset(){
+            //dialVI.angle=0;
+            rrToothRingVI.reset();
+//            document.getElementById('data1').value="";
+            document.getElementsByTagName('input').value="";
+            var t = document.getElementsByTagName("INPUT");
+            for (var i=0; i<t.length;i++){
+                    t[i].value="";//清空
+            }
+            document.getElementById('error').innerText = "";
+
+        }
+    </script>
+
+
+
+</body>
+</html>

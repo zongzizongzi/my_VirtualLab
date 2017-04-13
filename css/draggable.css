@@ -1,0 +1,190 @@
+.demo {
+    /* for IE10+ touch devices */
+    touch-action: none;
+}
+
+.draggable-sideBar {
+    width: 160px;
+    height: 700px;
+    border: 1px solid #CCC;
+    background-color: white;
+
+    /*from jsPlumbToolkit-defaults.css*/
+    /*overflow: hidden !important;*/
+    position: relative;
+    /*cursor: pointer;*/
+    overflow: auto !important;
+}
+
+.draggable-sideBar .draggable-element {
+    border: 1px solid rgba(52, 103, 137, 0.5);
+    box-shadow: 2px 2px 19px #aaa;
+    -o-box-shadow: 2px 2px 19px #aaa;
+    -webkit-box-shadow: 2px 2px 19px #aaa;
+    -moz-box-shadow: 2px 2px 19px #aaa;
+    /*-moz-border-radius: 0.5em;*/
+    /*border-radius: 0.5em;*/
+    /*opacity: 0.8;*/
+    /*line-height: 80px;*/
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+    text-align: center;
+    z-index: 20;
+    background-color: ghostwhite;
+    color: black;
+    font-family: helvetica, sans-serif;
+    padding: 0.3em;
+    margin: 2px 0;
+    font-size: 1.2em;
+    -webkit-transition: -webkit-box-shadow 0.15s ease-in;
+    -moz-transition: -moz-box-shadow 0.15s ease-in;
+    -o-transition: -o-box-shadow 0.15s ease-in;
+    transition: box-shadow 0.15s ease-in;
+}
+
+.draggable-sideBar .draggable-element:hover {
+    box-shadow: 2px 2px 19px #444;
+    -o-box-shadow: 2px 2px 19px #444;
+    -webkit-box-shadow: 2px 2px 19px #444;
+    -moz-box-shadow: 2px 2px 19px #444;
+    opacity: 0.6;
+}
+
+.draggable-div {
+    flex-grow: 1;
+    height: 700px;
+    border: 1px solid #CCC;
+    background-color: white;
+
+    /*from jsPlumbToolkit-defaults.css*/
+    /*overflow: hidden !important;*/
+    position: relative;
+    /*margin-top: 30px;*/
+    /*cursor: pointer;*/
+    overflow: auto !important;
+}
+
+.draggable-div .draggable-element {
+    border: 1px solid #346789;
+    /*box-shadow: 2px 2px 19px #aaa;*/
+    /*-o-box-shadow: 2px 2px 19px #aaa;*/
+    /*-webkit-box-shadow: 2px 2px 19px #aaa;*/
+    /*-moz-box-shadow: 2px 2px 19px #aaa;*/
+    /*-moz-border-radius: 0.5em;*/
+    /*border-radius: 0.5em;*/
+    opacity: 0.8;
+    line-height: 80px;
+    cursor: pointer;
+    text-align: center;
+    z-index: 20;
+    position: absolute;
+    background-color: #eeeeef;
+    color: black;
+    font-family: helvetica, sans-serif;
+    padding: 0.3em;
+    font-size: 0.9em;
+    -webkit-transition: -webkit-box-shadow 0.15s ease-in;
+    -moz-transition: -moz-box-shadow 0.15s ease-in;
+    -o-transition: -o-box-shadow 0.15s ease-in;
+    transition: box-shadow 0.15s ease-in;
+}
+
+.draggable-div .jtk-connector {
+    z-index: 4;
+}
+
+.draggable-div .jtk-endpoint, .endpointTargetLabel, .endpointSourceLabel {
+    z-index: 21;
+    cursor: pointer;
+}
+
+.draggable-div .aLabel {
+    background-color: white;
+    padding: 0.4em;
+    font: 12px sans-serif;
+    color: #444;
+    z-index: 21;
+    border: 1px dotted gray;
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+#contextMenu {
+
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 120px;
+    display: none;
+    box-shadow: 2px 2px 19px #aaa;
+    -o-box-shadow: 2px 2px 19px #aaa;
+    -webkit-box-shadow: 2px 2px 19px #aaa;
+    -moz-box-shadow: 2px 2px 19px #aaa;
+    /*-moz-border-radius: 0.5em;*/
+    /*border-radius: 0.5em;*/
+    z-index: 25;
+    background-color: white;
+    color: black;
+    font-family: helvetica, sans-serif;
+    font-size: 1em;
+    -webkit-transition: -webkit-box-shadow 0.15s ease-in;
+    -moz-transition: -moz-box-shadow 0.15s ease-in;
+    -o-transition: -o-box-shadow 0.15s ease-in;
+    transition: box-shadow 0.15s ease-in;
+}
+
+.context-li {
+
+    border-bottom: 1px solid silver;
+    padding: 2px 2px;
+    height: 20px;
+    text-align: center;
+    cursor: pointer;
+    background-color: white;
+}
+
+.context-li:hover {
+    background-color: #EEEEEE;
+    box-shadow: 1px 1px 19px #AAA;
+    -o-box-shadow: 1px 1px 19px #AAA;
+    -webkit-box-shadow: 1px 1px 19px #AAA;
+    -moz-box-shadow: 1px 1px 19px #AAA;
+}
+
+#navigationBar-div {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    height: 40px;
+    background: #00a0e3;
+}
+
+.navigationBar-btn {
+    color: #FFF;
+    /*text-align:center;*/
+    /*font-size: 1em;*/
+    padding: 15px 30px;
+    background: #00a0e3;
+    display: inline-block;
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    outline: none;
+}
+
+.navigationBar-btn:hover {
+    background: #6dd3d1;
+}
+
+/*.draggable-div .aLabel.jtk-hover {*/
+/*background-color: #5C96BC;*/
+/*color: white;*/
+/*border: 1px solid white;*/
+/*}*/
+

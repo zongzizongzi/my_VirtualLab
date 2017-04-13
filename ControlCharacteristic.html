@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>典型环节控制特性分析</title>
+	<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="main-div">
+	<div>
+		<canvas id="inputCanvas" width="1000" height="300"></canvas>
+		<canvas id="outputCanvas" width="1000" height="300"></canvas>
+    </div>
+	<div class="rowFlex-div">
+		<canvas id="DCOutputVICanvas" width="65" height="50"></canvas>
+		<canvas id="StepResponseGeneratorVICanvas" width="65" height="50"></canvas>
+		<button class="normal-btn" onclick="setStepType(1)">比例</button>
+		<button class="normal-btn" onclick="setStepType(2)">积分</button>
+		<button class="normal-btn" onclick="setStepType(3)">微分</button>
+		<button class="normal-btn" onclick="setStepType(4)">惯性</button>
+		<button class="normal-btn" onclick="setStepType(5)">震荡</button>
+		<button class="normal-btn" onclick="setStepType(6)">比例积分</button>
+		<button class="normal-btn" onclick="setStepType(7)">比例惯性</button>
+		<button class="normal-btn" onclick="setStepType(8)">比例微分</button>
+	</div>
+</div>
+<script src="js/VILibrary.js"></script>
+<script src="js/jquery-3.1.1.min.js"></script>
+<script>
+    let inputWave = new VILibrary.VI.WaveVI($('#inputCanvas'));
+    let outputWave = new VILibrary.VI.WaveVI($('#outputCanvas'));
+    let DCOutputVI = new VILibrary.VI.DCOutputVI($('#DCOutputVICanvas'));
+    let StepResponseGeneratorVI = new VILibrary.VI.StepResponseGeneratorVI($('#StepResponseGeneratorVICanvas'));
+
+    VILibrary.InnerObjects.bindDataLine(StepResponseGeneratorVI.id, outputWave.id, 0, 0);
+    VILibrary.InnerObjects.bindDataLine(DCOutputVI.id, inputWave.id, 0, 0);
+    VILibrary.InnerObjects.bindDataLine(DCOutputVI.id, StepResponseGeneratorVI.id, 0, 0);
+
+    let signalType = 1, n = 0;
+    function setStepType (type) {
+
+        reset();
+        while (n < 10) {
+            StepResponseGeneratorVI.setData(0);
+            DCOutputVI.setData(0);
+            n++;
+        }
+        n = 0;
+        DCOutputVI.setData(100);
+        signalType = type;
+        switch (signalType) {
+            case 1://比例
+                StepResponseGeneratorVI.setStepType(1);
+                StepResponseGeneratorVI.k1 = 1.5;
+                break;
+            case 2://积分
+                StepResponseGeneratorVI.setStepType(2);
+                StepResponseGeneratorVI.k2 = 5;
+                break;
+            case 3://微分
+                StepResponseGeneratorVI.setStepType(3);
+                StepResponseGeneratorVI.k3 = 0.0025;
+                break;
+            case 4://惯性
+                StepResponseGeneratorVI.setStepType(6);
+                StepResponseGeneratorVI.k1 = 0.025;
+                break;
+            case 5://震荡
+                StepResponseGeneratorVI.setStepType(7);
+                StepResponseGeneratorVI.k1 = 50;
+                StepResponseGeneratorVI.k2 = 0.05;
+                break;
+            case 6://比例积分
+                StepResponseGeneratorVI.setStepType(4);
+                break;
+            case 7://比例惯性
+                StepResponseGeneratorVI.setStepType(8);
+                StepResponseGeneratorVI.k1 = 0.025;
+                StepResponseGeneratorVI.k2 = 1;
+                break;
+            case 8://比例微分
+                StepResponseGeneratorVI.setStepType(5);
+                StepResponseGeneratorVI.k3 = 0.0025;
+                break;
+            default:
+                StepResponseGeneratorVI.setStepType(1);
+                StepResponseGeneratorVI.k1 = 1.5;
+                break;
+        }
+        DCOutputVI.toggleObserver(true);
+    }
+    function reset () {
+
+        DCOutputVI.reset();
+        StepResponseGeneratorVI.reset();
+    }
+</script>
+
+</body>
+</html>
