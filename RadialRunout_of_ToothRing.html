@@ -14,12 +14,6 @@
             <canvas id="myDial" width="300" height="300"></canvas>
             <button id="completeBtn"  onclick="setEChartData()" >读数完成</button>
             <button id="resetBtn"  onclick="reset()">重置</button>
-            <!--<tr>
-                <td><canvas id="myDial" width="350" height="300"></canvas></td>
-            </tr>
-            <tr>
-                <td><button id="completeBtn" onclick="setEChartData()">读数完成</button></td>
-            </tr>-->
 
         </td>
         <td rowspan="2"><!--合并行-->
@@ -133,15 +127,24 @@
                     <th>测得误差</th>
                     <td id="error" colspan="10"></td><!--合并列-->
             </tr>
+                <tr>
+                    <th>实验结论</th>
+                    <td id="conclusion" colspan="10"></td><!--合并列-->
+                </tr>
         </table>
         </td>
         </tr>
-
     </table>
-   <!-- <div>
-        （表中读数单位为：μm）
-        齿圈径向跳动△Fr=<output id="result" type="number" class="data-output"></output>μm
-    </div>-->
+
+    <div>被测齿轮基本参数：</div>
+        <table id="MessageTable">
+            <tr>
+                <td>模数m</td><td>齿数Z</td><td>压力角α</td><td>齿轮精度</td><td>径向跳动公差Fr（μm）</td>
+            </tr>
+            <tr>
+                <td>4</td><td>40</td><td>20°</td><td>10</td><td>140</td>
+            </tr>
+        </table>
 </div>
     <!--虚拟仪器库-->
     <script src="js/VILibrary.js"></script>
@@ -158,7 +161,6 @@
     <script src="js/three/ObjectControls.js"></script>
     <script>
         'use strict';
-        //let layerOpenFlag = false;
 
         let dialVI = new VILibrary.VI.DialVI($('#myDial'));
         let rrToothRingVI = new VILibrary.VI.RRToothRingVI($('#mainCanvas'), true);
@@ -166,38 +168,34 @@
         dialVI.toggleObserver(true);
 
         function setEChartData() {
-
-            let data = [],error/*, sumData = [], relativeSumData = [], sum = 0.0*/;
-            for (let i = 1; i <= 5; i++) {
+            let ERROR=140;//公差
+            let data = [],error;
+            for (let i = 1; i <= 40; i++) {
                 let temp = parseFloat(document.getElementById('data' + i).value);
-//            console.log(isNaN(temp)+':'+typeof temp);//type是number但isNaN检测得true？
                 if (isNaN(temp)) {
                     alert('读数未完成，请检查实验步骤是否正确');
                     return;
                 }
                 else {
                     data.push(temp);
-                    /*sum += parseFloat(data[i - 1]);
-                    sumData.push(sum);
-                    relativeSumData.push((sumData[i - 1] - i * data[0]).toFixed(1));
-                    document.getElementById('sumData' + i).innerText = sum.toFixed(1);
-                    document.getElementById('relativeSumData' + i).innerText = relativeSumData[i - 1];*/
                 }
             }
             error= Math.max.apply(Math,data)-Math.min.apply(Math,data);
             document.getElementById('error').innerText = error+"μm";
+            if(error<=ERROR) document.getElementById('conclusion').innerText = "△Fr<Fr，在公差范围内，合格";
+            else document.getElementById('conclusion').innerText = "△Fr>Fr，超出公差范围，不合格";
         }
 
         function reset(){
-            //dialVI.angle=0;
             rrToothRingVI.reset();
-//            document.getElementById('data1').value="";
             document.getElementsByTagName('input').value="";
             var t = document.getElementsByTagName("INPUT");
             for (var i=0; i<t.length;i++){
                     t[i].value="";//清空
             }
             document.getElementById('error').innerText = "";
+            document.getElementById('conclusion').innerText = "";
+
 
         }
     </script>

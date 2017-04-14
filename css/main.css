@@ -266,4 +266,17 @@ html {
     width:8%;
     height: 15px;
 }
+#MessageTable{
+    margin-left:auto;
+    margin-right:auto;
+    /*border-right: 2px solid black;
+    border-bottom: 2px solid black;
+    border-top: 2px solid black;*/
+    border-collapse: collapse;
+    border: 2px solid black;
+    width: 600px;
+}
+#MessageTable td {
+    border: 1px solid black;
+}
 
