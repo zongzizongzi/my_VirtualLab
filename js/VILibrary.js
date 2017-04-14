@@ -5785,6 +5785,7 @@ VILibrary.VI = {
                     ];
                     Promise.all(promiseArr).then(function (objArr) {
 
+
                         base = objArr[0];
                         gear = objArr[1];
                         slider = objArr[2];
