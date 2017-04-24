@@ -2062,7 +2062,6 @@ VILibrary.VI = {
 						scene.add(onButton);
 						switchControl.attach(onButton);
 						this.timer = window.setInterval(function () {
-							
 							VILibrary.InnerObjects.dataUpdater(_this.dataLine);
 						}, 50);
 					}
@@ -5637,8 +5636,6 @@ VILibrary.VI = {
             super(VICanvas);
 
             const _this = this;
-            let mtlLoader = new THREE.MTLLoader();
-            let objLoader = new THREE.OBJLoader();
 
 
             let camera, scene, renderer, controls, sliderControl, testerControl, gearControl,
@@ -6206,6 +6203,474 @@ VILibrary.VI = {
             this.draw(this.angle);
 
 
+
+        }
+    },
+    GearCompositeErrorVI: class  GearCompositeErrorVI extends TemplateVI {
+        constructor(VICanvas, draw3DFlag) {
+
+            super(VICanvas);
+
+            const _this = this;
+
+            let camera, scene, renderer, controls,base,gear1,gear2,handleUp,handleDown,lead_screw,slider2,sliderControl,rotateControl,handleControl;
+            let handleDownMark=false,gearMesh=false,errorArray=[22,29,40,40,47,53,56,63,64,71,77,89,84,90,101,105,113,101,104,89,66,49,43,32,28,25,21,9,9,4,-11,-21,-25,-13,-9,7,8,17,21,26];
+
+
+
+            let gearNo=0,error=0,sliderDown=false;
+
+			/*this.toggleObserver = function (flag) {
+
+			 if (flag) {
+
+			 if (!this.timer && this.dataLine) {
+
+			 /!*markControl.detach(mark);
+			 scene.remove(offButton);
+			 switchControl.detach(offButton);
+			 scene.add(onButton);
+			 switchControl.attach(onButton);*!/
+			 this.timer = window.setInterval(function () {
+
+			 VILibrary.InnerObjects.dataUpdater(_this.dataLine);
+			 }, 50);
+			 }
+			 }
+			 else {
+
+			 if (this.timer) {
+
+			 window.clearInterval(this.timer);
+			 this.timer = 0;
+			 }
+			 /!*markControl.attach(mark);
+			 scene.remove(onButton);
+			 switchControl.detach(onButton);
+			 scene.add(offButton);
+			 switchControl.attach(offButton);*!/
+			 }
+			 };*/
+
+            /**
+             *
+             * @param input 输入端口读取角度
+             */
+			/*this.setData = function (input) {
+
+			 let inputAngle = Number(Array.isArray(input) ? input[input.length - 1] : input);
+
+			 if (Number.isNaN(inputAngle)) {
+
+			 console.log('RRToothRingVI: Input value error');
+			 return;
+			 }
+			 let outputPosition, Ts = 1 / this.Fs, angleMax = 100 * Ts;
+			 /!*if (this.limit) {
+			 if ((inputAngle - this.PIDAngle) > angleMax) {
+
+			 inputAngle = this.PIDAngle + angleMax;
+			 }
+			 if ((this.PIDAngle - inputAngle) > angleMax) {
+
+			 inputAngle = this.PIDAngle - angleMax;
+			 }
+			 if (inputAngle > 30) {
+
+			 inputAngle = 30;
+			 }
+			 if (inputAngle < -30) {
+
+			 inputAngle = -30;
+			 }
+			 }*!/
+
+			 this.PIDAngle = inputAngle;//向输出端口上写数据
+
+			 outputPosition = this.position1 + 0.5 * Ts * (inputAngle + this.angle1);
+			 this.angle1 = inputAngle;
+			 this.position1 = outputPosition;
+			 inputAngle = outputPosition;
+			 outputPosition = this.position2 + 0.5 * Ts * (inputAngle + this.angle2);
+			 this.angle2 = inputAngle;
+			 this.position2 = outputPosition;
+
+			 outputPosition = outputPosition < -120 ? -120 : outputPosition;
+			 outputPosition = outputPosition > 120 ? 120 : outputPosition;
+			 this.PIDPosition = parseFloat(outputPosition).toFixed(2);//向输出端口上写数据
+
+			 //将输出数保存在数组内
+			 if (this.index <= (this.dataLength - 1)) {
+
+			 this.angelOutput[this.index] = this.PIDAngle;
+			 this.positionOutput[this.index] = this.PIDPosition;
+			 this.index += 1;
+			 }
+			 else {
+
+			 let i;
+			 for (i = 0; i < this.dataLength - 1; i += 1) {
+			 this.angelOutput[i] = this.angelOutput[i + 1];
+			 this.positionOutput[i] = this.positionOutput[i + 1];
+			 }
+			 this.angelOutput[this.dataLength - 1] = this.PIDAngle;
+			 this.positionOutput[this.dataLength - 1] = this.PIDPosition;
+			 }
+			 setPosition(this.PIDAngle * Math.PI / 180, this.PIDPosition);
+			 };*/
+           /* this.reset=function(){
+                gear.rotateX(-gearNo*Math.PI/20);
+                slider.position.y=sliderMark.position.y=0;
+                if(!testerDown)tester.rotateX(Math.PI/4);
+                gearNo=0,error=0,testerDown=true,sliderDown=false;
+            }
+
+            this.getData = function (dataType) {
+
+                if (dataType === 1) {
+
+                    return error;  //输出误差
+                }
+            };*/
+
+
+            this.draw=function () {
+                if (draw3DFlag) {
+
+                    let loadingImg = document.createElement('img');
+                    loadingImg.src = 'img/loading.gif';
+                    loadingImg.style.width = '64px';
+                    loadingImg.style.height = '64px';
+                    loadingImg.style.position = 'absolute';
+                    loadingImg.style.top = this.container.offsetTop + this.container.offsetHeight / 2 - 32 + 'px';
+                    loadingImg.style.left = this.container.offsetLeft + this.container.offsetWidth / 2 - 32 + 'px';
+                    loadingImg.style.zIndex = '10001';
+                    this.container.parentNode.appendChild(loadingImg);
+
+                    let promiseArr = [
+                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/base_slider1.mtl', 'assets/GearCompositeError/base_slider1.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/gear1.mtl', 'assets/GearCompositeError/gear1.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/gear2.mtl', 'assets/GearCompositeError/gear2.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/handle_up.mtl', 'assets/GearCompositeError/handle_up.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/lead_screw.mtl', 'assets/GearCompositeError/lead_screw.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/slider2.mtl', 'assets/GearCompositeError/slider2.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/handle_up.mtl', 'assets/GearCompositeError/handle_down.obj'),
+                    ];
+                    Promise.all(promiseArr).then(function (objArr) {
+                        base = objArr[0];
+                        gear1 = objArr[1];
+                        gear2 = objArr[2];
+                        handleUp = objArr[3];
+                        lead_screw = objArr[4];
+                        slider2 = objArr[5];
+                        handleDown=objArr[6];
+                        loadingImg.style.display = 'none';
+                        GCEDraw();
+                    }).catch(e => console.log('GearCompositeErrorVI: ' + e));
+                }
+                else {
+
+                    this.ctx = this.container.getContext("2d");
+                    let img = new Image();
+                    img.src = 'img/RR_ToothRing.png';
+                    img.onload = function () {
+                        _this.ctx.drawImage(img, 0, 0, _this.container.width, _this.container.height);
+                    };
+                }
+
+				/* mtlLoader.load('assets/RadialRunout_of_ToothRing/base.mtl', function (materials){
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/base.obj', function (a){
+				 a.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 base=a;
+				 mtlLoader.load('assets/RadialRunout_of_ToothRing/gear.mtl', function (materials){
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/gear.obj', function (b){
+				 b.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 gear=b;
+
+				 mtlLoader.load('assets/RadialRunout_of_ToothRing/slider.mtl', function (materials){
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/slider.obj', function (c){
+				 c.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 slider=c;
+
+				 mtlLoader.load('assets/RadialRunout_of_ToothRing/tester.mtl', function (materials){
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/tester.obj', function (d){
+				 d.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 tester=d;
+
+				 mtlLoader.load('assets/RadialRunout_of_ToothRing/testerMark.mtl', function (materials) {
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/testerMark.obj', function (e) {
+				 e.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 testerMark = e;
+				 mtlLoader.load('assets/RadialRunout_of_ToothRing/sliderMark.mtl', function (materials) {
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/sliderMark.obj', function (f) {
+				 f.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 sliderMark = f;
+				 RRDraw();
+				 })
+				 })
+				 })
+				 })
+				 })
+				 })
+				 })
+				 })
+				 })
+				 })
+				 });
+				 });*/
+				/*let p1=new Promise(function (resolve,reject) {
+				 /!*THREE.DefaultLoadingManager.onLoad=resolve;
+				 THREE.DefaultLoadingManager.onLoad=reject;*!/
+				 //base.onload=resolve;
+				 base.onerror=reject;
+				 });
+				 p1.then(function () {
+				 renderScene();
+				 })
+				 p1.catch(function () {
+				 //console.log('RRToothRingVI:' + e);
+				 })*/
+
+            };
+            this.draw();
+
+
+            window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame
+                || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+            //相机、渲染、灯光、控制等初始设置
+            function GCEDraw () {
+                scene = new THREE.Scene();
+
+                renderer = new THREE.WebGLRenderer({canvas: _this.container, antialias: true});
+                renderer.setClearColor(0x6495ED);
+                renderer.setSize(_this.container.clientWidth, _this.container.clientHeight);
+
+                camera = new THREE.PerspectiveCamera(45, _this.container.clientWidth / _this.container.clientHeight, 1, 1000);
+                camera.position.set(0,100,250);
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+               //测量头初始位置（测量头以转轴中点为原点）
+                gear2.position.x=0;
+                gear2.position.y=66;
+                gear1.position.x=-83;
+                gear1.position.y=66;
+
+
+
+                let light = new THREE.AmbientLight(0x555555);
+                scene.add(light);
+                let light1 = new THREE.DirectionalLight(0xffffff, 1);
+                light1.position.set(4000, 4000, 4000);
+                scene.add(light1);
+                let light2 = new THREE.DirectionalLight(0xffffff, 1);
+                light2.position.set(-4000, 4000, -4000);
+                scene.add(light2);
+
+                controls = new THREE.OrbitControls(camera, renderer.domElement);//鼠标对整个三维模型（相机）的控制
+                controls.rotateSpeed = 0.8;
+                controls.enableZoom = true;
+                controls.zoomSpeed = 1.2;
+                controls.enableDamping = true;
+                let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 400),new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} ));
+
+                //拖动控制
+                sliderControl = new ObjectControls(camera, renderer.domElement);
+                sliderControl.map = plane;
+                sliderControl.offsetUse = true;
+
+                sliderControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                sliderControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                sliderControl.attachEvent('dragAndDrop', onSliderDrag);
+
+                sliderControl.attachEvent('mouseUp', function () {
+
+                    controls.enabled = true;
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                //拖动旋转
+                /*rotateControl =new ObjectControls(camera, renderer.domElement);
+                rotateControl.offsetUse = true;
+
+                rotateControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                rotateControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                rotateControl.attachEvent('dragAndDrop', onRotateDrag);
+
+                rotateControl.attachEvent('mouseUp', function () {
+
+                    controls.enabled = true;
+                    renderer.domElement.style.cursor = 'auto';
+                });*/
+
+
+                //测量头点击抬起、放下
+                handleControl = new ObjectControls(camera, renderer.domElement);
+                handleControl.offsetUse = true;
+
+                handleControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                handleControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                handleControl.attachEvent('onclick', function () {
+                    handleDownMark=!handleDownMark;
+                    if(handleDownMark){
+                        sliderControl.enabled =false;
+                        scene.remove(handleUp);
+                        handleControl.detach(handleUp);
+                        scene.add(handleDown);
+                        handleControl.attach(handleDown);
+					}
+                    else {
+                        sliderControl.enabled =true;
+                        scene.remove(handleDown);
+                        handleControl.detach(handleDown);
+                        scene.add(handleUp);
+                        handleControl.attach(handleUp);
+
+					}
+
+                });
+
+                //齿轮点击旋转一个齿
+               /* gearControl = new ObjectControls(camera, renderer.domElement);
+                gearControl.offsetUse = true;
+
+                gearControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                gearControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                gearControl.attachEvent('onclick',onGearClick);*/
+
+
+                //绑定控制对象
+                scene.add(base,gear1,slider2,lead_screw,gear2,handleUp);
+                // slider2.add();
+                // scene.add(base);
+                sliderControl.attach(slider2);
+                handleControl.attach(handleUp);
+				// rotateControl.attach(lead_screw);
+                // gearControl.attach(gear);
+
+                GCEAnimate();
+            }
+
+            function onSliderDrag () {
+                controls.enabled = false;
+                renderer.domElement.style.cursor = 'pointer';
+                this.focused.position.y = this.previous.y;  //lock x direction
+                if (this.focused.position.x < -20.5) {
+
+                    this.focused.position.x = -20.5;
+                }
+                else if (this.focused.position.x > 83) {
+
+                    this.focused.position.x = 83;
+                }
+                gearMesh=slider2.position.x< -20?true:false;
+                gear2.position.x=slider2.position.x;
+                handleDown.position.x=slider2.position.x;
+                handleUp.position.x=slider2.position.x;
+                // error=(testerDown&&sliderDown)?errorArray[gearNo]:0;
+            }
+            function onRotateDrag () {
+                /*controls.enabled = false;
+                renderer.domElement.style.cursor = 'pointer';
+                this.focused.position.y = this.previous.y;  //lock x direction*/
+                // this.focused.position.x = this.previous.x;
+                /*if (this.focused.position.x < -20.5) {
+
+                    this.focused.position.x = -20.5;
+                }
+                else if (this.focused.position.x > 83) {
+
+                    this.focused.position.x = 83;
+                }*/
+
+            }
+
+
+
+            function GCEAnimate() {
+                window.requestAnimationFrame(GCEAnimate);//回调
+                controls.update();
+                renderer.render(scene, camera);
+            }
 
         }
     },
