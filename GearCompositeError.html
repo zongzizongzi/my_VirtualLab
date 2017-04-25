@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>齿轮径向综合误差</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="main-div">
+    <canvas id="mainCanvas" width="1000" height="500"></canvas>
+    <div class="rowFlex-div">
+
+        <div style="display:inline;">
+            <span class="normal-span">齿轮径向综合误差:</span>
+            <!--<input type="number" id="waterHeightInput" value="400" placeholder="0-800" class="normal-input">-->
+            <input type="number" class="normal-input">
+        </div>
+        <div style="display:inline;">
+            <span class="normal-span"  >一齿径向综合误差:</span>
+            <input type="number" class="normal-input">
+        </div >
+        <div style="display:inline;"><input type="button" class="normal-btn" value="开始" onclick="start()">
+            <input type="button" class="normal-btn" value="重置" onclick="reset()">
+        </div>
+
+    </div>
+</div>
+<!--虚拟仪器库-->
+<script src="js/VILibrary.js"></script>
+<!--js简写方法-->
+<script src="js/jquery-3.1.1.min.js"></script>
+<!--弹出框-->
+<script src="js/layui/lay/dest/layui.all.js"></script>
+
+<!--三维显示库-->
+<script src="js/three/three.js"></script>
+<script src="js/three/MTLLoader.js"></script>
+<script src="js/three/OBJLoader.js"></script>
+<script src="js/three/controls/OrbitControls.js"></script>
+<script src="js/three/ObjectControls.js"></script>
+<script>
+    'use strict';
+    let gearCompositeErrorVI = new VILibrary.VI.GearCompositeErrorVI($('#mainCanvas'), true);
+    function start() {
+        gearCompositeErrorVI.toggleObserver(!gearCompositeErrorVI.timer);
+
+    }
+    function reset() {
+        gearCompositeErrorVI.reset();
+//        gearCompositeErrorVI.toggleObserver(false);
+        var t = document.getElementsByClassName("normal-input");
+        for (var i=0; i<t.length;i++){
+            t[i].value="";//清空
+        }
+        /*gearCompositeErrorVI.timer=1;
+        gearCompositeErrorVI.toggleObserver(!gearCompositeErrorVI.timer);*/
+//        document.getElementById('error').innerText = "";
+//        document.getElementById('conclusion').innerText = "";
+    }
+    /*VILibrary.InnerObjects.bindDataLine(rrToothRingVI.id, dialVI.id, 1, 0);
+    dialVI.toggleObserver(true);
+    */
+</script>
+
+</body>
+</html>

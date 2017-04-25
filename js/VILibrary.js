@@ -6213,12 +6213,13 @@ VILibrary.VI = {
 
             const _this = this;
 
-            let camera, scene, renderer, controls,base,gear1,gear2,handleUp,handleDown,lead_screw,slider2,sliderControl,rotateControl,handleControl;
+            let camera, scene, renderer, controls,base,gear1,gear2,handleUp,handleDown,lead_screw,slider2,lead_screwControl,handleControl;
             let handleDownMark=false,gearMesh=false,errorArray=[22,29,40,40,47,53,56,63,64,71,77,89,84,90,101,105,113,101,104,89,66,49,43,32,28,25,21,9,9,4,-11,-21,-25,-13,-9,7,8,17,21,26];
 
 
 
             let gearNo=0,error=0,sliderDown=false;
+            this.timer=0;
 
 			/*this.toggleObserver = function (flag) {
 
@@ -6332,6 +6333,34 @@ VILibrary.VI = {
                     return error;  //输出误差
                 }
             };*/
+
+
+            this.toggleObserver = function () {
+           	let delta=0;
+                if (gearMesh&&handleDownMark) {
+
+                    if (!this.timer) {
+                        this.timer = window.setInterval(function () {
+
+                            delta += 36;
+                            gear2.rotation.y += 2 * Math.PI * 0.05 / 10;
+                            gear1.rotation.y -= 2 * Math.PI * 0.05 / 10*2/3;
+                            //定时更新相同数据线VI的数据
+                           /* if (_this.dataLine) {
+
+                                VILibrary.InnerObjects.dataUpdater(_this.dataLine);
+                            }*/
+                        }, 100);
+                    }
+                }
+            };
+            this.reset=function(){
+                window.clearInterval(this.timer);
+                this.timer = 0;
+                gear2.rotation.y =gear1.rotation.y =0;
+                slider2.position.x =0;
+                if(handleDownMark){onHandleClick();};
+			}
 
 
             this.draw=function () {
@@ -6519,54 +6548,30 @@ VILibrary.VI = {
                 controls.enableZoom = true;
                 controls.zoomSpeed = 1.2;
                 controls.enableDamping = true;
-                let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 400),new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} ));
-
-                //拖动控制
-                sliderControl = new ObjectControls(camera, renderer.domElement);
-                sliderControl.map = plane;
-                sliderControl.offsetUse = true;
-
-                sliderControl.attachEvent('mouseOver', function () {
-
-                    renderer.domElement.style.cursor = 'pointer';
-                });
-
-                sliderControl.attachEvent('mouseOut', function () {
-
-                    renderer.domElement.style.cursor = 'auto';
-                });
-
-                sliderControl.attachEvent('dragAndDrop', onSliderDrag);
-
-                sliderControl.attachEvent('mouseUp', function () {
-
-                    controls.enabled = true;
-                    renderer.domElement.style.cursor = 'auto';
-                });
+                let plane1 = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 400),new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} ));
 
                 //拖动旋转
-                /*rotateControl =new ObjectControls(camera, renderer.domElement);
-                rotateControl.offsetUse = true;
-
-                rotateControl.attachEvent('mouseOver', function () {
-
+                let plane2 = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 400),new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} ));
+                 plane2.rotateY(0.5*Math.PI);
+                lead_screwControl =new ObjectControls(camera, renderer.domElement);
+                lead_screwControl.map = plane2;
+                lead_screwControl.offsetUse = true;
+                lead_screwControl.attachEvent('mouseOver', function () {
                     renderer.domElement.style.cursor = 'pointer';
                 });
 
-                rotateControl.attachEvent('mouseOut', function () {
+                lead_screwControl.attachEvent('mouseOut', function () {
 
                     renderer.domElement.style.cursor = 'auto';
                 });
 
-                rotateControl.attachEvent('dragAndDrop', onRotateDrag);
+                lead_screwControl.attachEvent('dragAndDrop', onRotateDrag);
 
-                rotateControl.attachEvent('mouseUp', function () {
+                lead_screwControl.attachEvent('mouseUp', function () {
 
                     controls.enabled = true;
                     renderer.domElement.style.cursor = 'auto';
-                });*/
-
-
+                });
                 //测量头点击抬起、放下
                 handleControl = new ObjectControls(camera, renderer.domElement);
                 handleControl.offsetUse = true;
@@ -6581,92 +6586,62 @@ VILibrary.VI = {
                     renderer.domElement.style.cursor = 'auto';
                 });
 
-                handleControl.attachEvent('onclick', function () {
-                    handleDownMark=!handleDownMark;
-                    if(handleDownMark){
-                        sliderControl.enabled =false;
-                        scene.remove(handleUp);
-                        handleControl.detach(handleUp);
-                        scene.add(handleDown);
-                        handleControl.attach(handleDown);
-					}
-                    else {
-                        sliderControl.enabled =true;
-                        scene.remove(handleDown);
-                        handleControl.detach(handleDown);
-                        scene.add(handleUp);
-                        handleControl.attach(handleUp);
-
-					}
-
-                });
-
-                //齿轮点击旋转一个齿
-               /* gearControl = new ObjectControls(camera, renderer.domElement);
-                gearControl.offsetUse = true;
-
-                gearControl.attachEvent('mouseOver', function () {
-
-                    renderer.domElement.style.cursor = 'pointer';
-                });
-
-                gearControl.attachEvent('mouseOut', function () {
-
-                    renderer.domElement.style.cursor = 'auto';
-                });
-
-                gearControl.attachEvent('onclick',onGearClick);*/
-
+                handleControl.attachEvent('onclick',onHandleClick);
 
                 //绑定控制对象
-                scene.add(base,gear1,slider2,lead_screw,gear2,handleUp);
-                // slider2.add();
-                // scene.add(base);
-                sliderControl.attach(slider2);
+                scene.add(base,lead_screw,gear1,slider2,gear2,handleUp);
+                // sliderControl.attach(slider2);
                 handleControl.attach(handleUp);
-				// rotateControl.attach(lead_screw);
-                // gearControl.attach(gear);
+				lead_screwControl.attach(lead_screw);
 
                 GCEAnimate();
             }
 
-            function onSliderDrag () {
+            function onRotateDrag () {
                 controls.enabled = false;
                 renderer.domElement.style.cursor = 'pointer';
+
+                let offsetY=this.focused.position.y-this.previous.y;
                 this.focused.position.y = this.previous.y;  //lock x direction
-                if (this.focused.position.x < -20.5) {
+                this.focused.position.x = this.previous.x;
+                let angle=-Math.atan(offsetY/1.5);
+                slider2.position.x+=offsetY;
+                if (slider2.position.x< -20.5) {
 
-                    this.focused.position.x = -20.5;
+                    slider2.position.x = -20.5;
                 }
-                else if (this.focused.position.x > 83) {
+                else if (slider2.position.x > 83) {
 
-                    this.focused.position.x = 83;
+                    slider2.position.x = 83;
                 }
+                else {lead_screw.rotateX(angle);}
                 gearMesh=slider2.position.x< -20?true:false;
+
+            }
+            function onHandleClick() {
+                handleDownMark=!handleDownMark;
+                if(handleDownMark){
+                    lead_screwControl.enabled =false;
+                    scene.remove(handleUp);
+                    handleControl.detach(handleUp);
+                    scene.add(handleDown);
+                    handleControl.attach(handleDown);
+                }
+                else {
+                    lead_screwControl.enabled =true;
+                    scene.remove(handleDown);
+                    handleControl.detach(handleDown);
+                    scene.add(handleUp);
+                    handleControl.attach(handleUp);
+
+                }
+
+            }
+
+            function GCEAnimate() {
                 gear2.position.x=slider2.position.x;
                 handleDown.position.x=slider2.position.x;
                 handleUp.position.x=slider2.position.x;
-                // error=(testerDown&&sliderDown)?errorArray[gearNo]:0;
-            }
-            function onRotateDrag () {
-                /*controls.enabled = false;
-                renderer.domElement.style.cursor = 'pointer';
-                this.focused.position.y = this.previous.y;  //lock x direction*/
-                // this.focused.position.x = this.previous.x;
-                /*if (this.focused.position.x < -20.5) {
-
-                    this.focused.position.x = -20.5;
-                }
-                else if (this.focused.position.x > 83) {
-
-                    this.focused.position.x = 83;
-                }*/
-
-            }
-
-
-
-            function GCEAnimate() {
                 window.requestAnimationFrame(GCEAnimate);//回调
                 controls.update();
                 renderer.render(scene, camera);
