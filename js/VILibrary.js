@@ -6213,154 +6213,64 @@ VILibrary.VI = {
 
             const _this = this;
 
-            let camera, scene, renderer, controls,base,gear1,gear2,handleUp,handleDown,lead_screw,slider2,lead_screwControl,handleControl;
-            let handleDownMark=false,gearMesh=false,errorArray=[22,29,40,40,47,53,56,63,64,71,77,89,84,90,101,105,113,101,104,89,66,49,43,32,28,25,21,9,9,4,-11,-21,-25,-13,-9,7,8,17,21,26];
-
-
-
-            let gearNo=0,error=0,sliderDown=false;
+            let camera, scene, renderer, controls,base,gear1,gear2,handleUp,handleDown,lead_screw,onSwitch,offSwitch,slider2,lead_screwControl,handleControl,switchControl;
+            let handleDownMark=false,gearMesh=false;
+            let errorArray=[-4,-2,-7,-3,-8,-7,-12,-10,-15,-12,-14,-10,-11,-9,-11,-8,-9,-5,-6,-2,-5,0,-1,3,-1,7,5,11,10,14,12,13,9,11,8,9,5,6,2,3,0];
+            let errOutput=[];
             this.timer=0;
-
-			/*this.toggleObserver = function (flag) {
-
-			 if (flag) {
-
-			 if (!this.timer && this.dataLine) {
-
-			 /!*markControl.detach(mark);
-			 scene.remove(offButton);
-			 switchControl.detach(offButton);
-			 scene.add(onButton);
-			 switchControl.attach(onButton);*!/
-			 this.timer = window.setInterval(function () {
-
-			 VILibrary.InnerObjects.dataUpdater(_this.dataLine);
-			 }, 50);
-			 }
-			 }
-			 else {
-
-			 if (this.timer) {
-
-			 window.clearInterval(this.timer);
-			 this.timer = 0;
-			 }
-			 /!*markControl.attach(mark);
-			 scene.remove(onButton);
-			 switchControl.detach(onButton);
-			 scene.add(offButton);
-			 switchControl.attach(offButton);*!/
-			 }
-			 };*/
+            let index=0;
 
             /**
              *
              * @param input 输入端口读取角度
              */
-			/*this.setData = function (input) {
 
-			 let inputAngle = Number(Array.isArray(input) ? input[input.length - 1] : input);
+            this.toggleObserver = function (flag) {
 
-			 if (Number.isNaN(inputAngle)) {
+                if (flag) {
 
-			 console.log('RRToothRingVI: Input value error');
-			 return;
-			 }
-			 let outputPosition, Ts = 1 / this.Fs, angleMax = 100 * Ts;
-			 /!*if (this.limit) {
-			 if ((inputAngle - this.PIDAngle) > angleMax) {
+                    if (!this.timer&& gearMesh && handleDownMark) {
+                    	if(!index){errOutput=[0];}
+                        scene.remove(offSwitch);
+                        switchControl.detach(offSwitch);
+                        scene.add(onSwitch);
+                        switchControl.attach(onSwitch);
 
-			 inputAngle = this.PIDAngle + angleMax;
-			 }
-			 if ((this.PIDAngle - inputAngle) > angleMax) {
-
-			 inputAngle = this.PIDAngle - angleMax;
-			 }
-			 if (inputAngle > 30) {
-
-			 inputAngle = 30;
-			 }
-			 if (inputAngle < -30) {
-
-			 inputAngle = -30;
-			 }
-			 }*!/
-
-			 this.PIDAngle = inputAngle;//向输出端口上写数据
-
-			 outputPosition = this.position1 + 0.5 * Ts * (inputAngle + this.angle1);
-			 this.angle1 = inputAngle;
-			 this.position1 = outputPosition;
-			 inputAngle = outputPosition;
-			 outputPosition = this.position2 + 0.5 * Ts * (inputAngle + this.angle2);
-			 this.angle2 = inputAngle;
-			 this.position2 = outputPosition;
-
-			 outputPosition = outputPosition < -120 ? -120 : outputPosition;
-			 outputPosition = outputPosition > 120 ? 120 : outputPosition;
-			 this.PIDPosition = parseFloat(outputPosition).toFixed(2);//向输出端口上写数据
-
-			 //将输出数保存在数组内
-			 if (this.index <= (this.dataLength - 1)) {
-
-			 this.angelOutput[this.index] = this.PIDAngle;
-			 this.positionOutput[this.index] = this.PIDPosition;
-			 this.index += 1;
-			 }
-			 else {
-
-			 let i;
-			 for (i = 0; i < this.dataLength - 1; i += 1) {
-			 this.angelOutput[i] = this.angelOutput[i + 1];
-			 this.positionOutput[i] = this.positionOutput[i + 1];
-			 }
-			 this.angelOutput[this.dataLength - 1] = this.PIDAngle;
-			 this.positionOutput[this.dataLength - 1] = this.PIDPosition;
-			 }
-			 setPosition(this.PIDAngle * Math.PI / 180, this.PIDPosition);
-			 };*/
-           /* this.reset=function(){
-                gear.rotateX(-gearNo*Math.PI/20);
-                slider.position.y=sliderMark.position.y=0;
-                if(!testerDown)tester.rotateX(Math.PI/4);
-                gearNo=0,error=0,testerDown=true,sliderDown=false;
-            }
-
-            this.getData = function (dataType) {
-
-                if (dataType === 1) {
-
-                    return error;  //输出误差
-                }
-            };*/
-
-
-            this.toggleObserver = function () {
-           	let delta=0;
-                if (gearMesh&&handleDownMark) {
-
-                    if (!this.timer) {
+                    	let delta =360/20/180*Math.PI  ;//一齿的弧度
                         this.timer = window.setInterval(function () {
-
-                            delta += 36;
-                            gear2.rotation.y += 2 * Math.PI * 0.05 / 10;
-                            gear1.rotation.y -= 2 * Math.PI * 0.05 / 10*2/3;
+                            errOutput[index]=errorArray[index];
+                            console.log(errOutput[index]);
+                            index+=1;
                             //定时更新相同数据线VI的数据
-                           /* if (_this.dataLine) {
+                            if (_this.dataLine) {
 
                                 VILibrary.InnerObjects.dataUpdater(_this.dataLine);
-                            }*/
+                            }
+                            if(index>=40){
+                            	window.clearInterval(_this.timer);
+                                index=0;
+                            }
+                            gear2.rotation.y += delta *0.5;//0.5个齿的弧度
+                            gear1.rotation.y -= delta * 0.5*2/3;
+
+
                         }, 100);
                     }
                 }
+				else{
+					scene.remove(onSwitch);
+					switchControl.detach(onSwitch);
+					scene.add(offSwitch);
+					switchControl.attach(offSwitch);
+					window.clearInterval(this.timer);
+					this.timer = 0;
+				}
             };
-            this.reset=function(){
-                window.clearInterval(this.timer);
-                this.timer = 0;
-                gear2.rotation.y =gear1.rotation.y =0;
-                slider2.position.x =0;
-                if(handleDownMark){onHandleClick();};
-			}
+            this.getData=function (dataType) {
+                console.log(errOutput);
+            	return errOutput;
+
+            }
 
 
             this.draw=function () {
@@ -6380,19 +6290,23 @@ VILibrary.VI = {
                         VILibrary.InnerObjects.loadModule('assets/GearCompositeError/base_slider1.mtl', 'assets/GearCompositeError/base_slider1.obj'),
                         VILibrary.InnerObjects.loadModule('assets/GearCompositeError/gear1.mtl', 'assets/GearCompositeError/gear1.obj'),
                         VILibrary.InnerObjects.loadModule('assets/GearCompositeError/gear2.mtl', 'assets/GearCompositeError/gear2.obj'),
-                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/handle_up.mtl', 'assets/GearCompositeError/handle_up.obj'),
                         VILibrary.InnerObjects.loadModule('assets/GearCompositeError/lead_screw.mtl', 'assets/GearCompositeError/lead_screw.obj'),
                         VILibrary.InnerObjects.loadModule('assets/GearCompositeError/slider2.mtl', 'assets/GearCompositeError/slider2.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/handle_up.mtl', 'assets/GearCompositeError/handle_up.obj'),
                         VILibrary.InnerObjects.loadModule('assets/GearCompositeError/handle_up.mtl', 'assets/GearCompositeError/handle_down.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/button-off.mtl', 'assets/GearCompositeError/button-off.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/button-on.mtl', 'assets/GearCompositeError/button-on.obj'),
                     ];
                     Promise.all(promiseArr).then(function (objArr) {
                         base = objArr[0];
                         gear1 = objArr[1];
                         gear2 = objArr[2];
-                        handleUp = objArr[3];
-                        lead_screw = objArr[4];
-                        slider2 = objArr[5];
+                        lead_screw = objArr[3];
+                        slider2 = objArr[4];
+                        handleUp = objArr[5];
                         handleDown=objArr[6];
+                        offSwitch=objArr[7];
+                        onSwitch=objArr[8];
                         loadingImg.style.display = 'none';
                         GCEDraw();
                     }).catch(e => console.log('GearCompositeErrorVI: ' + e));
@@ -6401,113 +6315,11 @@ VILibrary.VI = {
 
                     this.ctx = this.container.getContext("2d");
                     let img = new Image();
-                    img.src = 'img/RR_ToothRing.png';
+                    img.src = 'img/GearCompositeError.png';
                     img.onload = function () {
                         _this.ctx.drawImage(img, 0, 0, _this.container.width, _this.container.height);
                     };
                 }
-
-				/* mtlLoader.load('assets/RadialRunout_of_ToothRing/base.mtl', function (materials){
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/base.obj', function (a){
-				 a.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 base=a;
-				 mtlLoader.load('assets/RadialRunout_of_ToothRing/gear.mtl', function (materials){
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/gear.obj', function (b){
-				 b.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 gear=b;
-
-				 mtlLoader.load('assets/RadialRunout_of_ToothRing/slider.mtl', function (materials){
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/slider.obj', function (c){
-				 c.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 slider=c;
-
-				 mtlLoader.load('assets/RadialRunout_of_ToothRing/tester.mtl', function (materials){
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/tester.obj', function (d){
-				 d.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 tester=d;
-
-				 mtlLoader.load('assets/RadialRunout_of_ToothRing/testerMark.mtl', function (materials) {
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/testerMark.obj', function (e) {
-				 e.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 testerMark = e;
-				 mtlLoader.load('assets/RadialRunout_of_ToothRing/sliderMark.mtl', function (materials) {
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/sliderMark.obj', function (f) {
-				 f.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 sliderMark = f;
-				 RRDraw();
-				 })
-				 })
-				 })
-				 })
-				 })
-				 })
-				 })
-				 })
-				 })
-				 })
-				 });
-				 });*/
-				/*let p1=new Promise(function (resolve,reject) {
-				 /!*THREE.DefaultLoadingManager.onLoad=resolve;
-				 THREE.DefaultLoadingManager.onLoad=reject;*!/
-				 //base.onload=resolve;
-				 base.onerror=reject;
-				 });
-				 p1.then(function () {
-				 renderScene();
-				 })
-				 p1.catch(function () {
-				 //console.log('RRToothRingVI:' + e);
-				 })*/
-
             };
             this.draw();
 
@@ -6542,6 +6354,9 @@ VILibrary.VI = {
                 let light2 = new THREE.DirectionalLight(0xffffff, 1);
                 light2.position.set(-4000, 4000, -4000);
                 scene.add(light2);
+
+
+
 
                 controls = new THREE.OrbitControls(camera, renderer.domElement);//鼠标对整个三维模型（相机）的控制
                 controls.rotateSpeed = 0.8;
@@ -6588,11 +6403,29 @@ VILibrary.VI = {
 
                 handleControl.attachEvent('onclick',onHandleClick);
 
+                //开关
+                switchControl = new ObjectControls(camera, renderer.domElement);
+                switchControl.offsetUse = true;
+
+                switchControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                switchControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                switchControl.attachEvent('onclick',function () {
+
+                    _this.toggleObserver(!_this.timer);
+                });
                 //绑定控制对象
-                scene.add(base,lead_screw,gear1,slider2,gear2,handleUp);
-                // sliderControl.attach(slider2);
+                scene.add(base,lead_screw,gear1,slider2,gear2,handleUp,offSwitch);
                 handleControl.attach(handleUp);
-				lead_screwControl.attach(lead_screw);
+                lead_screwControl.attach(lead_screw);
+                switchControl.attach(offSwitch);
 
                 GCEAnimate();
             }
@@ -6642,6 +6475,8 @@ VILibrary.VI = {
                 gear2.position.x=slider2.position.x;
                 handleDown.position.x=slider2.position.x;
                 handleUp.position.x=slider2.position.x;
+                offSwitch.position.x=slider2.position.x;
+                onSwitch.position.x=slider2.position.x;
                 window.requestAnimationFrame(GCEAnimate);//回调
                 controls.update();
                 renderer.render(scene, camera);

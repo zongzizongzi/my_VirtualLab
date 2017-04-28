@@ -19,9 +19,12 @@
             <span class="normal-span"  >一齿径向综合误差:</span>
             <input type="number" class="normal-input">
         </div >
-        <div style="display:inline;"><input type="button" class="normal-btn" value="开始" onclick="start()">
+        <div>注：被测齿轮径向综合总偏差 F"= 37μm ，一齿径向综合偏差 f"= 11μm</div>
+        <!--<div style="display:inline;">
+            <input type="button" class="normal-btn" value="开始" onclick="start()">
+            <input type="button" class="normal-btn" value="暂停" onclick="pause()">
             <input type="button" class="normal-btn" value="重置" onclick="reset()">
-        </div>
+        </div>-->
 
     </div>
 </div>
@@ -41,25 +44,49 @@
 <script>
     'use strict';
     let gearCompositeErrorVI = new VILibrary.VI.GearCompositeErrorVI($('#mainCanvas'), true);
-    function start() {
-        gearCompositeErrorVI.toggleObserver(!gearCompositeErrorVI.timer);
-
-    }
-    function reset() {
-        gearCompositeErrorVI.reset();
-//        gearCompositeErrorVI.toggleObserver(false);
-        var t = document.getElementsByClassName("normal-input");
-        for (var i=0; i<t.length;i++){
-            t[i].value="";//清空
+    let layerOpenFlag=false;
+    window.setInterval(function () {
+        if (gearCompositeErrorVI.timer && !layerOpenFlag) {
+            openWave();
         }
-        /*gearCompositeErrorVI.timer=1;
-        gearCompositeErrorVI.toggleObserver(!gearCompositeErrorVI.timer);*/
-//        document.getElementById('error').innerText = "";
-//        document.getElementById('conclusion').innerText = "";
+    }, 100);
+    function openWave () {
+        if (layerOpenFlag) {
+
+            return
+        }
+        layer.open({
+            type: 1,
+            title: '相关数据波形图',
+            area: ['auto', 'auto'],
+            shade: 0,
+            maxmin: true,
+            moveOut: true,
+            offset: 'lt',
+            closeBtn: false,
+            zIndex: layer.zIndex,
+            content: '<div class="columnFlex-div" style="margin: 5px 5px">' +
+            '<div class="columnFlex-div">' +
+            '<canvas id="positionCanvas" width="500" height="300"></canvas>' +
+            '<span>中心距变动曲线</span>' +
+            '</div>' +
+            '</div>',
+            success: function (layero) {
+                layerOpenFlag=true;
+                layer.setTop(layero);
+
+                let positionWaveVI = new VILibrary.VI.WaveVI($('#positionCanvas'));
+                VILibrary.InnerObjects.bindDataLine(gearCompositeErrorVI.id, positionWaveVI.id, 1, 0);
+
+                positionWaveVI.pointNum = 40;
+                positionWaveVI.setAxisRangX(0, 360);
+                positionWaveVI.setAxisRangY(-25,25);
+                positionWaveVI.setLabel( '角度/°','μm');
+
+
+            }
+        });
     }
-    /*VILibrary.InnerObjects.bindDataLine(rrToothRingVI.id, dialVI.id, 1, 0);
-    dialVI.toggleObserver(true);
-    */
 </script>
 
 </body>
