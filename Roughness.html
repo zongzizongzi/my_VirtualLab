@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>表面粗糙度测量实验</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="main-div">
+    <canvas id="mainCanvas" width="1000" height="600"></canvas>
+    <table id="mainTable">
+        <tr>
+            <td>
+                <canvas id="panelCanvas" width="295" height="200"></canvas>
+            </td>
+            <td rowspan="2">
+                <table id="roughnessTable">
+                    <tr>
+                        <th>五个波峰点/格</th>
+                        <td>h1：<input id="data1" type="number" class="data-input0"></td>
+                        <td>h2：<input id="data2" type="number" class="data-input0"></td>
+                        <td>h3：<input id="data3" type="number" class="data-input0"></td>
+                        <td>h4：<input id="data4" type="number" class="data-input0"></td>
+                        <td>h5：<input id="data5" type="number" class="data-input0"></td>
+                        <td id="sum1">∑h峰</td>
+
+                    </tr>
+                    <tr>
+                        <th>五个波谷点/格</th>
+                        <td>h6：<input id="data6" type="number" class="data-input0"></td>
+                        <td>h7：<input id="data7" type="number" class="data-input0"></td>
+                        <td>h8：<input id="data8" type="number" class="data-input0"></td>
+                        <td>h9：<input id="data9" type="number" class="data-input0"></td>
+                        <td>10：<input id="data10" type="number" class="data-input0"></td>
+                        <td id="sum2">∑h谷<input id="data11" type="number" class="data-input0"></td>
+
+                    </tr>
+                    <tr>
+                        <th>实测粗糙度Rz/μm</th>
+                        <td id="error" colspan="10"></td><!--合并列-->
+
+                    </tr>
+                </table>
+                注：系数E=0.63μm/格；Rz=E(∑h峰-∑h谷)/5。
+            </td>
+
+        </tr>
+        <!--<tr>
+            <td>
+                <button id="completeBtn" onclick="setEChartData()">读数完成</button>
+            </td>
+        </tr>-->
+    </table>
+</div>
+<script src="js/VILibrary.js"></script>
+<script src="js/jquery-3.1.1.min.js"></script>
+<script src="js/layui/lay/dest/layui.all.js"></script>
+<script src="js/three/three.js"></script>
+<script src="js/three/MTLLoader.js"></script>
+<script src="js/three/OBJLoader.js"></script>
+<script src="js/three/controls/OrbitControls.js"></script>
+<script src="js/three/ObjectControls.js"></script>
+<script>
+   /* let addVI = new VILibrary.VI.AddVI($('<canvas id="addVI"></canvas>'));
+    let PIDVI = new VILibrary.VI.PIDVI($('<canvas id="PIDVI"></canvas>'));*/
+    let roughnessVI = new VILibrary.VI.RoughnessVI($('#mainCanvas'), true);
+/*    VILibrary.InnerObjects.bindDataLine(ballBeamVI.id, addVI.id, 3, 1);
+    VILibrary.InnerObjects.bindDataLine(ballBeamVI.id, addVI.id, 2, 0);
+    VILibrary.InnerObjects.bindDataLine(addVI.id, PIDVI.id, 0, 0);
+    VILibrary.InnerObjects.bindDataLine(PIDVI.id, ballBeamVI.id, 0, 0);*/
+</script>
+</body>
+</html>

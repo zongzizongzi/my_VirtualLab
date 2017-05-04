@@ -6484,4 +6484,390 @@ VILibrary.VI = {
 
         }
     },
+    RoughnessVI:class DialVI extends TemplateVI{
+        constructor(VICanvas, draw3DFlag) {
+
+            super(VICanvas);
+
+            const _this = this;
+
+
+            let camera, scene, renderer,
+				base, slider,button_off,button_on,machineRay,
+				controls, sliderControl,buttonControl;
+            // let testerDown=true,errorArray=[22,29,40,40,47,53,56,63,64,71,77,89,84,90,101,105,113,101,104,89,66,49,43,32,28,25,21,9,9,4,-11,-21,-25,-13,-9,7,8,17,21,26];
+
+
+            let onFlag=false;
+
+            this.toggleObserver = function (flag) {
+
+                if (flag) {
+
+                    // if (!this.timer) {
+                        base.remove(button_off);
+                        buttonControl.detach(button_off);
+                        base.add(button_on);
+                        buttonControl.attach(button_on);
+                        sliderControl.enabled=true;
+                        slider.add(machineRay);
+
+                    // }
+                }
+                else{
+                    base.remove(button_on);
+                    buttonControl.detach(button_on);
+                    base.add(button_off);
+                    buttonControl.attach(button_off);
+                    sliderControl.enabled=false;
+                    slider.remove(machineRay);
+                }
+            };
+
+            /**
+             *
+             * @param input 输入端口读取角度
+             */
+			/*this.setData = function (input) {
+
+			 let inputAngle = Number(Array.isArray(input) ? input[input.length - 1] : input);
+
+			 if (Number.isNaN(inputAngle)) {
+
+			 console.log('RRToothRingVI: Input value error');
+			 return;
+			 }
+			 let outputPosition, Ts = 1 / this.Fs, angleMax = 100 * Ts;
+			 /!*if (this.limit) {
+			 if ((inputAngle - this.PIDAngle) > angleMax) {
+
+			 inputAngle = this.PIDAngle + angleMax;
+			 }
+			 if ((this.PIDAngle - inputAngle) > angleMax) {
+
+			 inputAngle = this.PIDAngle - angleMax;
+			 }
+			 if (inputAngle > 30) {
+
+			 inputAngle = 30;
+			 }
+			 if (inputAngle < -30) {
+
+			 inputAngle = -30;
+			 }
+			 }*!/
+
+			 this.PIDAngle = inputAngle;//向输出端口上写数据
+
+			 outputPosition = this.position1 + 0.5 * Ts * (inputAngle + this.angle1);
+			 this.angle1 = inputAngle;
+			 this.position1 = outputPosition;
+			 inputAngle = outputPosition;
+			 outputPosition = this.position2 + 0.5 * Ts * (inputAngle + this.angle2);
+			 this.angle2 = inputAngle;
+			 this.position2 = outputPosition;
+
+			 outputPosition = outputPosition < -120 ? -120 : outputPosition;
+			 outputPosition = outputPosition > 120 ? 120 : outputPosition;
+			 this.PIDPosition = parseFloat(outputPosition).toFixed(2);//向输出端口上写数据
+
+			 //将输出数保存在数组内
+			 if (this.index <= (this.dataLength - 1)) {
+
+			 this.angelOutput[this.index] = this.PIDAngle;
+			 this.positionOutput[this.index] = this.PIDPosition;
+			 this.index += 1;
+			 }
+			 else {
+
+			 let i;
+			 for (i = 0; i < this.dataLength - 1; i += 1) {
+			 this.angelOutput[i] = this.angelOutput[i + 1];
+			 this.positionOutput[i] = this.positionOutput[i + 1];
+			 }
+			 this.angelOutput[this.dataLength - 1] = this.PIDAngle;
+			 this.positionOutput[this.dataLength - 1] = this.PIDPosition;
+			 }
+			 setPosition(this.PIDAngle * Math.PI / 180, this.PIDPosition);
+			 };*/
+            this.reset=function(){
+               /* gear.rotateX(-gearNo*Math.PI/20);
+                slider.position.y=sliderMark.position.y=0;
+                if(!testerDown)tester.rotateX(Math.PI/4);
+                gearNo=0,error=0,testerDown=true,sliderDown=false;*/
+            }
+
+            this.getData = function (dataType) {
+
+                /*if (dataType === 1) {
+
+                    return error;  //输出误差
+                }*/
+            };
+
+
+            this.draw=function () {
+                if (draw3DFlag) {
+
+                    let loadingImg = document.createElement('img');
+                    loadingImg.src = 'img/loading.gif';
+                    loadingImg.style.width = '64px';
+                    loadingImg.style.height = '64px';
+                    loadingImg.style.position = 'absolute';
+                    loadingImg.style.top = this.container.offsetTop + this.container.offsetHeight / 2 - 32 + 'px';
+                    loadingImg.style.left = this.container.offsetLeft + this.container.offsetWidth / 2 - 32 + 'px';
+                    loadingImg.style.zIndex = '10001';
+                    this.container.parentNode.appendChild(loadingImg);
+
+                    let promiseArr = [
+                        VILibrary.InnerObjects.loadModule('assets/Roughness/base&slider0.mtl', 'assets/Roughness/base&slider0.obj'),
+                        // VILibrary.InnerObjects.loadModule('assets/Roughness/slider0.mtl', 'assets/Roughness/slider0.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roughness/slider.mtl', 'assets/Roughness/slider.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roughness/button_off.mtl', 'assets/Roughness/button_off.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roughness/button_on.mtl', 'assets/Roughness/button_on.obj'),
+                    ];
+                    Promise.all(promiseArr).then(function (objArr) {
+
+
+                        base = objArr[0];
+                        slider = objArr[1];
+                        button_off = objArr[2];
+                        button_on = objArr[3];
+                        loadingImg.style.display = 'none';
+                        RoughnessDraw();
+                    }).catch(e => console.log('RRToothRingVI: ' + e));
+                }
+                else {
+
+                    this.ctx = this.container.getContext("2d");
+                    let img = new Image();
+                    img.src = 'img/RR_ToothRing.png';
+                    img.onload = function () {
+
+                        _this.ctx.drawImage(img, 0, 0, _this.container.width, _this.container.height);
+                    };
+                }
+
+				/* mtlLoader.load('assets/RadialRunout_of_ToothRing/base.mtl', function (materials){
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/base.obj', function (a){
+				 a.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 base=a;
+				 mtlLoader.load('assets/RadialRunout_of_ToothRing/gear.mtl', function (materials){
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/gear.obj', function (b){
+				 b.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 gear=b;
+
+				 mtlLoader.load('assets/RadialRunout_of_ToothRing/slider.mtl', function (materials){
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/slider.obj', function (c){
+				 c.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 slider=c;
+
+				 mtlLoader.load('assets/RadialRunout_of_ToothRing/tester.mtl', function (materials){
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/tester.obj', function (d){
+				 d.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 tester=d;
+
+				 mtlLoader.load('assets/RadialRunout_of_ToothRing/testerMark.mtl', function (materials) {
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/testerMark.obj', function (e) {
+				 e.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 testerMark = e;
+				 mtlLoader.load('assets/RadialRunout_of_ToothRing/sliderMark.mtl', function (materials) {
+				 materials.preload();
+
+				 objLoader.setMaterials(materials);
+				 objLoader.load('assets/RadialRunout_of_ToothRing/sliderMark.obj', function (f) {
+				 f.traverse(function (child) {
+				 if (child instanceof THREE.Mesh) {
+
+				 child.material.side = THREE.DoubleSide;
+				 }
+				 });
+				 sliderMark = f;
+				 RRDraw();
+				 })
+				 })
+				 })
+				 })
+				 })
+				 })
+				 })
+				 })
+				 })
+				 })
+				 });
+				 });*/
+				/*let p1=new Promise(function (resolve,reject) {
+				 /!*THREE.DefaultLoadingManager.onLoad=resolve;
+				 THREE.DefaultLoadingManager.onLoad=reject;*!/
+				 //base.onload=resolve;
+				 base.onerror=reject;
+				 });
+				 p1.then(function () {
+				 renderScene();
+				 })
+				 p1.catch(function () {
+				 //console.log('RRToothRingVI:' + e);
+				 })*/
+
+            };
+            this.draw();
+
+
+            window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame
+                || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+            //相机、渲染、灯光、控制等初始设置
+            function RoughnessDraw () {
+                scene = new THREE.Scene();
+
+                renderer = new THREE.WebGLRenderer({canvas: _this.container, antialias: true});
+                renderer.setClearColor(0x6495ED);
+                renderer.setSize(_this.container.clientWidth, _this.container.clientHeight);
+
+                camera = new THREE.PerspectiveCamera(45, _this.container.clientWidth / _this.container.clientHeight, 1, 1000);
+                camera.position.set(-100,200,700);
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+                base.add(slider,button_off);
+                scene.add(base);
+                base.position.y=-80;
+
+                machineRay = new THREE.Mesh(new THREE.CylinderGeometry(1, 1,70), new THREE.MeshBasicMaterial({
+                    color: 0xff0000,
+                    opacity: 0.9
+                }));
+                machineRay.rotation.z = -Math.PI / 4;
+                machineRay.rotation.y =-33.8 /180 * Math.PI;
+                machineRay.position.set(8,71,5);
+                let light = new THREE.AmbientLight(0x555555);
+                scene.add(light);
+                let light1 = new THREE.DirectionalLight(0xffffff, 1);
+                light1.position.set(4000, 4000, -4000);
+                scene.add(light1);
+                let light2 = new THREE.DirectionalLight(0xffffff, 1);
+                light2.position.set(-2000, 4000, 4000);
+                scene.add(light2);
+
+                controls = new THREE.OrbitControls(camera, renderer.domElement);//鼠标对整个三维模型（相机）的控制
+                controls.rotateSpeed = 0.8;
+                controls.enableZoom = true;
+                controls.zoomSpeed = 1.2;
+                controls.enableDamping = true;
+                let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 400),new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} ));
+                //plane.rotateY(30/180*Math.PI);
+
+                //拖动控制
+                sliderControl = new ObjectControls(camera, renderer.domElement);
+                sliderControl.map = plane;
+                sliderControl.offsetUse = true;
+
+                sliderControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                sliderControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                sliderControl.attachEvent('dragAndDrop', onSliderDrag);
+
+                sliderControl.attachEvent('mouseUp', function () {
+
+                    controls.enabled = true;
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+
+                buttonControl = new ObjectControls(camera, renderer.domElement);
+                buttonControl.offsetUse = true;
+
+                buttonControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                buttonControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                buttonControl.attachEvent('onclick',function () {
+                    onFlag=!onFlag;
+                    _this.toggleObserver(onFlag);
+                });
+
+                //绑定控制对象
+                sliderControl.attach(slider);
+                buttonControl.attach(button_off);
+
+                RoughnessAnimate();
+            }
+
+            function onSliderDrag () {
+
+                controls.enabled = false;
+                renderer.domElement.style.cursor = 'pointer';
+                this.focused.position.x = this.previous.x;  //lock x direction
+                if (this.focused.position.y < -12) {
+
+                    this.focused.position.y = -12;
+                }
+                else if (this.focused.position.y > 3.2) {
+
+                    this.focused.position.y = 3.2;
+                }
+                slider.position.y = this.focused.position.y;
+                console.log(slider.position.y);
+
+            }
+
+            function RoughnessAnimate() {
+                window.requestAnimationFrame(RoughnessAnimate);//回调
+                controls.update();
+                renderer.render(scene, camera);
+            }
+
+        }
+	},
 };
