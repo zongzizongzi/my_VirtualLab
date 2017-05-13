@@ -16,28 +16,44 @@
             <td rowspan="2">
                 <table id="roughnessTable">
                     <tr>
-                        <th>五个波峰点/格</th>
-                        <td>h1：<input id="data1" type="number" class="data-input0"></td>
-                        <td>h2：<input id="data2" type="number" class="data-input0"></td>
-                        <td>h3：<input id="data3" type="number" class="data-input0"></td>
-                        <td>h4：<input id="data4" type="number" class="data-input0"></td>
-                        <td>h5：<input id="data5" type="number" class="data-input0"></td>
-                        <td id="sum1">∑h峰</td>
+                        <th rowspan="2">五个波峰点/格</th>
+                        <td>h1：</td>
+                        <td>h2：</td>
+                        <td>h3：</td>
+                        <td>h4：</td>
+                        <td>h5：</td>
+                        <td >∑h峰:</td>
+                    </tr>
+                    <tr>
+                        <td><input id="data1" type="number" class="data-input0"></td>
+                        <td><input id="data2" type="number" class="data-input0"></td>
+                        <td><input id="data3" type="number" class="data-input0"></td>
+                        <td><input id="data4" type="number" class="data-input0"></td>
+                        <td><input id="data5" type="number" class="data-input0"></td>
+                        <td id="sum1"></td>
 
                     </tr>
                     <tr>
-                        <th>五个波谷点/格</th>
-                        <td>h6：<input id="data6" type="number" class="data-input0"></td>
-                        <td>h7：<input id="data7" type="number" class="data-input0"></td>
-                        <td>h8：<input id="data8" type="number" class="data-input0"></td>
-                        <td>h9：<input id="data9" type="number" class="data-input0"></td>
-                        <td>10：<input id="data10" type="number" class="data-input0"></td>
-                        <td id="sum2">∑h谷<input id="data11" type="number" class="data-input0"></td>
+                        <th rowspan="2">五个波谷点/格</th>
+                        <td>h6：</td>
+                        <td>h7：</td>
+                        <td>h8：</td>
+                        <td>h9：</td>
+                        <td>h10：</td>
+                        <td >∑h谷:</td>
+                    </tr>
+                    <tr>
+                        <td><input id="data6" type="number" class="data-input0"></td>
+                        <td><input id="data7" type="number" class="data-input0"></td>
+                        <td><input id="data8" type="number" class="data-input0"></td>
+                        <td><input id="data9" type="number" class="data-input0"></td>
+                        <td><input id="data10" type="number" class="data-input0"></td>
+                        <td id="sum2"></td>
 
                     </tr>
                     <tr>
-                        <th>实测粗糙度Rz/μm</th>
-                        <td id="error" colspan="10"></td><!--合并列-->
+                        <th>粗糙度Rz/μm</th>
+                        <td id="roughness" colspan="10"></td><!--合并列-->
 
                     </tr>
                 </table>
@@ -61,13 +77,40 @@
 <script src="js/three/controls/OrbitControls.js"></script>
 <script src="js/three/ObjectControls.js"></script>
 <script>
-   /* let addVI = new VILibrary.VI.AddVI($('<canvas id="addVI"></canvas>'));
-    let PIDVI = new VILibrary.VI.PIDVI($('<canvas id="PIDVI"></canvas>'));*/
+    'use strict';
     let roughnessVI = new VILibrary.VI.RoughnessVI($('#mainCanvas'), true);
-/*    VILibrary.InnerObjects.bindDataLine(ballBeamVI.id, addVI.id, 3, 1);
-    VILibrary.InnerObjects.bindDataLine(ballBeamVI.id, addVI.id, 2, 0);
-    VILibrary.InnerObjects.bindDataLine(addVI.id, PIDVI.id, 0, 0);
-    VILibrary.InnerObjects.bindDataLine(PIDVI.id, ballBeamVI.id, 0, 0);*/
+    let panelVI=new VILibrary.VI.PanelVI($('#panelCanvas'), true);
+    VILibrary.InnerObjects.bindDataLine(roughnessVI.id, panelVI.id, 1, 0);
+    let E=0.63;
+    setInterval("setData()", 100);
+    function setData() {
+
+        calculat(0);
+        calculat(5);
+
+    }
+    function calculat(j) {
+        let sum=0,sum1,sum2;
+        for (let i = 1; i <= 5; i++) {
+            let temp = parseFloat(document.getElementById('data' + (j+i)).value);
+            if (isNaN(temp)) {
+               return;
+            }
+            else {
+                sum+=temp;
+            }
+
+        }
+        if(j)document.getElementById('sum2').innerText = sum;
+        else document.getElementById('sum1').innerText = sum;
+         sum1 = parseFloat(document.getElementById('sum1').innerText);
+         sum2 = parseFloat(document.getElementById('sum2').innerText);
+        if((!isNaN(sum1))&&(!isNaN(sum2))){document.getElementById('roughness').innerText = (sum1-sum2)*E/5;}
+
+    }
+
+
+
 </script>
 </body>
 </html>

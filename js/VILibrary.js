@@ -6484,7 +6484,7 @@ VILibrary.VI = {
 
         }
     },
-    RoughnessVI:class DialVI extends TemplateVI{
+    RoughnessVI:class RoughnessVI extends TemplateVI{
         constructor(VICanvas, draw3DFlag) {
 
             super(VICanvas);
@@ -6493,7 +6493,7 @@ VILibrary.VI = {
 
 
             let camera, scene, renderer,
-				base, slider,button_off,button_on,machineRay,
+				base, slider,button_off,button_on,machineRay,sliderST,
 				controls, sliderControl,buttonControl;
             // let testerDown=true,errorArray=[22,29,40,40,47,53,56,63,64,71,77,89,84,90,101,105,113,101,104,89,66,49,43,32,28,25,21,9,9,4,-11,-21,-25,-13,-9,7,8,17,21,26];
 
@@ -6511,6 +6511,10 @@ VILibrary.VI = {
                         buttonControl.attach(button_on);
                         sliderControl.enabled=true;
                         slider.add(machineRay);
+                    this.timer = window.setInterval(function () {
+
+                        VILibrary.InnerObjects.dataUpdater(_this.dataLine);
+                    }, 100);
 
                     // }
                 }
@@ -6521,6 +6525,12 @@ VILibrary.VI = {
                     buttonControl.attach(button_off);
                     sliderControl.enabled=false;
                     slider.remove(machineRay);
+                    sliderST=3;
+                    setTimeout(function (){window.clearInterval(this.timer);
+                        this.timer = 0;},200);
+
+
+
                 }
             };
 
@@ -6528,68 +6538,6 @@ VILibrary.VI = {
              *
              * @param input 输入端口读取角度
              */
-			/*this.setData = function (input) {
-
-			 let inputAngle = Number(Array.isArray(input) ? input[input.length - 1] : input);
-
-			 if (Number.isNaN(inputAngle)) {
-
-			 console.log('RRToothRingVI: Input value error');
-			 return;
-			 }
-			 let outputPosition, Ts = 1 / this.Fs, angleMax = 100 * Ts;
-			 /!*if (this.limit) {
-			 if ((inputAngle - this.PIDAngle) > angleMax) {
-
-			 inputAngle = this.PIDAngle + angleMax;
-			 }
-			 if ((this.PIDAngle - inputAngle) > angleMax) {
-
-			 inputAngle = this.PIDAngle - angleMax;
-			 }
-			 if (inputAngle > 30) {
-
-			 inputAngle = 30;
-			 }
-			 if (inputAngle < -30) {
-
-			 inputAngle = -30;
-			 }
-			 }*!/
-
-			 this.PIDAngle = inputAngle;//向输出端口上写数据
-
-			 outputPosition = this.position1 + 0.5 * Ts * (inputAngle + this.angle1);
-			 this.angle1 = inputAngle;
-			 this.position1 = outputPosition;
-			 inputAngle = outputPosition;
-			 outputPosition = this.position2 + 0.5 * Ts * (inputAngle + this.angle2);
-			 this.angle2 = inputAngle;
-			 this.position2 = outputPosition;
-
-			 outputPosition = outputPosition < -120 ? -120 : outputPosition;
-			 outputPosition = outputPosition > 120 ? 120 : outputPosition;
-			 this.PIDPosition = parseFloat(outputPosition).toFixed(2);//向输出端口上写数据
-
-			 //将输出数保存在数组内
-			 if (this.index <= (this.dataLength - 1)) {
-
-			 this.angelOutput[this.index] = this.PIDAngle;
-			 this.positionOutput[this.index] = this.PIDPosition;
-			 this.index += 1;
-			 }
-			 else {
-
-			 let i;
-			 for (i = 0; i < this.dataLength - 1; i += 1) {
-			 this.angelOutput[i] = this.angelOutput[i + 1];
-			 this.positionOutput[i] = this.positionOutput[i + 1];
-			 }
-			 this.angelOutput[this.dataLength - 1] = this.PIDAngle;
-			 this.positionOutput[this.dataLength - 1] = this.PIDPosition;
-			 }
-			 setPosition(this.PIDAngle * Math.PI / 180, this.PIDPosition);
-			 };*/
             this.reset=function(){
                /* gear.rotateX(-gearNo*Math.PI/20);
                 slider.position.y=sliderMark.position.y=0;
@@ -6598,11 +6546,16 @@ VILibrary.VI = {
             }
 
             this.getData = function (dataType) {
+                if (onFlag){
+                    // console.log("move",)
+                    if(-6<=slider.position.y&&slider.position.y<=(-4))sliderST=0;
+                    else if(-8<=slider.position.y&&slider.position.y<=(-2))sliderST=1;
+                    else if(-10<=slider.position.y&&slider.position.y<=0)sliderST=2;
+                    else sliderST=3;
+                }
+                else sliderST=3;
+                return sliderST;
 
-                /*if (dataType === 1) {
-
-                    return error;  //输出误差
-                }*/
             };
 
 
@@ -6648,106 +6601,6 @@ VILibrary.VI = {
                     };
                 }
 
-				/* mtlLoader.load('assets/RadialRunout_of_ToothRing/base.mtl', function (materials){
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/base.obj', function (a){
-				 a.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 base=a;
-				 mtlLoader.load('assets/RadialRunout_of_ToothRing/gear.mtl', function (materials){
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/gear.obj', function (b){
-				 b.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 gear=b;
-
-				 mtlLoader.load('assets/RadialRunout_of_ToothRing/slider.mtl', function (materials){
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/slider.obj', function (c){
-				 c.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 slider=c;
-
-				 mtlLoader.load('assets/RadialRunout_of_ToothRing/tester.mtl', function (materials){
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/tester.obj', function (d){
-				 d.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 tester=d;
-
-				 mtlLoader.load('assets/RadialRunout_of_ToothRing/testerMark.mtl', function (materials) {
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/testerMark.obj', function (e) {
-				 e.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 testerMark = e;
-				 mtlLoader.load('assets/RadialRunout_of_ToothRing/sliderMark.mtl', function (materials) {
-				 materials.preload();
-
-				 objLoader.setMaterials(materials);
-				 objLoader.load('assets/RadialRunout_of_ToothRing/sliderMark.obj', function (f) {
-				 f.traverse(function (child) {
-				 if (child instanceof THREE.Mesh) {
-
-				 child.material.side = THREE.DoubleSide;
-				 }
-				 });
-				 sliderMark = f;
-				 RRDraw();
-				 })
-				 })
-				 })
-				 })
-				 })
-				 })
-				 })
-				 })
-				 })
-				 })
-				 });
-				 });*/
-				/*let p1=new Promise(function (resolve,reject) {
-				 /!*THREE.DefaultLoadingManager.onLoad=resolve;
-				 THREE.DefaultLoadingManager.onLoad=reject;*!/
-				 //base.onload=resolve;
-				 base.onerror=reject;
-				 });
-				 p1.then(function () {
-				 renderScene();
-				 })
-				 p1.catch(function () {
-				 //console.log('RRToothRingVI:' + e);
-				 })*/
 
             };
             this.draw();
@@ -6770,8 +6623,9 @@ VILibrary.VI = {
                 base.add(slider,button_off);
                 scene.add(base);
                 base.position.y=-80;
+                slider.position.y=5;
 
-                machineRay = new THREE.Mesh(new THREE.CylinderGeometry(1, 1,70), new THREE.MeshBasicMaterial({
+                machineRay = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5,70), new THREE.MeshBasicMaterial({
                     color: 0xff0000,
                     opacity: 0.9
                 }));
@@ -6849,16 +6703,16 @@ VILibrary.VI = {
                 controls.enabled = false;
                 renderer.domElement.style.cursor = 'pointer';
                 this.focused.position.x = this.previous.x;  //lock x direction
-                if (this.focused.position.y < -12) {
+                if (this.focused.position.y < -14) {
 
-                    this.focused.position.y = -12;
+                    this.focused.position.y = -14;
                 }
-                else if (this.focused.position.y > 3.2) {
+                else if (this.focused.position.y > 5) {
 
-                    this.focused.position.y = 3.2;
+                    this.focused.position.y = 5;
                 }
                 slider.position.y = this.focused.position.y;
-                console.log(slider.position.y);
+
 
             }
 
@@ -6870,4 +6724,480 @@ VILibrary.VI = {
 
         }
 	},
+	/*PanelVI:class PanelVI extends TemplateVI {
+        constructor(VICanvas, draw3DFlag) {
+
+            super(VICanvas);
+
+            const _this = this;
+
+            let camera, scene, renderer,
+                scrollMesh,rulerMesh,panelMesh,markLine,
+				panelControl, formerY=0;
+
+            // let rulerPosition = -400;
+
+            //crossMark in renderer
+            let crossMarkTexture = new THREE.TextureLoader().load('img/crossMark.png');
+            let crossMarkMaterial = new THREE.MeshBasicMaterial({map: crossMarkTexture});
+            crossMarkMaterial.transparent = true;
+            let crossMark = new THREE.Mesh(new THREE.PlaneGeometry(128, 128), crossMarkMaterial);
+            crossMark.position.x = -160;
+            crossMark.position.z = 1;
+
+            let indexMark,indexMark1;
+            // let raycaster = new THREE.Raycaster();
+            let indexLines = [], indexNumbers = [];
+            let objects = [], mouse = new THREE.Vector2(), SELECTED, mouseY = 0, rulerPosition = -400;
+
+            let requestAnimationFrame = window.requestAnimationFrame
+                || window.mozRequestAnimationFrame
+                || window.webkitRequestAnimationFrame
+                || window.msRequestAnimationFrame;
+            window.requestAnimationFrame = requestAnimationFrame;
+
+
+
+            panelDraw();
+            panelAnimate();
+
+            function panelDraw() {
+                let panelCanvas = document.getElementById('panelCanvas')
+                renderer = new THREE.WebGLRenderer({canvas: _this.container, antialias: true});
+                renderer.setClearColor(0x6495ED);
+                renderer.setClearAlpha(0);
+                renderer.setSize(_this.container.clientWidth, _this.container.clientHeight);
+
+
+                camera = new THREE.PerspectiveCamera(30, _this.container.clientWidth / _this.container.clientHeight, 1, 2000);
+                camera.position.z = 1000;
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+                scene = new THREE.Scene();
+
+                let light = new THREE.DirectionalLight(0xffffff, 1);
+                light.position.set(0, 0, 1000);
+                scene.add(light);
+
+                let scrollTexture = new THREE.TextureLoader().load('img/1.png');
+                let scrollGeometry = new THREE.BoxGeometry(32 * 2.5, 128 * 2.5, 10);
+                 scrollMesh = new THREE.Mesh(scrollGeometry,
+                    new THREE.MeshBasicMaterial({map: scrollTexture}));
+                scrollMesh.position.x = 330;
+
+                 rulerMesh = new THREE.Mesh(new THREE.PlaneGeometry(180, 400),
+                    new THREE.MeshBasicMaterial({color: 0xffffff}));
+                rulerMesh.position.x = 180;
+
+                drawIndexLine();
+
+                 panelMesh = new THREE.Mesh(new THREE.CircleGeometry(220, 40, 0, Math.PI * 2),
+                    new THREE.MeshBasicMaterial({color: 0x66FF00}));
+
+                panelMesh.position.x = -160;
+                //add zoomIndex
+                drawZoomIndexLine();
+
+                let markGeometry = new THREE.Geometry();
+                let markMaterial = new THREE.LineBasicMaterial({color: 0x000000, linewidth: 0.5});
+                markGeometry.vertices.push(new THREE.Vector3(200, 0.5, 0));
+                markGeometry.vertices.push(new THREE.Vector3(90, 0.5, 0));
+                 markLine = new THREE.Line(markGeometry, markMaterial, THREE.LineSegments);
+
+                /!*let indexMarkGeometry = new THREE.Geometry();
+                indexMarkGeometry.vertices.push(new THREE.Vector3(-380, 0, 0));
+                indexMarkGeometry.vertices.push(new THREE.Vector3(60, 0, 0));
+
+                indexMark = new THREE.Line(indexMarkGeometry, new THREE.LineBasicMaterial({
+                    color: 0x000000,
+                    linewidth: 0.5
+                }), THREE.LineSegments);
+                indexMark1 = new THREE.Line(indexMarkGeometry, new THREE.LineBasicMaterial({
+                    color: 0x000000,
+                    linewidth: 0.5
+                }), THREE.LineSegments);*!/
+                 drawIndexMark();
+
+                indexMark.position.z = 2;
+                scene.add(indexMark);
+                indexMark.add(indexMark1);
+                scene.add(scrollMesh);
+                scene.add(rulerMesh);
+                scene.add(panelMesh);
+                scene.add(markLine);
+                objects.push(scrollMesh);
+
+                let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(800, 800),new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} ));
+                //plane.rotateY(30/180*Math.PI);
+                plane.position.x = 330;
+
+                //拖动控制
+                panelControl = new ObjectControls(camera, renderer.domElement);
+                panelControl.map = plane;
+                panelControl.offsetUse = true;
+
+                panelControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                panelControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                panelControl.attachEvent('dragAndDrop', onScrollDrag);
+
+                panelControl.attachEvent('mouseUp', function () {
+
+                    // controls.enabled = true;
+                    renderer.domElement.style.cursor = 'auto';
+                });
+               /!* panelControl.attachEvent('mousedown', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                    formerY=this.focused.position.y;
+                });*!/
+                panelControl.attach(scrollMesh);
+
+
+
+                panelAnimate();
+            }
+            function panelAnimate() {
+                window.requestAnimationFrame(panelAnimate);
+                renderer.render(scene, camera);
+            }
+
+            function drawIndexMark() {
+
+                scene.remove(indexMark);
+
+                let indexMarkGeometry = new THREE.Geometry();
+                indexMarkGeometry.vertices.push(new THREE.Vector3(-160 - Math.sqrt(220 * 220 - (rulerPosition + 400) * (rulerPosition + 400)), rulerPosition + 400, 0));
+                indexMarkGeometry.vertices.push(new THREE.Vector3(-160 + Math.sqrt(220 * 220 - (rulerPosition + 400) * (rulerPosition + 400)), rulerPosition + 400, 0));
+
+                indexMark = new THREE.Line(indexMarkGeometry, new THREE.LineBasicMaterial({
+                    color: 0x000000,
+                    linewidth: 0.5
+                }), THREE.LineSegments);
+                // indexMark.position.z = 2;
+
+                let indexMarkGeometry1 = new THREE.Geometry();
+                indexMarkGeometry1.vertices.push(new THREE.Vector3( -160-(rulerPosition + 400), - Math.sqrt(220 * 220 - (rulerPosition + 400) * (rulerPosition + 400)),0));
+                indexMarkGeometry1.vertices.push(new THREE.Vector3( -160-(rulerPosition + 400),   Math.sqrt(220 * 220 - (rulerPosition + 400) * (rulerPosition + 400)),0));
+
+                indexMark1 = new THREE.Line(indexMarkGeometry1, new THREE.LineBasicMaterial({
+                    color: 0x000000,
+                    linewidth: 0.5
+                }), THREE.LineSegments);
+
+                scene.add(indexMark);
+                indexMark.add(indexMark1);
+
+//        console.log('y: ' + rulerPosition);
+            }
+            function drawIndexLine() {
+
+                for (let i = 0; i < 100; i++) {
+                    let indexGeometry = new THREE.Geometry();
+                    let xPosition = 170;
+                    let yPosition = -199 + 15 * i + rulerPosition;
+                    if (yPosition >= 199 || yPosition <= -199) continue;
+
+                    if (i % 5 == 0) xPosition = 180;
+
+                    if (i % 10 == 0) {
+
+                        xPosition = 190;
+                        let indexCanvas = document.createElement('canvas');
+                        indexCanvas.style.width = "128px";
+                        indexCanvas.style.height = "256px";
+                        let context1 = indexCanvas.getContext('2d');
+                        context1.font = "30px Arial";
+                        context1.fillStyle = "rgba(0,0,0,1)";
+                        context1.fillText(i.toString(), 0, 25);
+                        // canvas contents will be used for a texture
+                        let texture1 = new THREE.Texture(indexCanvas);
+                        texture1.needsUpdate = true;
+                        let material1 = new THREE.MeshBasicMaterial({map: texture1});
+                        material1.transparent = true;
+                        let indexNumber = new THREE.Mesh(new THREE.PlaneGeometry(indexCanvas.width, indexCanvas.height), material1);
+                        indexNumber.position.set(350, yPosition - 60, 0);
+                        scene.add(indexNumber);
+                        indexNumbers.push(indexNumber);
+                    }
+
+                    indexGeometry.vertices.push(new THREE.Vector3(150, yPosition, 0));
+                    indexGeometry.vertices.push(new THREE.Vector3(xPosition, yPosition, 0));
+                    let indexLine = new THREE.Line(indexGeometry, new THREE.LineBasicMaterial({
+                        color: 0x000000,
+                        linewidth: 0.5
+                    }), THREE.LineSegments);
+                    scene.add(indexLine);
+                    indexLines.push(indexLine);
+                }
+            }
+            function drawZoomIndexLine() {
+                for (let i = 0; i < 100; i++) {
+                    let indexGeometry = new THREE.Geometry();
+                    let xPosition = -250;
+                    let yPosition = -200 + 20 * i;
+                    if (yPosition >= 200 || yPosition <= -200) continue;
+
+                    if (i % 5 == 0) {
+
+                        xPosition = -270;
+                        let zoomIndexCanvas = document.createElement('canvas');
+                        let context1 = zoomIndexCanvas.getContext('2d');
+                        context1.font = "40px Arial";
+                        context1.fillStyle = "rgba(0,0,0,1)";
+                        context1.fillText(i.toString(), 0, 90);
+                        // canvas contents will be used for a texture
+                        let texture1 = new THREE.Texture(zoomIndexCanvas)
+                        texture1.needsUpdate = true;
+                        let material1 = new THREE.MeshBasicMaterial({map: texture1});
+                        material1.transparent = true;
+                        let zoomIndexNumber = new THREE.Mesh(
+                            new THREE.PlaneGeometry(zoomIndexCanvas.width, zoomIndexCanvas.height), material1);
+                        zoomIndexNumber.position.set(-180, yPosition, 0);
+                        scene.add(zoomIndexNumber);
+                    }
+                    indexGeometry.vertices.push(new THREE.Vector3(-210, yPosition, 0));
+                    indexGeometry.vertices.push(new THREE.Vector3(xPosition, yPosition, 0));
+                    let zoomIndexLine = new THREE.Line(indexGeometry, new THREE.LineBasicMaterial({
+                        color: 0x000000,
+                        linewidth: 0.5
+                    }), THREE.LineSegments);
+                    scene.add(zoomIndexLine);
+                }
+            }
+
+            function onScrollDrag() {
+                renderer.domElement.style.cursor = 'pointer';
+                console.log( ( this.focused.position.y - formerY)/2 );
+
+                // rulerPosition += ( this.focused.position.y - formerY)/2 ;
+                // rulerPosition += ( this.focused.position.y - this.previous.y) ;
+                rulerPosition=400+this.focused.position.y/100;
+                formerY=this.focused.position.y;
+
+                this.focused.position.x = this.previous.x;  //lock x direction
+                scrollMesh.position.y = this.previous.y;  //lock x direction
+
+                while (indexNumbers.length > 0) {
+                    scene.remove(indexNumbers[0]);
+                    indexNumbers.shift();
+                }
+
+                while (indexLines.length > 0) {
+                    scene.remove(indexLines[0]);
+                    indexLines.shift();
+                }
+                drawIndexLine();
+                drawIndexMark();
+            }
+
+
+
+        }
+    }*/
+
+    PanelVI:class PanelVI extends TemplateVI{
+        constructor (VICanvas) {
+            super(VICanvas);
+            const _this = this;
+            this.name = 'PanelVI';
+            let ctx = this.container.getContext("2d"),img;
+            let canvasW=this.container.width,canvasH=this.container.height,
+				panelX=canvasW*0.3,panelY=canvasH/2,R=canvasW*0.3,
+				rulerW=canvasW*0.15,rulerH=canvasH*0.7,rulerX=panelX+R+canvasW*0.05,rulerY=(canvasH-rulerH)/2,
+			    scrollW=canvasW*0.1,scrollH=canvasH*0.5,scrollX=rulerX+rulerW,scrollY=(canvasH-scrollH)/2,
+                IS_DOWN=false,formerY=0,testNum=0,formerInput=0,
+                imgSRC='img/Roughness/Transparent.png',img2,
+				BLACK="#000000",
+				RED="#ff0000";
+            ctx.textBaseline="middle";//文字居中定位
+            ctx.lineWidth=1;
+
+
+            this.setData = function (input){
+
+                let inputST = Number(Array.isArray(input) ? input[input.length - 1] : input);
+
+                if (Number.isNaN(inputST)) {
+
+                    console.log('panelVI: Input value error');
+                    return;
+                }
+                if(input!=formerInput){
+                    switch (input)
+                    {
+                        case 0:imgSRC='img/Roughness/Clear.png';break;
+                        case 1:imgSRC='img/Roughness/Blurred1.png';break;
+                        case 2:imgSRC='img/Roughness/Blurred2.png';break;
+                        case 3:imgSRC='img/Roughness/Transparent.png';break;
+                    }
+                    drawImg2();
+				}
+                formerInput=input;
+            };
+
+            function scrollDraw() {
+                //手轮
+                img = new Image();
+                img.onload = function(){
+                    ctx.drawImage(img, scrollX,scrollY,scrollW,scrollH);
+
+                }
+                img.src = 'img/1.png';
+
+            }
+            function drawImg2() {
+                img2 = new Image();
+                img2.onload = function(){
+                    draw(0);
+                }
+                img2.src=imgSRC;
+            }
+
+
+
+            function draw(i) {
+
+                ctx.clearRect(0,0,scrollX,canvasH);//清空画布
+				/*静态部分*/
+                ctx.save();
+				ctx.fillStyle=BLACK;
+                ctx.beginPath();
+                ctx.arc(panelX, panelY,R, 0, Math.PI*2, false);
+                ctx.fill();
+                ctx.closePath();
+                ctx.drawImage(img2, panelX-R,panelY-R,2*R,2*R);
+                ctx.fillStyle=RED;
+                ctx.strokeStyle=RED;
+                ctx.beginPath();
+                ctx.translate(panelX,panelY);//坐标系移至圆心
+                ctx.rotate(-Math.PI/4);
+                for(let i=0;i<10;i++){
+                    ctx.moveTo(0.3*R,-(0.7-0.16*i)*R);
+                    ctx.lineTo(0.4*R,-(0.7-0.16*i)*R);
+                    ctx.fillText(i, 0.5*R, -(0.7-0.16*i)*R);
+                }
+                ctx.stroke();
+                ctx.closePath();
+                ctx.restore();
+
+                // 刻度尺
+                let my_gradient=ctx.createLinearGradient(0,0,0,canvasH);
+                my_gradient.addColorStop(0,"#555555");
+                my_gradient.addColorStop(0.5,"#cccccc");
+                my_gradient.addColorStop(1,"#555555");
+                ctx.fillStyle=my_gradient;
+                ctx.fillRect(rulerX,rulerY,rulerW,rulerH);
+                ctx.strokeStyle=BLACK;
+                ctx.beginPath();
+                ctx.moveTo(rulerX,panelY);
+                ctx.lineTo(rulerX+rulerW,panelY);
+                ctx.stroke();
+                ctx.closePath();
+
+
+
+
+				/*可动部分*/
+                ctx.save();//目镜视场内移动刻度线
+                ctx.translate(panelX,panelY);//坐标系移至圆心
+                ctx.strokeStyle=RED;
+                ctx.beginPath();
+                ctx.moveTo(-Math.sqrt(R*R-i*i),i);
+                ctx.lineTo(Math.sqrt(R*R-i*i),i);
+                ctx.moveTo(i,Math.sqrt(R*R-i*i));
+                ctx.lineTo(i,-Math.sqrt(R*R-i*i));
+                // ctx.moveTo(-i+R/2,-i-R/2);
+                // ctx.lineTo(-i+R/2+R/4*Math.sin(Math.PI/4),-(i+R/2+R/4*Math.sin(Math.PI/4)));
+                ctx.rotate(-Math.PI/4); // 画目镜刻度
+                ctx.moveTo(0.6*R,-0.16*i*R*0.01);
+                ctx.lineTo(0.8*R,-0.16*i*R*0.01);
+                ctx.moveTo(0.6*R,-0.16*i*R*0.01+3);
+                ctx.lineTo(0.8*R,-0.16*i*R*0.01+3);
+                ctx.stroke();
+                ctx.closePath();
+                ctx.restore();
+
+                //刻度尺刻度及数字
+                ctx.save();
+                ctx.beginPath();
+                let rulerLineX=rulerX+rulerW*0.2,//刻度线左侧起点
+                    rulerMin=rulerH*0.03,//刻度线间距
+                    rulerLineYp,
+                    rulerLineYn;
+                ctx.translate(rulerLineX,panelY);
+                ctx.fillStyle=BLACK;
+                for(let j=0;j<=50;j++){
+                    rulerLineYp=-i+j*rulerMin;
+                    rulerLineYn=-i-j*rulerMin;
+                    let lineLen = (j % 5) ? rulerW * 0.2 : rulerW * 0.3;
+                    if((rulerLineYp>(-rulerH/2))&&(rulerLineYp<rulerH/2)) {
+                        ctx.moveTo(0, rulerLineYp);
+                        ctx.lineTo(lineLen, rulerLineYp);
+                        if ((j % 10) == 0&&Math.abs(rulerLineYp)<(0.5*rulerH-10))ctx.fillText(50-j, lineLen + 1, rulerLineYp);
+                        //    被十整除而且不在标尺的边缘（保证数字不会超出标尺范围）
+                    }
+                    if(((-rulerH/2)<rulerLineYn)&&(rulerLineYn<rulerH/2)){
+                        ctx.moveTo(0,rulerLineYn);
+                        ctx.lineTo(lineLen,rulerLineYn);
+                        if((j%10)==0&&Math.abs(rulerLineYn)<(0.5*rulerH-10))ctx.fillText(50+j,lineLen+1,rulerLineYn);
+                    }
+                }
+
+                ctx.stroke();
+                ctx.closePath();
+                ctx.restore();
+
+
+
+
+
+
+            }
+
+            //拖动控制
+            _this.container.addEventListener("mousedown",function() {
+                event.preventDefault();this.style.cursor = 'pointer';IS_DOWN=true;formerY=event.offsetY;/*formerX=event.offsetX;*/},false);
+            _this.container.addEventListener("mousemove",function () {
+                event.preventDefault();
+                if (IS_DOWN == false) return;
+                let x=event.offsetX;
+                let y=event.offsetY;
+
+                if((scrollX<x<(scrollX+scrollW))&&(scrollY<y<(scrollY+scrollH))){
+                    this.style.cursor = 'pointer';
+                    testNum+=(y-formerY)*0.2;
+
+                    formerY=y;
+
+                }
+                draw(testNum);
+
+            },false);
+            _this.container.addEventListener("mouseup",function (){IS_DOWN=false;},false);
+            _this.container.addEventListener("mouseout",function (){IS_DOWN=false;this.style.cursor = 'auto';},false);
+            _this.container.addEventListener("mouseover",function (){this.style.cursor = 'pointer';},false);
+
+
+
+
+//调用函数
+
+            scrollDraw();
+            drawImg2();
+
+
+
+
+
+
+        }
+    },
 };
