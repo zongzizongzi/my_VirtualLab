@@ -6080,15 +6080,9 @@ VILibrary.VI = {
             this.STROKE_STYLE= "rgba(0,0,0,1)";
             this.FILL_STYLE= "rgba(80,80,80,0.6)";
             this.ctx.lineWidth=1;
-            this.MAX_NUMBER=120;//最大刻度值
-			let lineNUM;
+            let MAX_NUMBER=160;//最大刻度值
 
             this.draw=function (angle) {
-
-                if(150>this.MAX_NUMBER&&this.MAX_NUMBER>=50)lineNUM=5;
-                else if(this.MAX_NUMBER<50)lineNUM=0.5;
-                else lineNUM=10;
-                console.log("lineNUM",lineNUM);
                 this.ctx.clearRect(0,0,this.container.width,this.container.height);//清空画布
                 //画指针
                 this.rotateAngle=angle;
@@ -6118,17 +6112,17 @@ VILibrary.VI = {
                 this.ctx.textAlign = "center";//文本对齐
                 this.ctx.font=this.RADIUS/10+"px Times new roman";
                 this.ctx.textBaseline="middle";//文字居中定位
-                let delta=Math.PI/_this.MAX_NUMBER;
+                let delta=Math.PI/MAX_NUMBER;
                 let i=0;
-                for(i;i<=(_this.MAX_NUMBER/lineNUM);i++){
-                    let angle0=-Math.PI/2+delta*i*lineNUM;
-                    let angle1=-Math.PI/2-delta*i*lineNUM;
-                    // if(!(i%(lineNUM/2))){
-                        this.line(i*lineNUM,angle0);//顺时针方向
-                        if(i*lineNUM<_this.MAX_NUMBER){
-                            this.line(i*lineNUM,angle1);//逆时针方向
+                for(i;i<=MAX_NUMBER;i++){
+                    let angle0=-Math.PI/2+delta*i;
+                    let angle1=-Math.PI/2-delta*i;
+                    if(!(i%5)){
+                        this.line(i,angle0);//顺时针方向
+                        if(i!=MAX_NUMBER){
+                            this.line(i,angle1);//逆时针方向
                         }
-					// }
+					}
                 }
 
                 this.ctx.font=this.RADIUS/6+"px Verdana";
@@ -6156,10 +6150,10 @@ VILibrary.VI = {
                 this.ctx.rotate(angle);
                 this.ctx.beginPath();
                 this.ctx.moveTo(this.RADIUS,0);
-                if(i%(lineNUM*2)) this.ctx.lineTo(this.RADIUS-this.SHORT_TICK,0);
+                if(i%10) this.ctx.lineTo(this.RADIUS-this.SHORT_TICK,0);
                 else {
                     this.ctx.lineTo(this.RADIUS-this.LONG_TICK,0);
-                    if(!(i%(lineNUM*4))){
+                    if(!(i%20)){
                         this.ctx.translate(this.RADIUS*0.8,0);//坐标系移至文字中心
                         this.ctx.rotate(-angle);//逆向旋转，恢复文字方向
                         this.ctx.fillText(i, 0, 0);
@@ -6200,7 +6194,7 @@ VILibrary.VI = {
                     return;
                 }
                 //this.PIDAngle = inputAngle;//向输出端口上写数据
-                this.angle=inputError*Math.PI/_this.MAX_NUMBER;
+                this.angle=inputError*Math.PI/MAX_NUMBER;
                 this.draw(this.angle);
             }
 
@@ -7116,17 +7110,17 @@ VILibrary.VI = {
                 ctx.translate(panelX,panelY);//坐标系移至圆心
                 ctx.strokeStyle=RED;
                 ctx.beginPath();
-                ctx.moveTo(-Math.sqrt(R*R-i*i),-i);//十字线
-                ctx.lineTo(Math.sqrt(R*R-i*i),-i);
-                ctx.moveTo(-i,Math.sqrt(R*R-i*i));
-                ctx.lineTo(-i,-Math.sqrt(R*R-i*i));
+                ctx.moveTo(-Math.sqrt(R*R-i*i),i);
+                ctx.lineTo(Math.sqrt(R*R-i*i),i);
+                ctx.moveTo(i,Math.sqrt(R*R-i*i));
+                ctx.lineTo(i,-Math.sqrt(R*R-i*i));
                 // ctx.moveTo(-i+R/2,-i-R/2);
                 // ctx.lineTo(-i+R/2+R/4*Math.sin(Math.PI/4),-(i+R/2+R/4*Math.sin(Math.PI/4)));
                 ctx.rotate(-Math.PI/4); // 画目镜刻度
-                ctx.moveTo(0.6*R,0.16*i*R*0.01);
-                ctx.lineTo(0.8*R,0.16*i*R*0.01);
-                ctx.moveTo(0.6*R,0.16*i*R*0.01+3);
-                ctx.lineTo(0.8*R,0.16*i*R*0.01+3);
+                ctx.moveTo(0.6*R,-0.16*i*R*0.01);
+                ctx.lineTo(0.8*R,-0.16*i*R*0.01);
+                ctx.moveTo(0.6*R,-0.16*i*R*0.01+3);
+                ctx.lineTo(0.8*R,-0.16*i*R*0.01+3);
                 ctx.stroke();
                 ctx.closePath();
                 ctx.restore();
@@ -7141,8 +7135,8 @@ VILibrary.VI = {
                 ctx.translate(rulerLineX,panelY);
                 ctx.fillStyle=BLACK;
                 for(let j=0;j<=50;j++){
-                    rulerLineYp=i+j*rulerMin;
-                    rulerLineYn=i-j*rulerMin;
+                    rulerLineYp=-i+j*rulerMin;
+                    rulerLineYn=-i-j*rulerMin;
                     let lineLen = (j % 5) ? rulerW * 0.2 : rulerW * 0.3;
                     if((rulerLineYp>(-rulerH/2))&&(rulerLineYp<rulerH/2)) {
                         ctx.moveTo(0, rulerLineYp);
@@ -7213,88 +7207,8 @@ VILibrary.VI = {
             this.name = 'CircleRunoutVI';
 
             let camera,scene,renderer,
-				controls,base1Control,rotator1Control,rotator2Control,stickControl,buttonControl,
-				base1,base,axis,rotator1,rotator2,stick,onButton,offButton,
-				onFlag=false,exmStyle=0,index=0,
-                errArray1=[0,1.5,3,4.5,6,7.5,9,10.5,10.5,9,7.5,6,4.5,3,1.5,0,-1.5,-3,-1,0],
-                errArray2=[0,1,2,3,4,5,6,7,8,9,8,7,6,5,4,3,2,1,0.5,0],
-                errOutput=[0];
-
-            this.timer=0;
-
-            this.toggleObserver = function (flag) {
-
-                if (flag) {
-
-                    if (!this.timer&&exmStyle) {
-                         if(!index){errOutput=[0];}
-                        scene.remove(offButton);
-                        buttonControl.detach(offButton);
-                        scene.add(onButton);
-                        buttonControl.attach(onButton);
-                        document.getElementById("exmSelect").disabled=true;
-                        let delta =0.1*Math.PI  ;//一齿的弧度
-                        this.timer = window.setInterval(function () {
-                        	if(exmStyle==1)errOutput[index]=errArray1[index]+Math.random();
-                            if((exmStyle==2)||(exmStyle==3))errOutput[index]=errArray2[index]-Math.random();
-                        	index++;
-                            //定时更新相同数据线VI的数据
-
-
-                            axis.rotation.x = index*delta;
-                            if(axis.rotation.x>=Math.PI*2){
-                                window.clearInterval(_this.timer);
-                                document.getElementById("exmSelect").disabled=false;
-                                axis.rotation.x=0;
-                                index=0;
-                                this.timer = 0;
-                                scene.remove(onButton);
-                                buttonControl.detach(onButton);
-                                scene.add(offButton);
-                                buttonControl.attach(offButton);
-                                errOutput[20]=0;
-
-                            }
-                            if (_this.dataLine) {
-
-                                VILibrary.InnerObjects.dataUpdater(_this.dataLine);
-                            }
-                        }, 100);
-                    }
-                }
-                else{
-                    scene.remove(onButton);
-                    buttonControl.detach(onButton);
-                    scene.add(offButton);
-                    buttonControl.attach(offButton);
-                    window.clearInterval(this.timer);
-                    this.timer = 0;
-                    // index=0;
-                    // errOutput=[0];
-                    // axis.rotation.x =0;
-
-
-
-                }
-            };
-            this.getData=function (dataType) {
-				if(exmStyle==1||exmStyle==2||exmStyle==3){
-					let max=Math.max.apply(Math,errOutput).toFixed(1);
-                    let min=Math.min.apply(Math,errOutput).toFixed(1);
-                    let offset=(max-min).toFixed(1);
-					let tolerance=parseFloat(document.getElementById('tol'+exmStyle).innerText);
-                    let result=offset<=tolerance?"合格":"不合格";
-                    document.getElementById('data'+(exmStyle*4-3)).innerText =max;
-                    document.getElementById('data'+(exmStyle*4-2)).innerText =min;
-                    document.getElementById('data'+(exmStyle*4-1)).innerText =offset;
-                    document.getElementById('data'+exmStyle*4).innerText =result;
-
-				}
-				else errOutput=[0];
-                    console.log(errOutput);
-                return errOutput;
-
-            }
+				controls,base1Control,rotator1Control,rotator2Control,stickControl,
+				base1,base,axis,rotator1,rotator2,stick;
 
             this.draw=function () {
                 if (draw3DFlag) {
@@ -7314,11 +7228,8 @@ VILibrary.VI = {
                         VILibrary.InnerObjects.loadModule('assets/CircleRunout/base2.mtl', 'assets/CircleRunout/base2.obj'),
                         VILibrary.InnerObjects.loadModule('assets/CircleRunout/axis.mtl', 'assets/CircleRunout/axis.obj'),
                         VILibrary.InnerObjects.loadModule('assets/CircleRunout/Rotator1.mtl', 'assets/CircleRunout/Rotator1.obj'),
-                        VILibrary.InnerObjects.loadModule('assets/CircleRunout/stick.mtl', 'assets/CircleRunout/stick.obj'),
                         VILibrary.InnerObjects.loadModule('assets/CircleRunout/Rotator2.mtl', 'assets/CircleRunout/Rotator2.obj'),
-                        VILibrary.InnerObjects.loadModule('assets/CircleRunout/onButton.mtl', 'assets/CircleRunout/onButton.obj'),
-                        VILibrary.InnerObjects.loadModule('assets/CircleRunout/offButton.mtl', 'assets/CircleRunout/offButton.obj'),
-
+                        VILibrary.InnerObjects.loadModule('assets/CircleRunout/stick.mtl', 'assets/CircleRunout/stick.obj'),
                     ];
                     Promise.all(promiseArr).then(function (objArr) {
 
@@ -7327,11 +7238,8 @@ VILibrary.VI = {
                         base1 = objArr[1];
                         axis = objArr[2];
                         rotator1 = objArr[3];
-                        stick = objArr[4];
-                        rotator2 = objArr[5];
-                        onButton=objArr[6];
-                        offButton=objArr[7];
-
+                        rotator2=objArr[4];
+                        stick=objArr[5];
 
                         loadingImg.style.display = 'none';
                         CRDraw();
@@ -7368,17 +7276,19 @@ VILibrary.VI = {
                 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 
-                scene.add(base1,base,axis,offButton);
-                base1.add(rotator1);
+                scene.add(base1,base,axis,rotator1);
+                // base1.add(rotator1);
 				rotator1.add(stick);
 				stick.add(rotator2);
+				rotator2.position.set(-17,58.76,-8);
+                rotator1.position.set(50,-50,50);
+               /* // stick.position.set(50,-50,50);
+				// rotator2.position.set(23,12.5,42);
+                rotator2.position.set(23,8.76,42);
+                scene.add(base1,base,axis,rotator1/!*,stick,rotator2*!/);
+                rotator1.add(stick);
+                rotator2.position.set(-17,58.76,-8);*/
 
-                // base1.position.set(0,0,-10);
-                stick.position.set(0,0,0);
-				rotator1.position.set(50,-46.26,50);
-                rotator2.position.set(-27,58.76,-8);
-              /*  base1.position.set(0,0,-10);
-                stick.position.set(0,0,0);*/
 
                 let light = new THREE.AmbientLight(0x555555);
                 scene.add(light);
@@ -7401,7 +7311,6 @@ VILibrary.VI = {
                 base1Control = new ObjectControls(camera, renderer.domElement);
                 base1Control.map = plane;
                 base1Control.offsetUse = true;
-
 
                 base1Control.attachEvent('mouseOver', function () {
 
@@ -7428,16 +7337,24 @@ VILibrary.VI = {
                 rotator1Control.attachEvent('mouseOver', function () {
 
                     renderer.domElement.style.cursor = 'pointer';
+                    base1Control.enabled=false;
                 });
 
                 rotator1Control.attachEvent('mouseOut', function () {
+                    base1Control.enabled=true;
                     renderer.domElement.style.cursor = 'auto';
                 });
                 rotator1Control.attachEvent('dragAndDrop', onRotator1Drag);
                 rotator1Control.attachEvent('mouseUp', function () {
                     controls.enabled = true;
-                    stickControl.enabled=true;
+                    // base1Control.attachEvent('dragAndDrop', onBase1Drag);
+                    console.log(base1Control.dragAndDropFlag);
+                    /*setTimeout(function () {
+                        base1Control.enabled=true;
+                    },3000);*/
+                    base1Control.enabled=true;
                     renderer.domElement.style.cursor = 'auto';
+                    console.log(rotator1.position.x)
                 });
 
                 stickControl = new ObjectControls(camera, renderer.domElement);
@@ -7449,96 +7366,79 @@ VILibrary.VI = {
                     renderer.domElement.style.cursor = 'auto';
                 });
 
-                rotator2Control = new ObjectControls(camera, renderer.domElement);
-                rotator2Control.map = plane;
-                rotator2Control.offsetUse = true;
-                rotator2Control.attachEvent('dragAndDrop', onRotator2Drag);
-                rotator2Control.attachEvent('mouseUp', function () {
-                    controls.enabled = true;
-                    renderer.domElement.style.cursor = 'auto';
-                });
-
-                buttonControl = new ObjectControls(camera, renderer.domElement);
-                buttonControl.map = plane;
-                buttonControl.offsetUse = true;
-                buttonControl.attachEvent('onclick', function () {
-                    _this.toggleObserver(!_this.timer);
-                });
-                buttonControl.attachEvent('mouseOver', function () {
-
-                    renderer.domElement.style.cursor = 'pointer';
-                });
-
-                buttonControl.attachEvent('mouseOut', function () {
-
-                    renderer.domElement.style.cursor = 'auto';
-                });
-
                 //绑定控制对象
                 base1Control.attach(base1);
                 rotator1Control.attach(rotator1);
                 stickControl.attach(stick);
-                rotator2Control.attach(rotator2);
-                buttonControl.attach(offButton);
-
 
 
                 CRAnimate();
             }
 
             function onBase1Drag () {
-                if(this.focused.materialLibraries=="base2.mtl"){
-                    controls.enabled = false;
-                    renderer.domElement.style.cursor = 'pointer';
-                    /*if (this.focused.position.y < -20) {
 
-                        this.focused.position.y = -20;
-                    }
-                    else if (this.focused.position.y > 5) {
+                controls.enabled = false;
+                renderer.domElement.style.cursor = 'pointer';
+                if (this.focused.position.y < -20) {
 
-                        this.focused.position.y = 5;
-                    }*/
-                    if (this.focused.position.x < -120) {
+                    this.focused.position.y = -20;
+                }
+                else if (this.focused.position.y > 5) {
 
-                        this.focused.position.x = -120;
-                    }
-                    else if (this.focused.position.x > 30) {
+                    this.focused.position.y = 5;
+                }
+                if (this.focused.position.x < -120) {
 
-                        this.focused.position.x = 30;
-                    }
+                    this.focused.position.x = -120;
+                }
+                else if (this.focused.position.x > 30) {
 
-                    // base1.position.z =- this.focused.position.y;
-                    this.focused.position.y = this.previous.y;
-				}
-				else {
-                    this.focused.position.x = this.previous.x;
-                    this.focused.position.y = this.previous.y;
-				}
+                    this.focused.position.x = 30;
+                }
+
+                base1.position.z =- this.focused.position.y;
+                this.focused.position.y = this.previous.y;
+                console.log("f",rotator1.position.x)
+
+                rotator1.position.z= base1.position.z+50;
+                rotator1.position.x= base1.position.x+50;
+                // stick.position.z= base1.position.z;
+                // stick.position.x= base1.position.x;
+
+
             }
             function onRotator1Drag () {
-                if(this.focused.materialLibraries=="Rotator1.mtl"){
-                	stickControl.enabled=false;
+            	if(this.focused.materialLibraries=="Rotator1.mtl"){
                     controls.enabled = false;
+                    base1Control.enabled=false;
+                    // base1Control.detachEvent('dragAndDrop');
                     renderer.domElement.style.cursor = 'pointer';
-                    let formerX=this.previous.x;
-                    let offsetX=this.focused.position.x-formerX,flg=0;
-                    if(offsetX>0) flg=1;
-                    else if (offsetX<0) flg=-1;
-                    else  flg=0;
-                    // formerX=this.focused.position.x;
-                    rotator1.position.x = this.previous.x;
-                    rotator1.rotateY(flg*0.005);
-                    console.log("rotator1Control.enabled",rotator1Control.enabled);
-				}
-                else {
+					/*if (this.focused.position.x < -120) {
+
+					 this.focused.position.x = -120;
+					 }
+					 else if (this.focused.position.x > 30) {
+
+					 this.focused.position.x = 30;
+					 }*/
+
+                    let ang=this.focused.position.x*0.5
                     this.focused.position.x = this.previous.x;
-                    this.focused.position.y = this.previous.y;
-                }
+                    // rotator1.position.x = this.previous.x;
+                    rotator1.rotation.y=ang*0.01;
+                    console.log(this.focused);
+				}
+				else return;
+
+
+
+
             }
             function onStick1Drag () {
-                if(this.focused.materialLibraries=="stick.mtl"){
+            	if(this.focused.materialLibraries=="stick.mtl"){
                     controls.enabled = false;
                     renderer.domElement.style.cursor = 'pointer';
+                    console.log(rotator1.position.x);
                     if (this.focused.position.x < -120) {
 
                         this.focused.position.x = -120;
@@ -7549,93 +7449,15 @@ VILibrary.VI = {
                     }
                     this.focused.position.y = this.previous.y;
 				}
-                else {
-                    this.focused.position.x = this.previous.x;
-                    this.focused.position.y = this.previous.y;
-                }
-            }
-            function onRotator2Drag () {
-                    controls.enabled = false;
-                    renderer.domElement.style.cursor = 'pointer';
-                    let offsetY=this.focused.position.y-this.previous.y,flg=0;
-                    if(offsetY>0) flg=1;
-                    else if (offsetY<0) flg=-1;
-                    else  flg=0;
-                    this.focused.position.x= this.previous.x;
-                    this.focused.position.y= this.previous.y;
-                    rotator2.rotateX(-flg*0.003);
-            }
 
+
+
+
+            }
             function CRAnimate() {
                 window.requestAnimationFrame(CRAnimate);//回调
                 controls.update();
                 renderer.render(scene, camera);
-            }
-
-            this.changeStyle=function (i) {
-                exmStyle=i;
-                console.log(exmStyle);
-				switch (i){
-					case 0:{
-                        base1.position.set(0,0,-10);
-                        rotator1.position.set(50,-46.26,50);
-                        rotator2.position.set(-27,58.76,-8);
-                        stick.position.set(20,0,0);
-                        rotator1.rotation.y=0;
-                        rotator2.rotation.x=0;
-
-                        base1Control.enabled=true;
-                        rotator1Control.enabled=true;
-                        stickControl.enabled=true;
-                        rotator2Control.enabled=true;
-
-                        break;
-					}
-					case 1:{
-						base1.position.set(-70,0,-6);
-                        rotator1.position.set(50,-46.26,50);
-                        rotator2.position.set(-27,58.76,-8);
-                        stick.position.set(-10,0,0);
-                        rotator2.rotation.x=0;
-                        rotator1.rotation.y=-Math.PI/2;
-
-                        base1Control.enabled=false;
-                        rotator1Control.enabled=false;
-                        stickControl.enabled=false;
-                        rotator2Control.enabled=false;
-
-                        break;
-					}
-					case 2:{
-                        base1Control.enabled=false;
-                        rotator1Control.enabled=false;
-                        stickControl.enabled=false;
-                        rotator2Control.enabled=false;
-
-                        stick.position.set(-10,0,0);
-                        base1.position.set(-63.88,0,-6);
-                        rotator1.position.set(50,-46.5,50);
-                        rotator2.position.set(-27,58.76,-8);
-                        rotator1.rotation.y=-Math.PI/2;
-                        rotator2.rotation.x=Math.PI/6;
-                        break;
-					}
-					case 3:{
-                        base1.position.set(-35.69,0,-6);
-                        rotator1.position.set(50,-55.76,50);
-                        rotator2.position.set(-27,58.76,-8);
-                        stick.position.set(-10,0,0);
-                        rotator1.rotation.y=-Math.PI/2;
-                        rotator2.rotation.x=-Math.PI/3;
-
-                        base1Control.enabled=false;
-                        rotator1Control.enabled=false;
-                        stickControl.enabled=false;
-                        rotator2Control.enabled=false;
-                        break;
-					}
-					default: console.log("examStyle error");break;
-				}
             }
 
 

@@ -1,0 +1,42 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# 创建的文件:30.05.2017 18:21:33
+
+newmtl wire_217217217
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.85 0.85 0.85
+	Kd 0.85 0.85 0.85
+	Ks 0.35 0.35 0.35
+
+newmtl wire_086086086
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.34 0.34 0.34
+	Kd 0.34 0.34 0.34
+	Ks 0.35 0.35 0.35
+
+newmtl wire_255255255
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 1.00 1.00 1.00
+	Kd 1.00 1.00 1.00
+	Ks 0.35 0.35 0.35
+
+newmtl wire_088199225
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.35 0.78 0.88
+	Kd 0.35 0.78 0.88
+	Ks 0.35 0.35 0.35

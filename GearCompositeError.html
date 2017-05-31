@@ -13,11 +13,11 @@
         <div style="display:inline;">
             <span class="normal-span">齿轮径向综合误差:</span>
             <!--<input type="number" id="waterHeightInput" value="400" placeholder="0-800" class="normal-input">-->
-            <input type="number" class="normal-input">
+            <input type="number" class="normal-input"> μm
         </div>
         <div style="display:inline;">
             <span class="normal-span"  >一齿径向综合误差:</span>
-            <input type="number" class="normal-input">
+            <input type="number" class="normal-input"> μm
         </div >
         <div>注：被测齿轮径向综合总偏差 F"= 37μm ，一齿径向综合偏差 f"= 11μm</div>
         <!--<div style="display:inline;">
@@ -57,12 +57,12 @@
         }
         layer.open({
             type: 1,
-            title: '相关数据波形图',
+            title: '实验数据波形图',
             area: ['auto', 'auto'],
             shade: 0,
             maxmin: true,
             moveOut: true,
-            offset: 'lt',
+            offset: '5t',
             closeBtn: false,
             zIndex: layer.zIndex,
             content: '<div class="columnFlex-div" style="margin: 5px 5px">' +

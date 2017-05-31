@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>圆跳动误差测量实验</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="main-div">
+    <canvas id="mainCanvas" width="900" height="450"></canvas>
+    <div class="test-div">
+
+    </div>
+    <table id="mainTable">
+        <tr>
+            <td>
+                <canvas id="myDial" width="250" height="250"></canvas>
+
+            </td>
+            <td rowspan="2"><!--合并行-->
+                测量类型：
+                <select id="exmSelect" onchange="exmStyle()" >
+                    <option value="0"> </option>
+                    <option value="1">径向圆跳动误差测量</option>
+                    <option value="2">斜向圆跳动误差测量</option>
+                    <option value="3">端面圆跳动误差测量</option>
+                </select>
+                <!--<button id="completeBtn"  onclick="setEChartData()" >读数完成</button>-->
+                <button id="resetBtn"  onclick="reset()">重置读数</button>
+                <br/><br/>
+                <table id="circleData">
+                    <tr>
+                        <th>测量项目</th>
+                        <th>公差<br/>
+                            (μm)</th>
+                        <th>最大值<br/>(μm)</th>
+                        <th>最小值<br/>(μm)</th>
+                        <th>测得误差<br/>(μm)</th>
+                        <th>合格性</th>
+                    </tr>
+                    <tr>
+                        <th>径向圆跳动</th>
+                        <td id="tol1">15</td>
+                        <td id="data1"><!--<input id="data1" type="number" class="data-input">--></td>
+                        <td id="data2"></td>
+                        <td id="data3"></td>
+                        <td id="data4"></td>
+                        <!--<td><input id="data2" type="number" class="data-input"></td>
+                        <td><input id="data3" type="number" class="data-input"></td>
+                        <td><input id="data4" type="text" class="data-input"></td>-->
+                    </tr>
+                    <tr>
+                        <th>端面圆跳动</th>
+                        <td id="tol2">10</td>
+                        <td id="data5"></td>
+                        <td id="data6"></td>
+                        <td id="data7"></td>
+                        <td id="data8"></td>
+                        <!--<td><input id="data5" type="number" class="data-input"></td>
+                        <td><input id="data6" type="number" class="data-input"></td>
+                        <td><input id="data7" type="number" class="data-input"></td>
+                        <td><input id="data8" type="text" class="data-input"></td>-->
+                    </tr>
+                    <tr>
+                        <th>斜向圆跳动</th>
+                        <td id="tol3">10</td>
+                        <td id="data9"></td>
+                        <td id="data10"></td>
+                        <td id="data11"></td>
+                        <td id="data12"></td>
+                        <!--<td><input id="data9"  type="number" class="data-input"></td>
+                        <td><input id="data10" type="number" class="data-input"></td>
+                        <td><input id="data11" type="number" class="data-input"></td>
+                        <td><input id="data12" type="text" class="data-input"></td>-->
+                    </tr>
+
+
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+<!--<input type="text" list="exmTyp" name="textlist" />-->
+<!--<datalist id="exmTyp">-->
+
+
+
+<!--</datalist>-->
+
+
+<!--虚拟仪器库-->
+<script src="js/VILibrary.js"></script>
+<!--js简写方法-->
+<script src="js/jquery-3.1.1.min.js"></script>
+<!--弹出框-->
+<script src="js/layui/lay/dest/layui.all.js"></script>
+
+<!--三维显示库-->
+<script src="js/three/three.js"></script>
+<script src="js/three/MTLLoader.js"></script>
+<script src="js/three/OBJLoader.js"></script>
+<script src="js/three/controls/OrbitControls.js"></script>
+<script src="js/three/ObjectControls.js"></script>
+<script>
+    'use strict';
+    let dialVI = new VILibrary.VI.DialVI($('#myDial'));
+    let circleRunoutVI = new VILibrary.VI.CircleRunoutVI($('#mainCanvas'), true);
+//    let dialVI = new VILibrary.VI.DialVI($('#myDial'));
+    dialVI.MAX_NUMBER=20;dialVI.draw();
+//    dialVI = new VILibrary.VI.DialVI($('#myDial'));
+    VILibrary.InnerObjects.bindDataLine(circleRunoutVI.id, dialVI.id, 1, 0);
+//    VILibrary.InnerObjects.bindDataLine(rrToothRingVI.id, dialVI.id, 1, 0);
+    function exmStyle() {
+
+        var  myselect=document.getElementById("exmSelect");
+
+        var index=myselect.selectedIndex ;
+        circleRunoutVI.changeStyle(index);
+    }
+
+    function reset(){
+        dialVI.draw(0);
+        for (var i=1; i<=12;i++){
+             document.getElementById('data'+i).innerText = "";
+        }
+
+    }
+</script>
+
+</body>
+</html>

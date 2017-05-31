@@ -142,6 +142,15 @@ html {
     align-items: center;
     flex-wrap: wrap;
 }
+.columnFlex-div1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    top: 15%;
+    left: 80%;
+}
 
 #control-div {
     display: flex;
@@ -170,7 +179,7 @@ html {
 }
 
 .normal-input {
-    width: 70px;
+    width: 50px;
     font-size: 1.2em;
     padding: 2px 2px;
     text-align: left;
@@ -303,8 +312,27 @@ html {
 
 .data-input0 {
     width: 95%;
-    height: 50%;
+    height: 95%;
     text-align: center;
+}
+
+#circleData  {
+   /* border-right: 2px solid black;
+    border-bottom: 1px solid black;*/
+    border: 2px solid black;
+    border-collapse: collapse;
+    width: 600px;
+    margin: 0 auto;
+}
+#circleData th {
+    border: 2px solid black;
+    width: 6%;
+}
+
+#circleData td {
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+    width: 6%;
 }
 
 
