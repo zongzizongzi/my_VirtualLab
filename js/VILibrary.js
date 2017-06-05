@@ -52,11 +52,11 @@ VILibrary.InnerObjects = {
 	},
 	
 	getVIById: function (id) {
-		
+
 		for (let VI of this.existingVIArray) {
 			
 			if (VI.id === id) {
-				return VI
+				return VI;
 			}
 		}
 		return false;
@@ -6255,6 +6255,11 @@ VILibrary.VI = {
                             if(index>=40){
                             	window.clearInterval(_this.timer);
                                 index=0;
+                                scene.remove(onSwitch);
+                                switchControl.detach(onSwitch);
+                                scene.add(offSwitch);
+                                switchControl.attach(offSwitch);
+                                this.timer = 0;
                             }
                             gear2.rotation.y += delta *0.5;//0.5个齿的弧度
                             gear1.rotation.y -= delta * 0.5*2/3;
@@ -6490,6 +6495,7 @@ VILibrary.VI = {
 
         }
     },
+
     RoughnessVI:class RoughnessVI extends TemplateVI{
         constructor(VICanvas, draw3DFlag) {
 
@@ -7206,6 +7212,7 @@ VILibrary.VI = {
 
         }
     },
+
     CircleRunoutVI:class CircleRunoutVI extends TemplateVI{
         constructor (VICanvas,draw3DFlag) {
             super(VICanvas);
@@ -7638,6 +7645,384 @@ VILibrary.VI = {
 				}
             }
 
+
+
+
+        }
+    },
+
+    RoundnessVI:class CircleRunoutVI extends TemplateVI {
+        constructor(VICanvas, draw3DFlag) {
+            super(VICanvas);
+            const _this = this;
+            this.name = 'RoundnessVI';
+
+            let camera, scene, renderer,index = 0,
+				base,slider,tester,rotator,onSwitch,offSwitch,
+                controls,sliderControl,testerControl,switchControl,
+				xOn=false,yOn=false;
+               /*  base1Control, rotator1Control, rotator2Control, stickControl, buttonControl,
+                base1, base, axis, rotator1, rotator2, stick, onButton, offButton,
+                onFlag = false, exmStyle = 0,;*/
+			let errOutput = [0];
+
+            this.timer = 0;
+
+            this.toggleObserver = function (flag) {
+                if (flag&&xOn&&yOn) {
+
+                    // if (!this.timer&&xOn&&yOn) {
+                        // if(!index){errOutput=[0];}
+                        scene.remove(offSwitch);
+                        switchControl.detach(offSwitch);
+                        scene.add(onSwitch);
+                        switchControl.attach(onSwitch);
+
+                        let delta =0.05*Math.PI;
+                        let  table = document.getElementById("roundnessData");
+
+                        if(index==0){
+                        	let d= document.getElementsByClassName("exm_data");
+                        	for (var i=0; i<d.length;i++){d[i].innerText="";}
+                        }
+                        this.timer = window.setInterval(function () {
+                            errOutput[index]=50+10*Math.random();console.log(table.rows.length,index)
+                            if(index>table.rows.length-2){
+
+                                let  oneRow = table.insertRow();//插入一行
+                                let  cell1= oneRow.insertCell();//单单插入一行是不管用的，需要插入单元格
+                                let  cell2=oneRow.insertCell();
+                                let  cell3=oneRow.insertCell();
+                                cell1.innerText = index;
+                                cell2.className="exm_data";
+                                cell3.className="exm_data";
+                                cell2.id="a"+index;
+                                cell3.id="e"+index;
+
+
+							}
+
+                            document.getElementById("a"+index).innerText=index*delta;
+                            document.getElementById("e"+index).innerText=errOutput[index];
+
+
+                            index++;
+                            rotator.rotation.y = index*delta;
+                            if (_this.dataLine) {
+                                VILibrary.InnerObjects.dataUpdater(_this.dataLine);
+                            }
+                            if(rotator.rotation.y>=Math.PI*2){
+                                scene.remove(onSwitch);
+                                switchControl.detach(onSwitch);
+                                scene.add(offSwitch);
+                                switchControl.attach(offSwitch);
+                                window.clearInterval(_this.timer);
+                                rotator.rotation.y =0;
+                                    index=0;
+
+                                _this.timer = 0;
+                                errOutput=[0];
+                                // errOutput[20]=0;
+                            }
+                            //定时更新相同数据线VI的数据
+
+                        }, 100);
+                    }
+                // }
+                else{
+                    scene.remove(onSwitch);
+                    switchControl.detach(onSwitch);
+                    scene.add(offSwitch);
+                    switchControl.attach(offSwitch);
+                    window.clearInterval(this.timer);
+                    this.timer = 0;
+                }
+            }
+            this.getData=function(dataType){
+                // console.log("errOutput",errOutput);
+                return errOutput;
+			}
+
+            this.draw=function () {
+                if (draw3DFlag) {
+
+                    let loadingImg = document.createElement('img');
+                    loadingImg.src = 'img/loading.gif';
+                    loadingImg.style.width = '64px';
+                    loadingImg.style.height = '64px';
+                    loadingImg.style.position = 'absolute';
+                    loadingImg.style.top = this.container.offsetTop + this.container.offsetHeight / 2 - 32 + 'px';
+                    loadingImg.style.left = this.container.offsetLeft + this.container.offsetWidth / 2 - 32 + 'px';
+                    loadingImg.style.zIndex = '10001';
+                    this.container.parentNode.appendChild(loadingImg);
+
+                    let promiseArr = [
+                        VILibrary.InnerObjects.loadModule('assets/Roundness/base.mtl', 'assets/Roundness/base.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roundness/rotator.mtl', 'assets/Roundness/rotator.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roundness/slider.mtl', 'assets/Roundness/slider.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roundness/tester.mtl', 'assets/Roundness/tester.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roundness/offSwitch.mtl', 'assets/Roundness/offSwitch.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roundness/onSwitch.mtl', 'assets/Roundness/onSwitch.obj'),
+                    ];
+                    Promise.all(promiseArr).then(function (objArr) {
+                        base = objArr[0];
+                        rotator = objArr[1];
+                        slider = objArr[2];
+                        tester = objArr[3];
+                        offSwitch=objArr[4];
+                        onSwitch=objArr[5];
+                        loadingImg.style.display = 'none';
+                        RoundnessDraw();
+                    }).catch(e => console.log('RoundnessVI: ' + e));
+                }
+                else {
+
+                    this.ctx = this.container.getContext("2d");
+                    let img = new Image();
+                    img.src = 'img/Roundness.png';
+                    img.onload = function () {
+                        _this.ctx.drawImage(img, 0, 0, _this.container.width, _this.container.height);
+                    };
+                }
+            };
+            this.draw();
+
+			//相机、渲染、灯光、控制等初始设置
+            window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame
+                || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+            function RoundnessDraw () {
+                scene = new THREE.Scene();
+
+                scene.add(base,rotator,offSwitch,slider);
+                slider.add(tester);
+                //初始位置
+
+                renderer = new THREE.WebGLRenderer({canvas: _this.container, antialias: true});
+                renderer.setClearColor(0x6495ED);
+                renderer.setSize(_this.container.clientWidth, _this.container.clientHeight);
+
+                camera = new THREE.PerspectiveCamera(45, _this.container.clientWidth / _this.container.clientHeight, 1, 1000);
+                camera.position.set(0,100,250);
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+                let light = new THREE.AmbientLight(0x555555);
+                scene.add(light);
+                let light1 = new THREE.DirectionalLight(0xffffff, 1);
+                light1.position.set(4000, 4000, 4000);
+                scene.add(light1);
+                let light2 = new THREE.DirectionalLight(0xffffff, 1);
+                light2.position.set(-4000, 4000, -4000);
+                scene.add(light2);
+
+
+
+
+                controls = new THREE.OrbitControls(camera, renderer.domElement);//鼠标对整个三维模型（相机）的控制
+                controls.rotateSpeed = 0.8;
+                controls.enableZoom = true;
+                controls.zoomSpeed = 1.2;
+                controls.enableDamping = true;
+                let plane1 = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 400),new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} ));
+
+                //拖动旋转
+                let plane2 = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 400),new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} ));
+                plane2.rotateY(0.5*Math.PI);
+
+                sliderControl =new ObjectControls(camera, renderer.domElement);
+                sliderControl.map = plane2;
+                sliderControl.offsetUse = true;
+                sliderControl.attachEvent('mouseOver', function () {
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+                sliderControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+                sliderControl.attachEvent('dragAndDrop', onSliderDrag);
+                sliderControl.attachEvent('mouseUp', function () {
+
+                    controls.enabled = true;
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                testerControl =new ObjectControls(camera, renderer.domElement);
+                testerControl.map = plane2;
+                testerControl.offsetUse = true;
+                testerControl.attachEvent('mouseOver', function () {
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+                testerControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+                testerControl.attachEvent('dragAndDrop', onTesterDrag);
+                testerControl.attachEvent('mouseUp', function () {
+
+                    controls.enabled = true;
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                //开关
+                switchControl = new ObjectControls(camera, renderer.domElement);
+                switchControl.offsetUse = true;
+
+                switchControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                switchControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                switchControl.attachEvent('onclick',function () {
+
+                    _this.toggleObserver(!_this.timer);
+                });
+
+
+                sliderControl.attach(slider);
+                switchControl.attach(offSwitch);
+                testerControl.attach(tester);
+
+                RoundnessAnimate();
+            }
+
+            function onSliderDrag() {
+                controls.enabled = false;
+                renderer.domElement.style.cursor = 'pointer';
+
+                this.focused.position.x = this.previous.x;  //lock x direction
+				if(tester.position.x<-0.85){if (this.focused.position.y< -1.4) {this.focused.position.y = -1.4;}}
+				else {if (this.focused.position.y< -5) {this.focused.position.y = -5;}}
+                if (this.focused.position.y> 15) {this.focused.position.y =15;}
+
+                if(this.focused.position.y>=-1.3&&this.focused.position.y<=7)yOn=true;
+                else yOn=false;
+                console.log(slider.position.y)
+
+            }
+            function onTesterDrag() {
+                controls.enabled = false;
+                renderer.domElement.style.cursor = 'pointer';
+                this.focused.position.y = this.previous.y;  //lock x direction
+				if(slider.position.y<-1.4){if (this.focused.position.x< -0.85) {this.focused.position.x = -0.85;}}
+                else{if (this.focused.position.x< -6) {this.focused.position.x = -6;}}
+                if (this.focused.position.x> 18) {this.focused.position.x =18;}
+                if(this.focused.position.x<-5)xOn=true;
+				else xOn=false;
+            }
+            function RoundnessAnimate() {
+                window.requestAnimationFrame(RoundnessAnimate);//回调
+                controls.update();
+                renderer.render(scene, camera);
+            }
+
+        }
+        static get cnName() {
+
+            return '圆度误差实验';
+        }
+
+        static get defaultWidth() {
+
+            return '550px';
+        }
+
+        static get defaultHeight() {
+
+            return '300px';
+        }
+    },
+
+    NyquistVI:class NyquistVI extends TemplateVI{
+        constructor (VICanvas) {
+            super(VICanvas);
+
+            const _this = this;
+            this.name = 'NyquistVI';
+            this.ctx = this.container.getContext("2d");
+
+            this.angle=0;
+            let HEIGHT=this.container.height,
+				WIDTH=this.container.width,
+				shorter=Math.min(HEIGHT,WIDTH);
+
+            let r=[0];
+
+
+           let CENTER_X=WIDTH/2,
+               CENTER_Y=HEIGHT/2,
+               RADIUS=shorter*0.4,//基准线半径
+               START_ANGLE = 0, // Starting point on circle
+               END_ANGLE = Math.PI*2; // End point on circle
+
+			let BGColor="rgba(200,200,200,0.6)",
+				BLACK= "rgba(0,0,0,1)",
+				GREEN ="rgba(10,200,10,1)";
+
+
+
+
+            this.draw=function () {
+
+                this.ctx.clearRect(0,0,WIDTH,HEIGHT);//清空画布
+
+                this.ctx.fillStyle=BGColor;
+                this.ctx.strokeStyle=BLACK;
+                this.ctx.fillRect(0,0,WIDTH,HEIGHT);
+                this.ctx.strokeRect(0,0,WIDTH,HEIGHT);
+
+                this.ctx.beginPath();
+                // this.ctx.arc(CENTER_X, CENTER_Y,RADIUS, START_ANGLE, END_ANGLE, false);
+                this.ctx.moveTo(10,CENTER_Y);
+                this.ctx.lineTo(WIDTH-10,CENTER_Y);
+                this.ctx.moveTo(CENTER_X,10);
+                this.ctx.lineTo(CENTER_X,HEIGHT-10);
+                this.ctx.strokeStyle=GREEN;
+                this.ctx.stroke();
+                this.ctx.closePath();
+
+
+
+                this.ctx.save();
+                this.ctx.translate(CENTER_X,CENTER_Y);//坐标系移至圆心
+                this.ctx.beginPath();
+                let len=r.length,
+					delta=Math.PI*2/40;
+                r[len]=r[0];
+
+
+                this.ctx.moveTo(r[0],0);
+                for(let i=1;i<=len;i++)
+                {
+                    this.ctx.rotate(delta);
+                    this.ctx.lineTo(r[i],0);this.ctx.stroke();
+                    // if(i==40){ r=[0];}
+                    console.log(r)
+				}
+
+                this.ctx.closePath();
+                this.ctx.restore();
+			};
+
+            this.setData = function (input){
+                // let inputError = Number(Array.isArray(input) ? input[input.length - 1] : input);
+
+                if (Number.isNaN(input)) {
+
+                    console.log('NyquistVI: Input value error');
+                    return;
+                }
+                r=input;
+
+                this.draw();
+            }
+
+//调用函数
+
+            this.draw();
 
 
 

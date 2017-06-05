@@ -334,5 +334,41 @@ html {
     border-top: 1px solid black;
     width: 6%;
 }
+#roundnessData  {
+    /* border-right: 2px solid black;
+     border-bottom: 1px solid black;*/
+    margin-left:auto;
+    margin-right:auto;
+    border: 1px solid black;
+    border-collapse: collapse;
+    width: 500px;
 
+}
+/*#roundPanelCanvas thead tr{
+    display: block;
+}
+#roundPanelCanvas tbody{
+    display: block;
+    height: 100px;
+    overflow: auto;
+}*/
+
+#roundnessData th {
+    border: 1px solid black;
+    width: 6%;
+    height: 40px;
+}
+
+#roundnessData td {
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+    width: 6%;
+    height: 33px;
+}
+#flow_table {
+    overflow-y: auto;
+    position:relative;
+    /**/width: 500px;
+    height: 250px;
+}
 
