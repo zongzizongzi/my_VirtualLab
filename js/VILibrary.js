@@ -7660,11 +7660,13 @@ VILibrary.VI = {
             let camera, scene, renderer,index = 0,
 				base,slider,tester,rotator,onSwitch,offSwitch,
                 controls,sliderControl,testerControl,switchControl,
-				xOn=false,yOn=false;
+				xOn=false,yOn=true;
                /*  base1Control, rotator1Control, rotator2Control, stickControl, buttonControl,
                 base1, base, axis, rotator1, rotator2, stick, onButton, offButton,
                 onFlag = false, exmStyle = 0,;*/
-			let errOutput = [0];
+			let dataOutput = [0];
+			let errOutput=[0],R=70;//基准圆半径
+			
 
             this.timer = 0;
 
@@ -7672,7 +7674,7 @@ VILibrary.VI = {
                 if (flag&&xOn&&yOn) {
 
                     // if (!this.timer&&xOn&&yOn) {
-                        // if(!index){errOutput=[0];}
+                        // if(!index){dataOutput=[0];}
                         scene.remove(offSwitch);
                         switchControl.detach(offSwitch);
                         scene.add(onSwitch);
@@ -7683,10 +7685,13 @@ VILibrary.VI = {
 
                         if(index==0){
                         	let d= document.getElementsByClassName("exm_data");
-                        	for (var i=0; i<d.length;i++){d[i].innerText="";}
+                        	for (let i=0; i<d.length;i++){d[i].innerText="";}
                         }
                         this.timer = window.setInterval(function () {
-                            errOutput[index]=50+10*Math.random();console.log(table.rows.length,index)
+                            //dataOutput[index]=50+10*Math.random();
+							errOutput[index]=15*Math.random()-5;
+							dataOutput[index]=R+errOutput[index];
+							
                             if(index>table.rows.length-2){
 
                                 let  oneRow = table.insertRow();//插入一行
@@ -7702,7 +7707,7 @@ VILibrary.VI = {
 
 							}
 
-                            document.getElementById("a"+index).innerText=index*delta;
+                            document.getElementById("a"+index).innerText=index*9;//以角度表示
                             document.getElementById("e"+index).innerText=errOutput[index];
 
 
@@ -7721,12 +7726,13 @@ VILibrary.VI = {
                                     index=0;
 
                                 _this.timer = 0;
-                                errOutput=[0];
-                                // errOutput[20]=0;
+                                dataOutput=[0];
+								errOutput=[0];
+                                // dataOutput[20]=0;
                             }
                             //定时更新相同数据线VI的数据
 
-                        }, 100);
+                        }, 10);
                     }
                 // }
                 else{
@@ -7739,8 +7745,7 @@ VILibrary.VI = {
                 }
             }
             this.getData=function(dataType){
-                // console.log("errOutput",errOutput);
-                return errOutput;
+                return dataOutput;
 			}
 
             this.draw=function () {
@@ -7900,8 +7905,6 @@ VILibrary.VI = {
 
                 if(this.focused.position.y>=-1.3&&this.focused.position.y<=7)yOn=true;
                 else yOn=false;
-                console.log(slider.position.y)
-
             }
             function onTesterDrag() {
                 controls.enabled = false;
@@ -7937,6 +7940,8 @@ VILibrary.VI = {
     },
 
     NyquistVI:class NyquistVI extends TemplateVI{
+		
+		
         constructor (VICanvas) {
             super(VICanvas);
 
@@ -7946,26 +7951,29 @@ VILibrary.VI = {
 
             this.angle=0;
             let HEIGHT=this.container.height,
-				WIDTH=this.container.width,
-				shorter=Math.min(HEIGHT,WIDTH);
+				WIDTH=this.container.width;
+				// shorter=Math.min(HEIGHT,WIDTH);
 
             let r=[0];
 
 
            let CENTER_X=WIDTH/2,
                CENTER_Y=HEIGHT/2,
-               RADIUS=shorter*0.4,//基准线半径
                START_ANGLE = 0, // Starting point on circle
                END_ANGLE = Math.PI*2; // End point on circle
 
 			let BGColor="rgba(200,200,200,0.6)",
 				BLACK= "rgba(0,0,0,1)",
-				GREEN ="rgba(10,200,10,1)";
+				GREEN ="rgba(10,200,10,1)",
+				RED="rgba(200,10,10,1)";
 
 
 
 
-            this.draw=function () {
+            this.draw=function (inputR) {
+                this.ctx.textAlign = "center";//文本对齐
+                this.ctx.font="10px Times new roman";
+                this.ctx.textBaseline="middle";//文字居中定位
 
                 this.ctx.clearRect(0,0,WIDTH,HEIGHT);//清空画布
 
@@ -7974,37 +7982,61 @@ VILibrary.VI = {
                 this.ctx.fillRect(0,0,WIDTH,HEIGHT);
                 this.ctx.strokeRect(0,0,WIDTH,HEIGHT);
 
-                this.ctx.beginPath();
-                // this.ctx.arc(CENTER_X, CENTER_Y,RADIUS, START_ANGLE, END_ANGLE, false);
-                this.ctx.moveTo(10,CENTER_Y);
-                this.ctx.lineTo(WIDTH-10,CENTER_Y);
-                this.ctx.moveTo(CENTER_X,10);
-                this.ctx.lineTo(CENTER_X,HEIGHT-10);
-                this.ctx.strokeStyle=GREEN;
-                this.ctx.stroke();
-                this.ctx.closePath();
 
 
+                if(r.length>1){
+                	this.ctx.beginPath();
+                    this.ctx.moveTo(10,CENTER_Y);
+                    this.ctx.lineTo(WIDTH-10,CENTER_Y);
+                    this.ctx.moveTo(CENTER_X,10);
+                    this.ctx.lineTo(CENTER_X,HEIGHT-10);
+                    this.ctx.strokeStyle=GREEN;
+                    this.ctx.stroke();
+                    this.ctx.closePath();
 
-                this.ctx.save();
-                this.ctx.translate(CENTER_X,CENTER_Y);//坐标系移至圆心
-                this.ctx.beginPath();
-                let len=r.length,
-					delta=Math.PI*2/40;
-                r[len]=r[0];
 
+                    this.ctx.save();
+                    this.ctx.translate(CENTER_X,CENTER_Y);//坐标系移至圆心
+                    this.ctx.beginPath();
+                    let len=r.length,
+                        delta=Math.PI*2/40;
+                    if(r.length>=40)r[40]=r[0];
+                    this.ctx.moveTo(r[0],0);
+                    for(let i=1;i<=len;i++)
+                    {
+                        this.ctx.rotate(delta);
+                        this.ctx.lineTo(r[i],0);this.ctx.stroke();
+                    }
+                    this.ctx.closePath();
+                    this.ctx.restore();
 
-                this.ctx.moveTo(r[0],0);
-                for(let i=1;i<=len;i++)
-                {
-                    this.ctx.rotate(delta);
-                    this.ctx.lineTo(r[i],0);this.ctx.stroke();
-                    // if(i==40){ r=[0];}
-                    console.log(r)
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0.6*WIDTH,HEIGHT-25);
+                    this.ctx.lineTo(0.7*WIDTH,HEIGHT-25);
+                    this.ctx.fillStyle=BLACK;
+                    this.ctx.fillText("极坐标图",0.8*WIDTH,HEIGHT-25);
+                    this.ctx.fillText("误差放大1000倍",0.8*WIDTH,20);
+
+                    this.ctx.stroke();
+                    this.ctx.closePath();
 				}
 
-                this.ctx.closePath();
-                this.ctx.restore();
+
+
+
+
+                if(inputR>0){
+                    this.ctx.beginPath();
+                    this.ctx.arc(CENTER_X, CENTER_Y,inputR, START_ANGLE, END_ANGLE, false);
+                    this.ctx.moveTo(0.6*WIDTH,HEIGHT-10);
+                    this.ctx.lineTo(0.7*WIDTH,HEIGHT-10);
+                    this.ctx.fillText("最小二乘图",0.83*WIDTH,HEIGHT-10);
+                    this.ctx.strokeStyle=RED;
+                    this.ctx.stroke();
+                    this.ctx.closePath();
+                }
+
+
 			};
 
             this.setData = function (input){

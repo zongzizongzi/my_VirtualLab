@@ -57,47 +57,46 @@
                             <td class="exm_data" id="a5"></td>
                             <td class="exm_data" id="e5"></td>
                         </tr>
-                        <!--<tr>
-                            <td>6</td>
-                            <td id="a6"></td>
-                            <td id="e6"></td>
-                        </tr>
-                        <tr>
-                            <td>7</td>
-                            <td id="a7"></td>
-                            <td id="e7"></td>
-                        </tr>
-                        <tr>
-                            <td>8</td>
-                            <td id="a8"></td>
-                            <td id="e8"></td>
-                        </tr>
-                        <tr>
-                            <td>9</td>
-                            <td id="a9"></td>
-                            <td id="e9"></td>
-                        </tr>
-                        <tr>
-                            <td>10</td>
-                            <td id="a0"></td>
-                            <td id="e0"></td>
-                        </tr>-->
-
                         </tbody>
 
                     </table>
                 </div>
 
             </td>
-            <td><div style="width: 10px"></div></td>
+            <td><div style="width: 20px"></div></td>
             <td>
-                <canvas id="myDial" width="250" height="250"></canvas>
+                <canvas id="myDial" width="250" height="200"></canvas><br/>
+                <button onclick="calcu()">最小二乘法计算圆度误差</button>
             </td>
-
-
+        </tr>
+        <tr>
+            <table id="MessageTable">
+                <tr><div style="height: 20px"></div></tr>
+                <tr>
+                    <td>u1(mm)</td>
+                    <td>u2(mm)</td>
+                    <td>R(mm)</td>
+                    <td>圆度误差(mm)</td>
+                </tr>
+                <tr>
+                   <td id="u1">0</td>
+                    <td id="u2">0</td>
+                    <td id="r">0</td>
+                    <td id="f">0</td>
+                </tr>
+            </table>
         </tr>
 
+
     </table>
+    <!--<span class="normal-span"  >u1(mm):</span>
+    <input id="u1">
+    <span class="normal-span"  >u2(mm):</span>
+    <input id="u2">
+    <span class="normal-span"  >R(mm):</span>
+    <input id="r">
+    <span class="normal-span"  >圆度误差(mm):</span>
+    <input id="f">-->
 </div>
 <!--虚拟仪器库-->
 <script src="js/VILibrary.js"></script>
@@ -118,6 +117,34 @@
     let roundnessVI = new VILibrary.VI.RoundnessVI($('#mainCanvas'), true);
     let NyquistVI = new VILibrary.VI.NyquistVI($('#myDial'));
     VILibrary.InnerObjects.bindDataLine(roundnessVI.id, NyquistVI.id, 1, 0);
+    function calcu() {
+        var  len = document.getElementById("roundnessData").rows.length;
+        console.log(len);
+        var R=70,r=0,u1=0,u2=0,deltaR=[0];
+        for (let i=0; i<=len-2;i++){
+            r+=document.getElementById("e"+i).innerHTML/len;
+            u1+=-2/len*document.getElementById("e"+i).innerHTML*Math.cos(Math.PI*2/len*i);
+            u2+=-2/len*document.getElementById("e"+i).innerHTML*Math.sin(Math.PI*2/len*i)
+//            console.log("Element",document.getElementById("e"+i));
+//            console.log("text",document.getElementById("e"+i).value);
+//            console.log( "value",parseFloat(document.getElementById("e"+3).innerHTML));
+
+
+        }
+        document.getElementById("u1").innerHTML=u1.toFixed(2);
+        document.getElementById("u2").innerHTML=u2.toFixed(2);
+        document.getElementById("r").innerHTML=(r+R).toFixed(2);
+        NyquistVI.draw(r+R);
+        for (let i=0; i<=len-2;i++){//计算圆度误差
+            var dr=document.getElementById("e"+i).innerHTML-(r+u1*Math.cos(Math.PI*2/len*i)+u2*Math.sin(Math.PI*2/len*i));
+            deltaR.push(dr);
+        }
+        var f= Math.max.apply(Math,deltaR)-Math.min.apply(Math,deltaR);
+        document.getElementById("f").innerHTML=f.toFixed(2);
+
+
+
+    }
 </script>
 </body>
 </html>

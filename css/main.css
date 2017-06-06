@@ -287,11 +287,12 @@ html {
     margin-left:auto;
     margin-right:auto;
     border-collapse: collapse;
-    border: 2px solid black;
+    border: 1px solid black;
     width: 600px;
 }
 #MessageTable td {
     border: 1px solid black;
+    height: 15px;
 }
 
 #roughnessTable{
