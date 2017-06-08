@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>robot</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="main-div">
+    <canvas id="mainCanvas" width="900" height="900"></canvas>
+    <script src="js/VILibrary.js"></script>
+    <!--js简写方法-->
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <!--弹出框-->
+    <script src="js/layui/lay/dest/layui.all.js"></script>
+
+    <!--三维显示库-->
+    <script src="js/three/three.js"></script>
+    <script src="js/three/MTLLoader.js"></script>
+    <script src="js/three/OBJLoader.js"></script>
+    <script src="js/three/controls/OrbitControls.js"></script>
+    <script src="js/three/ObjectControls.js"></script>
+    <script>
+        'use strict';
+
+        let robotVI = new VILibrary.VI.RobotVI($('#mainCanvas'), true);
+    </script>
+</div>
+</body>
+</html>

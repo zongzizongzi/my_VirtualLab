@@ -7762,7 +7762,7 @@ VILibrary.VI = {
                     this.container.parentNode.appendChild(loadingImg);
 
                     let promiseArr = [
-                        VILibrary.InnerObjects.loadModule('assets/Roundness/base.mtl', 'assets/Roundness/base.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Robot/base.mtl', 'assets/Roundness/base.obj'),
                         VILibrary.InnerObjects.loadModule('assets/Roundness/rotator.mtl', 'assets/Roundness/rotator.obj'),
                         VILibrary.InnerObjects.loadModule('assets/Roundness/slider.mtl', 'assets/Roundness/slider.obj'),
                         VILibrary.InnerObjects.loadModule('assets/Roundness/tester.mtl', 'assets/Roundness/tester.obj'),
@@ -8060,4 +8060,134 @@ VILibrary.VI = {
 
         }
     },
+	RobotVI:class RobotVI extends TemplateVI {
+        constructor(VICanvas, draw3DFlag) {
+            super(VICanvas);
+            const _this = this;
+            this.name = 'RobotVI';
+
+            let camera, scene, renderer,controls,
+				base,link1,link2,link3,link4,link5,link6;
+            this.draw=function () {
+                if (draw3DFlag) {
+
+                    let loadingImg = document.createElement('img');
+                    loadingImg.src = 'img/loading.gif';
+                    loadingImg.style.width = '64px';
+                    loadingImg.style.height = '64px';
+                    loadingImg.style.position = 'absolute';
+                    loadingImg.style.top = this.container.offsetTop + this.container.offsetHeight / 2 - 32 + 'px';
+                    loadingImg.style.left = this.container.offsetLeft + this.container.offsetWidth / 2 - 32 + 'px';
+                    loadingImg.style.zIndex = '10001';
+                    this.container.parentNode.appendChild(loadingImg);
+
+                    let promiseArr = [
+                        VILibrary.InnerObjects.loadModule('assets/ABB/base.mtl', 'assets/ABB/base.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/ABB/link1.mtl', 'assets/ABB/link1.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/ABB/link2.mtl', 'assets/ABB/link2.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/ABB/link3.mtl', 'assets/ABB/link3.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/ABB/link4.mtl', 'assets/ABB/link4.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/ABB/link5.mtl', 'assets/ABB/link5.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/ABB/link6.mtl', 'assets/ABB/link6.obj'),
+
+                    ];
+                    Promise.all(promiseArr).then(function (objArr) {
+                        base = objArr[0];
+                        link1 = objArr[1];
+                        link2 = objArr[2];
+                        link3 = objArr[3];
+                        link4=objArr[4];
+                        link5=objArr[5];
+                        link6=objArr[6];
+                        loadingImg.style.display = 'none';
+                        RobotDraw();
+                    }).catch(e => console.log('RobotVI: ' + e));
+                }
+                else {
+
+                    this.ctx = this.container.getContext("2d");
+                    let img = new Image();
+                    img.src = 'img/Robot.png';
+                    img.onload = function () {
+                        _this.ctx.drawImage(img, 0, 0, _this.container.width, _this.container.height);
+                    };
+                }
+            };
+            this.draw();
+
+            //相机、渲染、灯光、控制等初始设置
+            window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame
+                || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+            function RobotDraw () {
+                scene = new THREE.Scene();
+
+                scene.add(base);
+                base.add(link1);
+                link1.add(link2);
+                link2.add(link3);
+                link3.add(link4);
+                link4.add(link5);
+                link5.add(link6);
+
+                base.position.set(0,-300,0);
+                link2.position.set(0,290,0);
+                link3.position.set(0,270,0);
+                link4.position.set(302,70,0);
+                link5.position.set(0,0,0);
+                link6.position.set(59,0,0);
+                /*link3.position.set(0,560,0);
+                link4.position.set(302,630,0);
+                link5.position.set(302,630,0);
+                link6.position.set(361,630,0);*/
+                renderer = new THREE.WebGLRenderer({canvas: _this.container, antialias: true});
+                renderer.setClearColor(0x6495ED);
+                renderer.setSize(_this.container.clientWidth, _this.container.clientHeight);
+
+                camera = new THREE.PerspectiveCamera(45, _this.container.clientWidth / _this.container.clientHeight, 1, 2000);
+                camera.position.set(0,600,1000);
+                camera.lookAt(new THREE.Vector3(0, 300, 0));
+
+                let light = new THREE.AmbientLight(0x555555);
+                scene.add(light);
+                let light1 = new THREE.DirectionalLight(0xffffff, 1);
+                light1.position.set(4000, 4000, 4000);
+                scene.add(light1);
+                let light2 = new THREE.DirectionalLight(0xffffff, 1);
+                light2.position.set(-4000, 4000, -4000);
+                scene.add(light2);
+
+                controls = new THREE.OrbitControls(camera, renderer.domElement);//鼠标对整个三维模型（相机）的控制
+                controls.rotateSpeed = 0.8;
+                controls.enableZoom = true;
+                controls.zoomSpeed = 1.2;
+                controls.enableDamping = true;
+
+                RobotAnimate();
+            }
+            this.jiont=function () {
+				
+            }
+            function RobotAnimate() {
+                window.requestAnimationFrame(RobotAnimate);//回调
+                controls.update();
+                renderer.render(scene, camera);
+            }
+
+
+        }
+        static get cnName() {
+
+            return '机器人控制';
+        }
+
+        static get defaultWidth() {
+
+            return '550px';
+        }
+
+        static get defaultHeight() {
+
+            return '300px';
+        }
+    }
 };
