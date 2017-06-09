@@ -18,6 +18,8 @@
 		<div>
 			<span class="normal-span">D:</span><input type="number" id="DInput" value="20" class="normal-input">
 		</div>
+		<button class="button" onclick="start()" >开始</button>
+		<button class="button"  onclick="reset()">重置</button>
 		<div>
 			<span class="normal-span">标记位置：</span><span id="positionSpan">0</span>
 		</div>
@@ -86,6 +88,10 @@
         $('#startBtn').attr('disabled', false);
         $('#positionInput').val(0);
     }
+    function start () {
+        ballBeamVI.toggleObserver(true);
+    }
+
     window.setInterval(function () {
         positionSpan.text(ballBeamVI.markPosition);
         if (ballBeamVI.timer && !layerIndex) {

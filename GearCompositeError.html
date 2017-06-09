@@ -9,7 +9,7 @@
 <div class="main-div">
     <canvas id="mainCanvas" width="1000" height="500"></canvas>
     <div class="rowFlex-div">
-
+        <button class="button" onclick="start()" style="font-size: 16px;">开始测量</button>
         <div style="display:inline;">
             <span class="normal-span">齿轮径向综合误差:</span>
             <!--<input type="number" id="waterHeightInput" value="400" placeholder="0-800" class="normal-input">-->
@@ -19,7 +19,7 @@
             <span class="normal-span"  >一齿径向综合误差:</span>
             <input type="number" class="normal-input"> μm
         </div >
-        <div>注：被测齿轮径向综合总偏差 F"= 37μm ，一齿径向综合偏差 f"= 11μm</div>
+        <div style="position: relative;font-size: 16px;right: -150px"><br/>注：被测齿轮径向综合总偏差 F"= 37μm ，一齿径向综合偏差 f"= 11μm</div>
         <!--<div style="display:inline;">
             <input type="button" class="normal-btn" value="开始" onclick="start()">
             <input type="button" class="normal-btn" value="暂停" onclick="pause()">
@@ -45,6 +45,9 @@
     'use strict';
     let gearCompositeErrorVI = new VILibrary.VI.GearCompositeErrorVI($('#mainCanvas'), true);
     let layerOpenFlag=false;
+    function start() {
+        gearCompositeErrorVI.toggleObserver(true);
+    }
     window.setInterval(function () {
         if (gearCompositeErrorVI.timer && !layerOpenFlag) {
             openWave();

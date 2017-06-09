@@ -22,8 +22,9 @@
                     <option value="2">斜向圆跳动误差测量</option>
                     <option value="3">端面圆跳动误差测量</option>
                 </select>
-                <!--<button id="completeBtn"  onclick="setEChartData()" >读数完成</button>-->
-                <button id="resetBtn"  onclick="reset()">重置读数</button>
+                <button class="button" id="start"  onclick="start()" >开始读数</button>
+                <button class="button" id="resetBtn"  onclick="reset()">重置读数</button>
+
                 <br/><br/>
                 <table id="circleData">
                     <tr>
@@ -121,7 +122,9 @@
         for (var i=1; i<=12;i++){
              document.getElementById('data'+i).innerText = "";
         }
-
+    }
+    function start() {
+        circleRunoutVI.toggleObserver(true);
     }
 </script>
 

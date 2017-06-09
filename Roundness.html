@@ -66,7 +66,8 @@
             <td><div style="width: 20px"></div></td>
             <td>
                 <canvas id="myDial" width="250" height="200"></canvas><br/>
-                <button onclick="calcu()">最小二乘法计算圆度误差</button>
+                <button class="button" onclick="start()">开始测量</button>
+                <button class="button" onclick="calcu()">最小二乘法计算圆度误差</button>
             </td>
         </tr>
         <tr>
@@ -128,8 +129,6 @@
 //            console.log("Element",document.getElementById("e"+i));
 //            console.log("text",document.getElementById("e"+i).value);
 //            console.log( "value",parseFloat(document.getElementById("e"+3).innerHTML));
-
-
         }
         document.getElementById("u1").innerHTML=u1.toFixed(2);
         document.getElementById("u2").innerHTML=u2.toFixed(2);
@@ -141,9 +140,9 @@
         }
         var f= Math.max.apply(Math,deltaR)-Math.min.apply(Math,deltaR);
         document.getElementById("f").innerHTML=f.toFixed(2);
-
-
-
+    }
+    function start() {
+        roundnessVI.toggleObserver(true);
     }
 </script>
 </body>

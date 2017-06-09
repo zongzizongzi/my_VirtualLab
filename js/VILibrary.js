@@ -5645,104 +5645,12 @@ VILibrary.VI = {
 
             let gearNo=0,error=0,sliderDown=false;
 
-			/*this.toggleObserver = function (flag) {
 
-			 if (flag) {
-
-			 if (!this.timer && this.dataLine) {
-
-			 /!*markControl.detach(mark);
-			 scene.remove(offButton);
-			 switchControl.detach(offButton);
-			 scene.add(onButton);
-			 switchControl.attach(onButton);*!/
-			 this.timer = window.setInterval(function () {
-
-			 VILibrary.InnerObjects.dataUpdater(_this.dataLine);
-			 }, 50);
-			 }
-			 }
-			 else {
-
-			 if (this.timer) {
-
-			 window.clearInterval(this.timer);
-			 this.timer = 0;
-			 }
-			 /!*markControl.attach(mark);
-			 scene.remove(onButton);
-			 switchControl.detach(onButton);
-			 scene.add(offButton);
-			 switchControl.attach(offButton);*!/
-			 }
-			 };*/
 
             /**
              *
              * @param input 输入端口读取角度
              */
-			/*this.setData = function (input) {
-
-			 let inputAngle = Number(Array.isArray(input) ? input[input.length - 1] : input);
-
-			 if (Number.isNaN(inputAngle)) {
-
-			 console.log('RRToothRingVI: Input value error');
-			 return;
-			 }
-			 let outputPosition, Ts = 1 / this.Fs, angleMax = 100 * Ts;
-			 /!*if (this.limit) {
-			 if ((inputAngle - this.PIDAngle) > angleMax) {
-
-			 inputAngle = this.PIDAngle + angleMax;
-			 }
-			 if ((this.PIDAngle - inputAngle) > angleMax) {
-
-			 inputAngle = this.PIDAngle - angleMax;
-			 }
-			 if (inputAngle > 30) {
-
-			 inputAngle = 30;
-			 }
-			 if (inputAngle < -30) {
-
-			 inputAngle = -30;
-			 }
-			 }*!/
-
-			 this.PIDAngle = inputAngle;//向输出端口上写数据
-
-			 outputPosition = this.position1 + 0.5 * Ts * (inputAngle + this.angle1);
-			 this.angle1 = inputAngle;
-			 this.position1 = outputPosition;
-			 inputAngle = outputPosition;
-			 outputPosition = this.position2 + 0.5 * Ts * (inputAngle + this.angle2);
-			 this.angle2 = inputAngle;
-			 this.position2 = outputPosition;
-
-			 outputPosition = outputPosition < -120 ? -120 : outputPosition;
-			 outputPosition = outputPosition > 120 ? 120 : outputPosition;
-			 this.PIDPosition = parseFloat(outputPosition).toFixed(2);//向输出端口上写数据
-
-			 //将输出数保存在数组内
-			 if (this.index <= (this.dataLength - 1)) {
-
-			 this.angelOutput[this.index] = this.PIDAngle;
-			 this.positionOutput[this.index] = this.PIDPosition;
-			 this.index += 1;
-			 }
-			 else {
-
-			 let i;
-			 for (i = 0; i < this.dataLength - 1; i += 1) {
-			 this.angelOutput[i] = this.angelOutput[i + 1];
-			 this.positionOutput[i] = this.positionOutput[i + 1];
-			 }
-			 this.angelOutput[this.dataLength - 1] = this.PIDAngle;
-			 this.positionOutput[this.dataLength - 1] = this.PIDPosition;
-			 }
-			 setPosition(this.PIDAngle * Math.PI / 180, this.PIDPosition);
-			 };*/
             this.reset=function(){
                 gear.rotateX(-gearNo*Math.PI/20);
                 slider.position.y=sliderMark.position.y=0;
@@ -6223,7 +6131,7 @@ VILibrary.VI = {
             let handleDownMark=false,gearMesh=false;
             let errorArray=[-4,-2,-7,-3,-8,-7,-12,-10,-15,-12,-14,-10,-11,-9,-11,-8,-9,-5,-6,-2,-5,0,-1,3,-1,7,5,11,10,14,12,13,9,11,8,9,5,6,2,3,0];
             let errOutput=[];
-            this.timer=0;
+            _this.timer=0;
             let index=0;
 
             /**
@@ -6235,7 +6143,7 @@ VILibrary.VI = {
 
                 if (flag) {
 
-                    if (!this.timer&& gearMesh && handleDownMark) {
+                    if (!_this.timer&& gearMesh && handleDownMark) {
                     	if(!index){errOutput=[0];}
                         scene.remove(offSwitch);
                         switchControl.detach(offSwitch);
@@ -6243,7 +6151,7 @@ VILibrary.VI = {
                         switchControl.attach(onSwitch);
 
                     	let delta =360/20/180*Math.PI  ;//一齿的弧度
-                        this.timer = window.setInterval(function () {
+                        _this.timer = window.setInterval(function () {
                             errOutput[index]=errorArray[index];
                             console.log(errOutput[index]);
                             index+=1;
@@ -6259,7 +6167,7 @@ VILibrary.VI = {
                                 switchControl.detach(onSwitch);
                                 scene.add(offSwitch);
                                 switchControl.attach(offSwitch);
-                                this.timer = 0;
+                                _this.timer = 0;
                             }
                             gear2.rotation.y += delta *0.5;//0.5个齿的弧度
                             gear1.rotation.y -= delta * 0.5*2/3;
@@ -6273,8 +6181,8 @@ VILibrary.VI = {
 					switchControl.detach(onSwitch);
 					scene.add(offSwitch);
 					switchControl.attach(offSwitch);
-					window.clearInterval(this.timer);
-					this.timer = 0;
+					window.clearInterval(_this.timer);
+					_this.timer = 0;
 				}
             };
             this.getData=function (dataType) {
@@ -6516,30 +6424,30 @@ VILibrary.VI = {
 
                 if (flag) {
 
-                    // if (!this.timer) {
+                    if (!_this.timer) {
                         base.remove(button_off);
                         buttonControl.detach(button_off);
                         base.add(button_on);
                         buttonControl.attach(button_on);
-                        sliderControl.enabled=true;
+                        // sliderControl.enabled=true;
                         slider.add(machineRay);
-                    this.timer = window.setInterval(function () {
+                    _this.timer = window.setInterval(function () {
 
                         VILibrary.InnerObjects.dataUpdater(_this.dataLine);
                     }, 100);
 
-                    // }
+                    }
                 }
                 else{
                     base.remove(button_on);
                     buttonControl.detach(button_on);
                     base.add(button_off);
                     buttonControl.attach(button_off);
-                    sliderControl.enabled=false;
+                    // sliderControl.enabled=false;
                     slider.remove(machineRay);
                     sliderST=3;
-                    setTimeout(function (){window.clearInterval(this.timer);
-                        this.timer = 0;},200);
+                    setTimeout(function (){window.clearInterval(_this.timer);
+                        _this.timer = 0;},200);
 
 
 
@@ -7227,13 +7135,13 @@ VILibrary.VI = {
                 errArray2=[0,1,2,3,4,5,6,7,8,9,8,7,6,5,4,3,2,1,0.5,0],
                 errOutput=[0];
 
-            this.timer=0;
+            _this.timer=0;
 
             this.toggleObserver = function (flag) {
 
                 if (flag) {
 
-                    if (!this.timer&&exmStyle) {
+                    if (!_this.timer&&exmStyle) {
                          if(!index){errOutput=[0];}
                         scene.remove(offButton);
                         buttonControl.detach(offButton);
@@ -7241,7 +7149,7 @@ VILibrary.VI = {
                         buttonControl.attach(onButton);
                         document.getElementById("exmSelect").disabled=true;
                         let delta =0.1*Math.PI  ;//一齿的弧度
-                        this.timer = window.setInterval(function () {
+                        _this.timer = window.setInterval(function () {
                         	if(exmStyle==1)errOutput[index]=errArray1[index]+Math.random();
                             if((exmStyle==2)||(exmStyle==3))errOutput[index]=errArray2[index]-Math.random();
                         	index++;
@@ -7254,7 +7162,7 @@ VILibrary.VI = {
                                 document.getElementById("exmSelect").disabled=false;
                                 axis.rotation.x=0;
                                 index=0;
-                                this.timer = 0;
+                                _this.timer = 0;
                                 scene.remove(onButton);
                                 buttonControl.detach(onButton);
                                 scene.add(offButton);
@@ -7275,13 +7183,10 @@ VILibrary.VI = {
                     scene.add(offButton);
                     buttonControl.attach(offButton);
                     window.clearInterval(this.timer);
-                    this.timer = 0;
+                    _this.timer = 0;
                     // index=0;
                     // errOutput=[0];
                     // axis.rotation.x =0;
-
-
-
                 }
             };
             this.getData=function (dataType) {
@@ -7671,9 +7576,9 @@ VILibrary.VI = {
             this.timer = 0;
 
             this.toggleObserver = function (flag) {
-                if (flag&&xOn&&yOn) {
+                if (flag) {
 
-                    // if (!this.timer&&xOn&&yOn) {
+                    if (!this.timer&&xOn&&yOn) {
                         // if(!index){dataOutput=[0];}
                         scene.remove(offSwitch);
                         switchControl.detach(offSwitch);
@@ -7689,7 +7594,7 @@ VILibrary.VI = {
                         }
                         this.timer = window.setInterval(function () {
                             //dataOutput[index]=50+10*Math.random();
-							errOutput[index]=15*Math.random()-5;
+							errOutput[index]=10*Math.random();
 							dataOutput[index]=R+errOutput[index];
 							
                             if(index>table.rows.length-2){
@@ -7734,7 +7639,7 @@ VILibrary.VI = {
 
                         }, 10);
                     }
-                // }
+                }
                 else{
                     scene.remove(onSwitch);
                     switchControl.detach(onSwitch);
@@ -7762,7 +7667,7 @@ VILibrary.VI = {
                     this.container.parentNode.appendChild(loadingImg);
 
                     let promiseArr = [
-                        VILibrary.InnerObjects.loadModule('assets/Robot/base.mtl', 'assets/Roundness/base.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roundness/base.mtl', 'assets/Roundness/base.obj'),
                         VILibrary.InnerObjects.loadModule('assets/Roundness/rotator.mtl', 'assets/Roundness/rotator.obj'),
                         VILibrary.InnerObjects.loadModule('assets/Roundness/slider.mtl', 'assets/Roundness/slider.obj'),
                         VILibrary.InnerObjects.loadModule('assets/Roundness/tester.mtl', 'assets/Roundness/tester.obj'),

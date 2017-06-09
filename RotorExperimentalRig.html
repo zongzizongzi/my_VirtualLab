@@ -19,6 +19,7 @@
             <option value="3">轴心位移X信号</option>
             <option value="4">轴心位移Y信号</option>
         </select>
+        <button class="normal-btn" onclick="start()" >旋转开关</button>
 	    <input type="button" class="normal-btn" value="打开波形面板" onclick="openWaveWindow()">
     </div>
     <div id="loadingDiv" class="loading-div">
@@ -36,6 +37,7 @@
 <script>
     'use strict';
     let layerOpenFlag = false;
+    let rotorOn=false;
 
     let knobVI = new VILibrary.VI.KnobVI($('#knobCanvas'));
     let roundPanelVI = new VILibrary.VI.RoundPanelVI($('#roundPanelCanvas'));
@@ -90,6 +92,10 @@
                 VILibrary.InnerObjects.bindDataLine(RotorExperimentalRigVI.id, orbitWaveVI.id, 3, 0);
             }
         });
+    }
+    function start() {
+        rotorOn=!rotorOn;
+        RotorExperimentalRigVI.toggleObserver(rotorOn);
     }
 </script>
 </body>
