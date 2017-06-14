@@ -6,8 +6,16 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<div class="main-div">
-    <canvas id="mainCanvas" width="900" height="900"></canvas>
+<div class="main-div2" width="1500">
+    <canvas id="mainCanvas" width="1200" height="800" ></canvas>
+    <div class="rowFlex-div" style="font: normal 15px Calibri">
+    轴1旋转：<input id="input1" type="range" max="165" min="-165" value="0" step="5" onchange="changeAng()">
+    轴2手臂：<input id="input2" type="range" max="110" min="-110" value="0" step="5" onchange="changeAng()">
+    轴3手臂：<input id="input3" type="range" max="70" min="-90" value="0" step="5" onchange="changeAng()">
+    轴4手腕：<input id="input4" type="range" max="160" min="-160" value="0" step="5" onchange="changeAng()">
+    轴5弯曲：<input id="input5" type="range" max="120" min="-120" value="0" step="5" onchange="changeAng()">
+    轴6翻转：<input id="input6" type="range" max="400" min="-400" value="0" step="5" onchange="changeAng()">
+    </div>
     <script src="js/VILibrary.js"></script>
     <!--js简写方法-->
     <script src="js/jquery-3.1.1.min.js"></script>
@@ -22,8 +30,14 @@
     <script src="js/three/ObjectControls.js"></script>
     <script>
         'use strict';
-
         let robotVI = new VILibrary.VI.RobotVI($('#mainCanvas'), true);
+        function changeAng() {
+            let val=[0];
+            for(let i=1;i<=6;i++){
+                val[i]=document.getElementById("input"+i).value/180*Math.PI;
+            }
+            robotVI.jointsControl(val);
+        }
     </script>
 </div>
 </body>

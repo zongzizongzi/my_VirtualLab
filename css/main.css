@@ -72,7 +72,10 @@ html {
 }
 
 /*****************************************************************/
-
+#head_div{
+    background-image:url("/img/机械学院.jpg");
+    background-size:cover;
+}
 #dataTable {
     border-right: 2px solid black;
     border-bottom: 1px solid black;
@@ -101,6 +104,13 @@ html {
 .main-div {
     margin: 0 auto;
     width: 1000px;
+    height: 100%;
+    text-align: center;
+    line-height: 30px;
+}
+.main-div2 {
+    margin: 0 auto;
+    width: 1200px;
     height: 100%;
     text-align: center;
     line-height: 30px;

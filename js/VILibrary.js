@@ -7972,7 +7972,59 @@ VILibrary.VI = {
             this.name = 'RobotVI';
 
             let camera, scene, renderer,controls,
-				base,link1,link2,link3,link4,link5,link6;
+				base,link1,link2,link3,link4,link5,link6,
+				diff=[0];
+
+            this.jointsControl=function (ang) {
+                let onPos1=false,onPos2=false,onPos3=false,onPos4=false,onPos5=false,onPos6=false
+
+                 diff[1]=ang[1]-link1.rotation.y;
+                 diff[2]=ang[2]-link2.rotation.z;
+                 diff[3]=ang[3]-link3.rotation.z;
+                 diff[4]=ang[4]-link4.rotation.x;
+                 diff[5]=ang[5]-link5.rotation.z;
+                 diff[6]=ang[6]-link6.rotation.x;
+                let step=5/180*Math.PI;
+                _this.timer = window.setInterval(function () {
+
+                    if(diff[1]>0){if(link1.rotation.y<ang[1])link1.rotation.y+=step;/*else link1.rotation.y=ang[1];*/}
+                    if(diff[2]>0){if(link2.rotation.z<ang[2])link2.rotation.z+=step;/*else link2.rotation.z=ang[2];*/}
+                    if(diff[3]>0){if(link3.rotation.z<ang[3])link3.rotation.z+=step;/*else link3.rotation.z=ang[3];*/}
+                    if(diff[4]>0){if(link4.rotation.x<ang[4])link4.rotation.x+=step;/*else link4.rotation.x=ang[4];*/}
+                    if(diff[5]>0){if(link5.rotation.z<ang[5])link5.rotation.z+=step;/*else link5.rotation.z=ang[5];*/}
+                    if(diff[6]>0){if(link6.rotation.x<ang[6])link6.rotation.x+=step;/*else link6.rotation.x=ang[6];*/}
+
+                    if(diff[1]<0){if(link1.rotation.y>ang[1])link1.rotation.y-=step;/*else link1.rotation.y=ang[1];*/}
+                    if(diff[2]<0){if(link2.rotation.z>ang[2])link2.rotation.z-=step;/*else link2.rotation.z=ang[2];*/}
+                    if(diff[3]<0){if(link3.rotation.z>ang[3])link3.rotation.z-=step;/*else link3.rotation.z=ang[3];*/}
+                    if(diff[4]<0){if(link4.rotation.x>ang[4])link4.rotation.x-=step;/*else link4.rotation.x=ang[4];*/}
+                    if(diff[5]<0){if(link5.rotation.z>ang[5])link5.rotation.z-=step;/*else link5.rotation.z=ang[5];*/}
+                    if(diff[6]<0){if(link6.rotation.x>ang[6])link6.rotation.x-=step;/*else link6.rotation.x=ang[6];*/}
+
+                    if(Math.abs(ang[1]-link1.rotation.y)<step){link1.rotation.y=ang[1];onPos1=true;}
+                    if(Math.abs(ang[2]-link2.rotation.z)<step){link2.rotation.z=ang[2];onPos2=true;}
+                    if(Math.abs(ang[3]-link3.rotation.z)<step){link3.rotation.z=ang[3];onPos3=true;}
+                    if(Math.abs(ang[4]-link4.rotation.x)<step){link4.rotation.x=ang[4];onPos4=true;}
+                    if(Math.abs(ang[5]-link5.rotation.z)<step){link5.rotation.z=ang[5];onPos5=true;}
+                    if(Math.abs(ang[6]-link6.rotation.x)<step){link6.rotation.x=ang[6];onPos6=true;}
+
+                    if(onPos1&&onPos2&&onPos3&&onPos4&&onPos5&&onPos6){
+                        window.clearInterval(_this.timer);
+                        _this.timer=0;
+					}
+                    if (_this.dataLine) {
+                        VILibrary.InnerObjects.dataUpdater(_this.dataLine);
+                    }
+                    /*if(rotator.rotation.y>=Math.PI*2){
+                        window.clearInterval(_this.timer);
+                        _this.timer = 0;
+                        // dataOutput[20]=0;
+                    }*/
+                    //定时更新相同数据线VI的数据
+
+                }, 50);
+            }
+
             this.draw=function () {
                 if (draw3DFlag) {
 
@@ -8034,7 +8086,7 @@ VILibrary.VI = {
                 link4.add(link5);
                 link5.add(link6);
 
-                base.position.set(0,-300,0);
+                base.position.set(0,-500,0);
                 link2.position.set(0,290,0);
                 link3.position.set(0,270,0);
                 link4.position.set(302,70,0);
@@ -8048,8 +8100,8 @@ VILibrary.VI = {
                 renderer.setClearColor(0x6495ED);
                 renderer.setSize(_this.container.clientWidth, _this.container.clientHeight);
 
-                camera = new THREE.PerspectiveCamera(45, _this.container.clientWidth / _this.container.clientHeight, 1, 2000);
-                camera.position.set(0,600,1000);
+                camera = new THREE.PerspectiveCamera(45, _this.container.clientWidth / _this.container.clientHeight, 1, 4000);
+                camera.position.set(0,500,1000);
                 camera.lookAt(new THREE.Vector3(0, 300, 0));
 
                 let light = new THREE.AmbientLight(0x555555);
@@ -8068,9 +8120,6 @@ VILibrary.VI = {
                 controls.enableDamping = true;
 
                 RobotAnimate();
-            }
-            this.jiont=function () {
-				
             }
             function RobotAnimate() {
                 window.requestAnimationFrame(RobotAnimate);//回调
