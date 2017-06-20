@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>公差带和配合</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="main-div" >
+    <div>
+        <canvas id="mainCanvas" width="500" height="600">
+        </canvas>
+    </div>
+    <div style="font: normal 20px Microsoft YaHei ;padding: 5px">
+        基准类型：
+        <input type="radio" id="baseType0" name="baseType" value="basicHole" >基孔制
+        <input type="radio" id="baseType1" name="baseType" value="basicShaft">基轴制
+     <!--   <select id="baseType"> &lt;!&ndash;onchange="check()" &ndash;&gt;
+            <option value="0">基孔制</option>
+            <option value="1">基轴制</option>
+        </select>-->
+
+    </div>
+    <div style="font: normal 20px Microsoft YaHei ;padding: 5px">
+        配合类型：
+        <!--<select id="fitType" >&lt;!&ndash;onchange="check()"&ndash;&gt;
+            <option value="0">间隙配合</option>
+            <option value="1">过渡配合</option>
+            <option value="1">过盈配合</option>
+        </select>-->
+        <input type="radio" name="fitType" value="clearanceFit" >间隙配合
+        <input type="radio" name="fitType" value="transitionFit">过渡配合
+        <input type="radio" name="fitType" value="interferenceFit">过盈配合
+    </div>
+    <div style="font: normal 20px Microsoft YaHei ;padding: 5px">
+        <button class="button" style="font:normal 17px Microsoft YaHei" onclick="check()">提交</button>
+        <button class="button" style="font:normal 17px Microsoft YaHei" onclick="esEI()">显示上下偏差</button>
+        <button class="button" style="font:normal 17px Microsoft YaHei" onclick="maxXY()">极限间隙或过盈</button>
+        &emsp;   配合示例：<span id="fit" style="font: normal 20px Calibri">φ20 </span>
+
+    </div>
+</div>
+
+<!--虚拟仪器库-->
+<script src="js/VILibrary.js"></script>
+<!--js简写方法-->
+<script src="js/jquery-3.1.1.min.js"></script>
+<!--弹出框-->
+<script src="js/layui/lay/dest/layui.all.js"></script>
+
+<!--三维显示库-->
+<script src="js/three/three.js"></script>
+<script src="js/three/MTLLoader.js"></script>
+<script src="js/three/OBJLoader.js"></script>
+<script src="js/three/controls/OrbitControls.js"></script>
+<script src="js/three/ObjectControls.js"></script>
+<script type="text/javascript">
+
+    let toleranceVI = new VILibrary.VI.ToleranceVI($('#mainCanvas'));
+
+    function check() {
+        var FitType = document.getElementsByName("fitType");
+//        var fitType = document.getElementById("fitType").selectedIndex;
+//        var baseType=document.getElementById("baseType").selectedIndex;
+        var fitType,baseType;
+        var g=7,k=2,s=35;
+        for (var i=0; i < FitType.length; i++) {
+            if (FitType.item(i).checked) {
+                fitType = FitType.item(i).getAttribute("value");
+                break;
+            }
+        }
+       if(document.getElementById("baseType0").checked){
+//        if(baseType==0){
+            baseType="basicHole";
+           switch (fitType)
+           {
+               case 'clearanceFit':
+                   document.getElementById("fit").innerHTML="φ20 <sup id='toleranceSup'><u>H7</u></sup><sub id='toleranceSub'>g6</sub>",
+                       //孔都是IT7，轴都是IT6,非基准的基本偏差代号都是g,k,s
+                   toleranceVI.setData(0,"g");
+                   break;
+               case 'transitionFit':
+                   document.getElementById("fit").innerHTML="φ20 <sup id='toleranceSup'><u>H7</u></sup><sub id='toleranceSub'>k6</sub>"
+                   toleranceVI.setData(0,"k");
+                   break;
+               case 'interferenceFit':
+                   document.getElementById("fit").innerHTML="φ20 <sup id='toleranceSup'><u>H7</u></sup><sub id='toleranceSub'>s6</sub>"
+                   toleranceVI.setData(0,"s");
+                   break;
+               default:alert("请选择配合类型")
+               // TODO
+           }
+        }
+//        else if(baseType==1) {
+        else if(document.getElementById("baseType1").checked) {
+           baseType="basicShaft";
+           switch (fitType)
+           {
+               case 'clearanceFit':
+                   document.getElementById("fit").innerHTML="φ20 <sup id='toleranceSup'><u>G7</u></sup><sub id='toleranceSub'>h6</sub>"
+                   toleranceVI.setData(1,"g");
+                   break;
+               case 'transitionFit':
+                   document.getElementById("fit").innerHTML="φ20 <sup id='toleranceSup'><u>K7</u></sup><sub id='toleranceSub'>h6</sub>"
+                   toleranceVI.setData(1,"k");
+                   break;
+               case 'interferenceFit':
+                   document.getElementById("fit").innerHTML="φ20 <sup id='toleranceSup'><u>S7</u></sup><sub id='toleranceSub'>h6</sub>"
+                   toleranceVI.setData(1,"s");
+                   break;
+               default:alert("请选择配合类型")
+           }
+       }
+       else alert("请选择基准类型")
+    }
+    function esEI() {
+        toleranceVI.esei();
+    }
+    function maxXY(){
+        toleranceVI.maxXY();
+    }
+</script>
+
+
+</body>
+</html>

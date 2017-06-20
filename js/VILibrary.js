@@ -7887,8 +7887,6 @@ VILibrary.VI = {
                 this.ctx.fillRect(0,0,WIDTH,HEIGHT);
                 this.ctx.strokeRect(0,0,WIDTH,HEIGHT);
 
-
-
                 if(r.length>1){
                 	this.ctx.beginPath();
                     this.ctx.moveTo(10,CENTER_Y);
@@ -7926,10 +7924,6 @@ VILibrary.VI = {
                     this.ctx.closePath();
 				}
 
-
-
-
-
                 if(inputR>0){
                     this.ctx.beginPath();
                     this.ctx.arc(CENTER_X, CENTER_Y,inputR, START_ANGLE, END_ANGLE, false);
@@ -7940,8 +7934,6 @@ VILibrary.VI = {
                     this.ctx.stroke();
                     this.ctx.closePath();
                 }
-
-
 			};
 
             this.setData = function (input){
@@ -7956,13 +7948,8 @@ VILibrary.VI = {
 
                 this.draw();
             }
-
 //调用函数
-
             this.draw();
-
-
-
         }
     },
 	RobotVI:class RobotVI extends TemplateVI {
@@ -8143,5 +8130,204 @@ VILibrary.VI = {
 
             return '300px';
         }
-    }
+    },
+    ToleranceVI:class ToleranceVI extends TemplateVI{
+        constructor (VICanvas) {
+            super(VICanvas);
+            const _this = this;
+            this.name = 'ToleranceVI';
+            this.ctx = this.container.getContext("2d");
+
+
+            this.ctx.font="20px Times new roman";
+            this.ctx.textBaseline="middle";//文字居中定位
+			this.ctx.lineWidth=1;
+
+            let HEIGHT=this.container.height,
+                WIDTH=this.container.width;
+            let CENTER_X=WIDTH/2,
+                CENTER_Y=HEIGHT/2;
+			let holeOffset=0,
+			    shaftOffset=0,
+                holeTol,
+				shaftTol,
+                DELTAW=WIDTH/20,
+				TIMES=parseInt(WIDTH/100),
+				IT6=13,
+				IT7=21,
+				holeMark="",
+				shaftMark="";
+			let holeX, holeY, rectWidth=60,holeH,
+                shaftX, shaftY,shaftH;
+
+
+
+            let BGColor="rgba(200,200,200,0.6)",
+                BLACK= "rgba(0,0,0,1)",
+                BLUE ="rgba(10,10,100,1)",
+                RED="rgba(200,10,10,0.8)",
+				GRAY="rgba(100,100,100,0.8)"
+
+            this.draw=function () {
+            	 holeTol=holeOffset>=0?IT7:-IT7;
+                if(holeOffset==6) holeTol=-IT7;
+            	 shaftTol=shaftOffset>0?IT6:-IT6;
+            	 holeX=3*DELTAW;
+            	 holeY=-holeOffset*TIMES;
+            	 holeH=-holeTol*TIMES;
+            	 shaftX=rectWidth+holeX+DELTAW;
+            	 shaftY=-shaftOffset*TIMES;
+            	 shaftH=-shaftTol*TIMES;
+
+                this.ctx.textAlign = "center";//文本对齐
+                this.ctx.clearRect(0,0,WIDTH,HEIGHT);//清空画布
+                this.ctx.fillStyle=BGColor;
+                this.ctx.strokeStyle=BLACK;
+                this.ctx.fillRect(0,0,WIDTH,HEIGHT);//背景
+                this.ctx.strokeRect(0,0,WIDTH,HEIGHT);
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(DELTAW,CENTER_Y);//中心线
+                this.ctx.lineTo(WIDTH-DELTAW,CENTER_Y);
+                this.ctx.stroke();
+                this.ctx.fillStyle=BLACK;
+                this.ctx.fillText("0",DELTAW/2,CENTER_Y);
+                this.ctx.fillText("+",DELTAW/2,CENTER_Y-20);
+                this.ctx.fillText("-",DELTAW/2,CENTER_Y+20);
+                this.ctx.closePath();
+                this.arrow(DELTAW*2,HEIGHT-20,DELTAW*2,CENTER_Y,false,"φ20");//基准尺寸标注
+
+                if(holeOffset||shaftOffset){
+                    this.ctx.save();
+                    this.ctx.translate(0,CENTER_Y);//坐标系移至Y中心
+                    //前面计算的公差带是以向上为正，而canvas中以向下为正，故以下纵坐标均取负
+                    this.ctx.fillStyle=GRAY;
+
+                    this.ctx.fillRect(holeX,holeY,rectWidth,holeH) ;  //孔公差带
+                    this.ctx.fillStyle=RED;
+                    this.ctx.fillRect(shaftX,shaftY,rectWidth,shaftH) ;  //轴公差带
+                    this.ctx.fillStyle=BLACK;
+                    this.ctx.fillText(holeMark,holeX+rectWidth/2,holeY+holeH/2);
+                    this.ctx.fillText(shaftMark,shaftX+rectWidth/2,shaftY+shaftH/2);
+                    this.ctx.restore();
+				}
+
+
+            };
+
+            this.setData = function (typ,offset){
+
+                if (!typ) {//基孔制
+					holeOffset=0;holeMark="H7"
+					switch(offset){//g=7,k=2,s=35;
+						case "g":shaftOffset=-7;shaftMark="g6";break;
+						case "k":shaftOffset=2;shaftMark="k6";break;
+						case "s":shaftOffset=35;shaftMark="s6";break;
+						default:alert("offsetERR")
+					}
+                }
+                else {//基轴制
+                    shaftOffset=0;shaftMark="h6";
+                    switch(offset){//g=7,k=2,s=35;
+                        case "g":holeOffset=7;holeMark="G7";break;
+                        case "k":holeOffset=6;holeMark="K7";break;//基本偏差代号为K,IT<=IT8,ES=-ei+△
+                        case "s":holeOffset=-35;holeMark="S7";break;
+                        default:alert("offsetERR")
+                    }
+                }
+                this.draw();
+            }
+            this.arrow=function(x1,y1,x2,y2,doubleS,s) {
+            	this.ctx.lineWidth=1;
+                this.ctx.fillStyle=BLACK;
+                this.ctx.strokeStyle=BLACK;
+                let a=x2-x1,b=y2-y1,len=Math.sqrt(a*a+b*b),ang;
+                if(a==0){if(b<0)ang=-Math.PI/2;else ang=Math.PI/2}
+                else  ang=Math.atan(b/a);
+                this.ctx.save();
+                this.ctx.translate(x1,y1);
+                this.ctx.rotate(ang);
+                this.ctx.beginPath();
+                this.ctx.moveTo(0,0);//中心线
+				if(doubleS){
+                    this.ctx.lineTo(10,3);
+                    this.ctx.lineTo(10,-3);
+                    this.ctx.lineTo(0,0);
+				}
+                this.ctx.lineTo(len,0);  this.ctx.stroke();
+
+                this.ctx. lineTo(len-10,-3);  this.ctx.stroke();
+                this.ctx. lineTo(len-10,+3);  this.ctx.stroke();
+                this.ctx. lineTo(len,0);  this.ctx.stroke();
+                // this.ctx.moveTo(len/2,10);
+                this.ctx.fillText(s,len/2,-10);
+                // this.ctx.stroke();
+                this.ctx.fill();
+                this.ctx.closePath();
+                this.ctx.restore();
+            }
+            this.esei=function () {
+                this.ctx.save();
+                this.ctx.translate(0,CENTER_Y);
+                this.ctx.textAlign = "left";//文本对齐
+                this.ctx.textBaseline="middle";//文字居中定位
+                if(holeOffset)this.ctx.fillText(offsetS(holeOffset),holeX+rectWidth+DELTAW/5,holeY-holeH*0.1);//孔上下偏差
+                this.ctx.fillText(offsetS(holeOffset+holeTol),holeX+rectWidth+DELTAW/5,holeY+holeH*1.1);
+                if(shaftOffset)this.ctx.fillText(offsetS(shaftOffset),shaftX+rectWidth+DELTAW/5,shaftY-shaftH*0.15);//轴上下偏差
+                this.ctx.fillText(offsetS(shaftOffset+shaftTol),shaftX+rectWidth+DELTAW/5,shaftY+shaftH*1.15);
+                this.ctx.restore();
+            }
+            function offsetS(n) {
+                if(n>0) return "+"+n;
+                else if(n<0)return n;
+                else return "";
+            }
+            this.maxXY=function () {
+                this.ctx.save();
+                this.ctx.beginPath();
+                this.ctx.translate(0,CENTER_Y);
+                // this.ctx.textAlign = "left";//文本对齐
+				let ES=holeTol>0?(holeOffset+holeTol):holeOffset;
+				let EI=holeTol<0?(holeOffset+holeTol):holeOffset;
+				let es=shaftTol>0?(shaftOffset+shaftTol):shaftOffset;
+                let ei=shaftTol<0?(shaftOffset+shaftTol):shaftOffset;
+                let s1,s2,n1=EI-es,n2=ES-ei,
+					arrow1Y1,arrow1Y2,arrow2Y1,arrow2Y2,
+                    arrow1X=shaftX+rectWidth+DELTAW*2.5,
+                    arrow2X=arrow1X+DELTAW*2.5;
+                if(n1>0){
+                	s1="Xmin= +"+n1;arrow1Y1=-es*TIMES;arrow1Y2 =-EI*TIMES;
+                }
+                else {
+                	s1="Ymax= "+n1; arrow1Y2=-es*TIMES;arrow1Y1 =-EI*TIMES;
+                }
+                if(n2>0){
+                	s2="Xmax= +"+n2;arrow2Y1=-ei*TIMES;arrow2Y2=-ES*TIMES;
+                }
+                else {
+                	s2="Ymin= "+n2;arrow2Y2=-ei*TIMES;arrow2Y1=-ES*TIMES;
+                }
+                this.ctx.font="15px Times new roman";
+
+                this.ctx.moveTo(holeX+rectWidth+DELTAW*0.3,-EI*TIMES);
+                this.ctx.lineTo(arrow1X+DELTAW*0.5,-EI*TIMES);
+                this.ctx.moveTo(shaftX+rectWidth+DELTAW*0.3,-es*TIMES);
+                this.ctx.lineTo(arrow1X+DELTAW*0.5,-es*TIMES);
+                this.ctx.moveTo(holeX+rectWidth+DELTAW*0.3,-ES*TIMES);
+                this.ctx.lineTo(arrow2X+DELTAW*0.5,-ES*TIMES);
+                this.ctx.moveTo(shaftX+rectWidth+DELTAW*0.3,-ei*TIMES);
+                this.ctx.lineTo(arrow2X+DELTAW*0.5,-ei*TIMES);
+                // this.ctx.fill();
+                this.ctx.stroke();
+                this.ctx.closePath();
+                this.arrow(arrow1X,arrow1Y1,arrow1X,arrow1Y2,true,s1);
+                this.arrow(arrow2X,arrow2Y1,arrow2X,arrow2Y2,true,s2);
+
+                this.ctx.restore();
+            }
+
+//调用函数
+            this.draw();
+        }
+    },
 };
