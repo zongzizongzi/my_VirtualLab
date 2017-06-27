@@ -399,4 +399,17 @@ html {
     margin-bottom: 5px;
     font-size: small;
 }
+.textDiv{
+    margin:auto;
+    text-align: left;
+    font: normal 18px Microsoft YaHei ;
+    width: 800px;padding: 20px;
+}
+.textDiv p{
+    padding: 10px;
+}
+.title{
+    font: normal 40px Microsoft YaHei ;
+    padding: 20px;
+}
 

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>直线度评估方法</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<div class="main-div" >
+    <div class="title">
+        <b>直线度评估</b>
+    </div>
+    <div style="font-size: 18px;padding-bottom: 20px">
+        <p>
+            通过自准直仪按八个相等跨度测量的机床导轨误差，各测点数据如下表。分别以三种评估方法评估此导轨直线度。
+        </p>
+    </div>
+    <table id="mainTable" style="margin: auto"  style="font-size: 18px">
+                <table id="dataTable">
+                    <tr>
+                        <th>测点序号</th>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>3</td>
+                        <td>4</td>
+                        <td>5</td>
+                        <td>6</td>
+                        <td>7</td>
+                        <td>8</td>
+                    </tr>
+                    <tr>
+                        <th>读数</th>
+                        <td id="data0">0</td>
+                       <!-- <td id="data1">+5</td>
+                        <td id="data2">+10</td>
+                        <td id="data3">+10.5</td>
+                        <td id="data4">+4</td>
+                        <td id="data5">+6</td>
+                        <td id="data6">+4</td>
+                        <td id="data7">+4.5</td>
+                        <td id="data8">+12</td>-->
+                        <td id="data1">5</td>
+                        <td id="data2">2</td>
+                        <td id="data3">-4</td>
+                        <td id="data4">-5</td>
+                        <td id="data5">+1</td>
+                        <td id="data6">-4</td>
+                        <td id="data7">+6</td>
+                        <td id="data8">-3</td>
+                    </tr>
+                    <tr>
+                        <th>累加值</th>
+                        <td id="sumData0">0</td>
+                        <td id="sumData1"></td>
+                        <td id="sumData2"></td>
+                        <td id="sumData3"></td>
+                        <td id="sumData4"></td>
+                        <td id="sumData5"></td>
+                        <td id="sumData6"></td>
+                        <td id="sumData7"></td>
+                        <td id="sumData8"></td>
+                    </tr>
+                    <tr>
+                        <th>测得误差</th>
+                        <td id="error" colspan="9"></td>
+                    </tr>
+                </table>
+    </table>
+    <div style="font-size: 18px;padding: 10px;" >
+        评估方法：
+        <select id="exmSelect" onchange="changeMethod()" style="font-size: 17px">
+            <option value="0"> </option>
+            <option value="1">最小区域法</option>
+            <option value="2">两端点法</option>
+            <option value="3">最小二乘法</option>
+        </select>
+    </div>
+    <div id="textDiv"   style="margin:auto;text-align: left;font: normal 18px Microsoft YaHei ; width: 800px;"></div>
+    <br/>
+    <div id="eChart-div">
+        <canvas id="mainCanvas" width="500" height="600"></canvas>
+    </div>
+    <div   style="margin:auto;text-align: left;font: normal 15px Microsoft YaHei ; width: 800px;"><b>注：</b>实际实验中为减小作图误差，常按相对累积误差作图 。</div>
+</div>
+
+<script src="js/ECharts/echarts.js"></script>
+<!--虚拟仪器库-->
+<script src="js/VILibrary.js"></script>
+<!--js简写方法-->
+<script src="js/jquery-3.1.1.min.js"></script>
+<!--弹出框-->
+<script src="js/layui/lay/dest/layui.all.js"></script>
+
+
+<script type="text/javascript">
+    'use strict';
+    let straightnessVI = new VILibrary.VI.StraightnessVI($('#mainCanvas'));
+    function changeMethod() {
+        let  methodSelected;
+        methodSelected=document.getElementById("exmSelect").selectedIndex;
+        straightnessVI.setData(methodSelected)
+        switch(methodSelected) {
+            case 1:document.getElementById("textDiv").innerHTML="<p> &emsp; &emsp; 在给定平面内,最小区域法评定直线度误差的判别准则是:两平行直线包容被测误差曲线时,若误差曲线与上下包容线成相间的三点接触,如“低-高-低”或“高-低-高”,则此包容线构成的包容区域即为最小区域。两平行包容线间的距离即为被测实际直线的直线度误差。</p>\
+               <p>&emsp; &emsp; 最小包容区域法符合最小条件。虽很难用解析法直接求出，但可以通过精确作图，用图解法也比较方便作出符合最小条件的两包容平行线。当直线度误差评定结果有异议或工件精度要求较高时，应以最小包容区域法的评定结果为准。</p>";break;
+            case 2:document.getElementById("textDiv").innerHTML="<p> &emsp; &emsp; 两端点连线法评定直线度误差的原理是：以首尾两测量点连线作为直线度误差评定的基准直线，根据该评定基线找出各测量点相对于它的最大、最小偏移量，取偏离值中的最大值Hmax与最小值Hmin的绝对值之和作为被测实际直线的直线度误差。</p>\
+                <p>&emsp; &emsp; 两端点连线法计算直线度误差作图简便、直观，但精度较低，而且作图要求精确。</p>";break;
+            case 3:document.getElementById("textDiv").innerHTML="<p> &emsp; &emsp;最小二乘法以各采样点对于基准直线的偏离值的平方和为最小的原则（最小二乘原则）来确定基准直线，找出直线两侧相对该直线的最大、最小偏移量，取偏离值中的最大值Hmax与最小值Hmin的绝对值之和作为被测实际直线的直线度误差。</p>\
+               <p>&emsp; &emsp; 最小二乘法比较实用，也比较方便采用计算机计算。</p>";break;
+            default:break;
+        }
+
+
+    }
+</script>
+</body>
+</html>

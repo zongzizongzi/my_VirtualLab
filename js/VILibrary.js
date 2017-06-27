@@ -6415,9 +6415,6 @@ VILibrary.VI = {
             let camera, scene, renderer,
 				base, slider,button_off,button_on,machineRay,sliderST,
 				controls, sliderControl,buttonControl;
-            // let testerDown=true,errorArray=[22,29,40,40,47,53,56,63,64,71,77,89,84,90,101,105,113,101,104,89,66,49,43,32,28,25,21,9,9,4,-11,-21,-25,-13,-9,7,8,17,21,26];
-
-
             let onFlag=false;
 
             this.toggleObserver = function (flag) {
@@ -8160,13 +8157,11 @@ VILibrary.VI = {
 			let holeX, holeY, rectWidth=60,holeH,
                 shaftX, shaftY,shaftH;
 
-
-
-            let BGColor="rgba(200,200,200,0.6)",
+            let BGColor="rgba(240,240,255,0.6)",
                 BLACK= "rgba(0,0,0,1)",
                 BLUE ="rgba(10,10,100,1)",
-                RED="rgba(200,10,10,0.8)",
-				GRAY="rgba(100,100,100,0.8)"
+                RED="#ff6666",
+				GRAY="#6699ff"
 
             this.draw=function () {
             	 holeTol=holeOffset>=0?IT7:-IT7;
@@ -8185,7 +8180,6 @@ VILibrary.VI = {
                 this.ctx.strokeStyle=BLACK;
                 this.ctx.fillRect(0,0,WIDTH,HEIGHT);//背景
                 this.ctx.strokeRect(0,0,WIDTH,HEIGHT);
-
                 this.ctx.beginPath();
                 this.ctx.moveTo(DELTAW,CENTER_Y);//中心线
                 this.ctx.lineTo(WIDTH-DELTAW,CENTER_Y);
@@ -8194,7 +8188,19 @@ VILibrary.VI = {
                 this.ctx.fillText("0",DELTAW/2,CENTER_Y);
                 this.ctx.fillText("+",DELTAW/2,CENTER_Y-20);
                 this.ctx.fillText("-",DELTAW/2,CENTER_Y+20);
+                this.ctx.font="15px Times new roman";
+                this.ctx.textAlign = "left";//文本对齐
+                this.ctx.fillText("轴公差带",DELTAW*17,HEIGHT-DELTAW*2.5);
+                this.ctx.fillText("孔公差带",DELTAW*17,HEIGHT-DELTAW*4.5);
+                this.ctx.fillStyle=GRAY;
+                this.ctx.fillRect(DELTAW*15,HEIGHT-DELTAW*5,DELTAW*1.5,DELTAW);
+                this.ctx.fillStyle=RED;
+                this.ctx.fillRect(DELTAW*15,HEIGHT-DELTAW*3,DELTAW*1.5,DELTAW);
                 this.ctx.closePath();
+                this.ctx.font="20px Times new roman";
+                this.ctx.textAlign = "center";//文本对齐
+
+
                 this.arrow(DELTAW*2,HEIGHT-20,DELTAW*2,CENTER_Y,false,"φ20");//基准尺寸标注
 
                 if(holeOffset||shaftOffset){
@@ -8237,10 +8243,11 @@ VILibrary.VI = {
                 }
                 this.draw();
             }
-            this.arrow=function(x1,y1,x2,y2,doubleS,s) {
+            this.arrow=function(x1,y1,x2,y2,doubleS,s) {//第一点，第二点，是否双向箭头，箭头文字
             	this.ctx.lineWidth=1;
-                this.ctx.fillStyle=BLACK;
+
                 this.ctx.strokeStyle=BLACK;
+                this.ctx.fontsize=15;
                 let a=x2-x1,b=y2-y1,len=Math.sqrt(a*a+b*b),ang;
                 if(a==0){if(b<0)ang=-Math.PI/2;else ang=Math.PI/2}
                 else  ang=Math.atan(b/a);
@@ -8260,6 +8267,10 @@ VILibrary.VI = {
                 this.ctx. lineTo(len-10,+3);  this.ctx.stroke();
                 this.ctx. lineTo(len,0);  this.ctx.stroke();
                 // this.ctx.moveTo(len/2,10);
+				this.ctx.fillStyle=BGColor;
+                this.ctx.clearRect((len/2-s.length*this.ctx.fontsize/4),(-10-this.ctx.fontsize/2),(s.length*this.ctx.fontsize/2),(this.ctx.fontsize));
+                this.ctx.fillRect((len/2-s.length*this.ctx.fontsize/4),(-10-this.ctx.fontsize/2),(s.length*this.ctx.fontsize/2),(this.ctx.fontsize));
+                this.ctx.fillStyle=BLACK;
                 this.ctx.fillText(s,len/2,-10);
                 // this.ctx.stroke();
                 this.ctx.fill();
@@ -8267,6 +8278,7 @@ VILibrary.VI = {
                 this.ctx.restore();
             }
             this.esei=function () {
+            	this.ctx.fillStyle=BLACK;
                 this.ctx.save();
                 this.ctx.translate(0,CENTER_Y);
                 this.ctx.textAlign = "left";//文本对齐
@@ -8330,4 +8342,338 @@ VILibrary.VI = {
             this.draw();
         }
     },
+    StraightnessVI:class StraightnessVI extends TemplateVI{
+        constructor (VICanvas) {
+            super(VICanvas);
+            const _this = this;
+            this.name = 'StraightnessVI';
+            this.ctx = this.container.getContext("2d");
+            let eChartDiv = document.getElementById('eChart-div');
+
+            let  methodSelected,error,
+				myChart,option,markLineOpt;
+            let data = [], sumData = [], dataSeries=[],/*relativeSumData = [], */sum = 0.0,dataArray = [];;
+
+            setEChartData();
+
+            this.setData = function (typ){
+                methodSelected=typ;
+                dataArray = [];
+                option.series.markLine = {
+                    data: []
+                };
+                myChart.setOption(option);
+
+                if(methodSelected==3){
+                    let a,b,sumXY=0,sumX=0,sumY=0,sumX2=0;
+                    for(let i=0;i<=8;i++){
+                        sumX+=i;
+                        sumY+=sumData[i];
+                        sumXY+=i*sumData[i];
+                        sumX2+=i*i;
+                    }
+                    b=(sumXY-1/8*sumX*sumY)/(sumX2-1/8*sumX*sumX);
+                    a=1/8*(sumY-b*sumX);
+                    let coords1 = [{
+                        coord: [0, a],
+                        symbol: 'none'
+                    }, {
+                        coord: [8, a+8*b],
+                        symbol: 'none'
+                    }];
+                    let y=[],errorArray=[];
+                    for(let i=0;i<=7;i++){
+                    	y[i]=a+b*i
+                        errorArray[i]=y[i]-sumData[i];
+                    }
+                    let errorMax=Math.max.apply(Math, errorArray);
+                    let errorMin=Math.min.apply(Math, errorArray);
+                    error=errorMax-errorMin;
+                    let maxIndex=errorArray.indexOf(errorMax);
+                    let minIndex=errorArray.indexOf(errorMin);
+                    document.getElementById('error').innerText =errorMax.toFixed(2)+"-("+errorMin.toFixed(2)+")= "+ error.toFixed(2);
+                    let coords2 = [{
+                        coord: [maxIndex, y[maxIndex]],
+                        symbol: 'none'
+                    }, {
+                        coord: [maxIndex, sumData[maxIndex]],
+                        symbol: 'none'
+                    }];
+                    let coords3 = [{
+                        coord: [minIndex, y[minIndex]],
+                        symbol: 'none'
+                    }, {
+                        coord: [minIndex, sumData[minIndex]],
+                        symbol: 'none'
+                    }];
+                    markLineOpt.data = [coords1,coords2,coords3];
+                    option.series.markLine = markLineOpt;
+                    myChart.setOption(option);
+				}
+            }
+
+            function setEChartData() {
+
+
+                for (let i = 0; i < 9; i++) {
+                    let temp = parseFloat(document.getElementById('data' + i).innerHTML);
+//            console.log(isNaN(temp)+':'+typeof temp);//type是number但isNaN检测得true？
+                    if (isNaN(temp)) {
+                        alert('读数未完成，请检查实验步骤是否正确');
+                        return;
+                    }
+                    else {
+                        data.push(temp);
+						sum += parseFloat(data[i]);
+						sumData.push(sum);
+						document.getElementById('sumData' + i).innerText = sum.toFixed(1);
+                        dataSeries.push([i,sum]);
+                    }
+
+                }
+
+                let MAX = (sumData.slice(0).sort(function (a, b) {//按大小排序
+                        return a - b;
+                    })[8] / 10 ).toFixed(0) * 10+10;
+                let MIN = (sumData.slice(0).sort(function (a, b) {
+                        return a - b;
+                    })[0] / 10 ).toFixed(0) * 10-10;
+//        if (MAX % 20 != 0)MAX += 10;
+//        if (MIN % 20 != 0)MIN -= 10;
+
+                option = {
+                    title: {
+                        text: '直线度误差相对累加折线',
+                        x: 'center',
+                        y: 0
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: '{b}: {c}'
+                    },
+                    toolbox: {
+                        feature: {
+                            myTool1: {
+                                show: true,
+                                title: '重绘包容线',
+                                icon: 'image://img/reset.png',
+                                onclick: function () {
+                                    dataArray = [];
+                                    option.series.markLine = {
+                                        data: []
+                                    };
+                                    myChart.setOption(option);
+                                }
+                            },
+                            saveAsImage: {}
+                        }
+                    },
+                    grid: {
+                        show: true
+                    },
+                    xAxis: {
+                        type: 'value',
+						interval:1,
+                        name: '序号',
+                        // data: ['初始','第一次', '第二次', '第三次', '第四次', '第五次', '第六次', '第七次', '第八次', '']
+                    },
+                    yAxis: {
+                        name: '读数',
+                        min: MIN,
+                        max: MAX
+                    },
+                    series: {
+                        name: '误差折线图',
+                        type: 'line'
+                    }
+                };
+
+
+                //coords3为包容线距离
+                let coords1, coords2, coords3, k;
+                markLineOpt = {
+                    label: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    tooltip: {
+                        show: false
+                    },
+                    silent: true
+                };
+
+                // option.series.data = sumData;
+                option.series.data =dataSeries
+
+				myChart = echarts.init(eChartDiv);
+                myChart.setOption(option);
+                myChart.on('click', function (params) {
+
+                    switch (methodSelected){
+                        case 0:alert('请选择评估方法');return;
+                        case 1:{
+                            if (dataArray.length > 6)   return;
+                            dataArray.push(params.dataIndex);
+                            dataArray.push(params.data[1]);
+                            console.log(params.data[1],dataArray);
+                            if (dataArray.length == 4) {
+                                if (Math.abs(dataArray[0] - dataArray[2]) == 1) {
+                                    dataArray.pop();
+                                    dataArray.pop();
+                                    dataArray.pop();
+                                    dataArray.pop();
+                                    alert('选点错误！请重新选择');
+                                    return;
+                                }
+                                k = (dataArray[3] - dataArray[1]) / (dataArray[2] - dataArray[0]);
+                                let x0 = 0, x1 = 8, y0 = dataArray[1] - k * dataArray[0], y1 = dataArray[3] - k * (dataArray[2] - 8);
+                                if (y0<MIN){y0=MIN;x0=dataArray[0]-(dataArray[1]-MIN)/k;}
+                                if (y0>MAX){y0=MAX;x0=dataArray[0]-(dataArray[1]-MAX)/k;}
+                                if (y1<MIN){y1=MIN;x1=dataArray[0]-(dataArray[1]-MIN)/k;}
+                                if (y1>MAX){y1=MAX;x1=dataArray[0]-(dataArray[1]-MAX)/k;}
+                                console.log(k + ', x0:' + x0 + ', x1:' + x1 + ', y0:' + y0 + ', y1:' + y1 + '\n');
+                                coords1 = [{
+                                    coord: [x0, y0],
+                                    symbol: 'none'
+                                }, {
+                                    coord: [x1, y1],
+                                    symbol: 'none'
+                                }];
+                                markLineOpt.data = [coords1];
+                                option.series.markLine = markLineOpt;
+                                myChart.setOption(option);
+                            }
+                            if (dataArray.length == 6) {
+                                if ((dataArray[4] <= dataArray[2] && dataArray[4] <= dataArray[0]) || (dataArray[4] >= dataArray[2] && dataArray[4] >= dataArray[0])) {
+                                    dataArray.pop();
+                                    dataArray.pop();
+                                    alert('选点错误！请重新选择');
+                                    return;
+                                }
+                                let x3 = 0, x4 = 8, x5 = dataArray[4],
+                                    y3 = dataArray[5] - k * dataArray[4],
+                                    y4 = dataArray[5] - k * (dataArray[4] - 8),//只能减不能加，加的时候加数会缩小为0.001
+                                    y5 = dataArray[3] - k * (dataArray[2] - dataArray[4]);
+                                error = y5 - dataArray[5];
+                                if (y3<MIN){y3=MIN;x3=dataArray[4]-(dataArray[5]-MIN)/k;}
+                                if (y3>MAX){y3=MAX;x3=dataArray[4]-(dataArray[5]-MAX)/k;}
+                                if (y4<MIN){y4=MIN;x4=dataArray[4]-(dataArray[5]-MIN)/k;}
+                                if (y4>MAX){y4=MAX;x4=dataArray[4]-(dataArray[5]-MAX)/k;}
+                                document.getElementById('error').innerText = error.toFixed(2);
+//                console.log('x3:' + x3 + ', x4:' + x4 + ', y3:' + y3 + ', y4:' + y4 + ', error:' + error + '\n');
+                                coords2 = [{
+                                    coord: [x3, y3],
+                                    symbol: 'none'
+                                }, {
+                                    coord: [x4, y4],
+                                    symbol: 'none'
+                                }];
+
+                                coords3 = [{
+                                    coord: [dataArray[4], dataArray[5]],
+                                    symbol: 'none'
+                                },
+                                    {
+                                        coord: [x5, y5],
+                                        symbol: 'none'
+                                    }];
+                                markLineOpt.data = [coords1, coords2, coords3];
+                                option.series.markLine = markLineOpt;
+                                myChart.setOption(option);
+                                let y=[],yy=[],product;
+                                for(let i=0;i<=8;i++){
+                                    y[i]=dataArray[1]-k*(dataArray[0]-i);//第一条包容线
+                                    yy[i]=dataArray[5]-k*(dataArray[4]-i);//第二条包容线
+                                    product=(y[i]-sumData[i])*(yy[i]-sumData[i]);
+                                    if(product>0){
+                                        alert('未包容所有数据点！请重绘包容线');
+                                        document.getElementById('error').innerText = "ERROR";
+                                        return;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                        case 2:{
+                            if (dataArray.length >=4)   return;
+                            dataArray.push(params.dataIndex);
+                            dataArray.push(params.data[1]);
+                            console.log(dataArray);
+                            if (dataArray.length ==2){
+                                if(dataArray[0]!=0&&dataArray[0]!=8){
+                                    dataArray.pop();
+                                    dataArray.pop();
+                                    alert('选点错误！请重新选择');
+                                    return;
+                                }
+                            }
+                            if (dataArray.length == 4) {//第二个点
+                                if (Math.abs(dataArray[0]-dataArray[2])==8) {//首尾两点
+                                    coords1 = [{
+                                        coord: [dataArray[0], dataArray[1]],
+                                        symbol: 'none'
+                                    }, {
+                                        coord: [dataArray[2],dataArray[3]],
+                                        symbol: 'none'
+                                    }];
+									/*markLineOpt.data = [coords1];
+									 option.series.markLine = markLineOpt;
+									 myChart.setOption(option);*/
+									/*计算最大偏差并绘制偏差线*/
+                                    k = (dataArray[3] - dataArray[1]) / (dataArray[2] - dataArray[0]);
+                                    let y=[],errorArray=[];
+                                    for(let i=0;i<=8;i++){
+                                        y[i]=dataArray[1]-k*(dataArray[0]-i);//dataArray[]只能减不能加
+                                        errorArray[i]=y[i]-sumData[i];
+                                    }
+                                    let errorMax=Math.max.apply(Math, errorArray);
+                                    let errorMin=Math.min.apply(Math, errorArray);
+                                    error=errorMax-errorMin;
+                                    let maxIndex=errorArray.indexOf(errorMax);
+                                    let minIndex=errorArray.indexOf(errorMin);
+                                    document.getElementById('error').innerText =errorMax.toFixed(2)+"-("+errorMin.toFixed(2)+")= "+ error.toFixed(2);
+                                    coords2 = [{
+                                        coord: [maxIndex, y[maxIndex]],
+                                        symbol: 'none'
+                                    }, {
+                                        coord: [maxIndex, sumData[maxIndex]],
+                                        symbol: 'none'
+                                    }];
+                                    coords3 = [{
+                                        coord: [minIndex, y[minIndex]],
+                                        symbol: 'none'
+                                    }, {
+                                        coord: [minIndex, sumData[minIndex]],
+                                        symbol: 'none'
+                                    }];
+                                    markLineOpt.data = [coords1, coords2, coords3];
+                                    option.series.markLine = markLineOpt;
+                                    myChart.setOption(option);
+
+
+                                }
+                                else {
+                                    dataArray.pop();
+                                    dataArray.pop();
+                                    dataArray.pop();
+                                    dataArray.pop();
+                                    alert('选点错误！请重新选择');
+                                    return;
+                                }
+
+                            }
+                            break;
+                        }
+                        case 3:{
+
+                        	break;
+                        }
+                        default:alert('评估方法错误');return;
+                    }
+                });
+            }
+
+        }
+	}
 };
