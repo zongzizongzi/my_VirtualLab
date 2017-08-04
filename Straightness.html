@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>导轨直线度误差</title>
+    <title>导轨直线度测量实验</title>
     <meta charset="utf-8">
     <link rel="stylesheet" href="css/main.css">
 
 
 </head>
 <body>
-
-<div class="main-div">
+<div style="width:1000px;margin:0  auto;text-align: center">
+    <button class="InstBtn" onclick="show(0)">实验说明书</button><button class="InstBtn" onclick="show(1)">开始实验</button><button class="InstBtn" style="width: 33%" onclick="show(2)">虚拟实验演示</button>
+</div>
+<div id="instructions"> <embed id="instructTxt" src="pdf/2_导轨直线度测量虚拟实验指导书%202.0.0.pdf"></embed></div>
+<div class="main-div" id="main_div">
     <canvas id="mainCanvas" width="1000" height="400"></canvas>
     <table id="mainTable">
         <tr>
@@ -69,11 +72,14 @@
                     </tr>
                 </table>
             </td>
-            <td>
+            <td colspan="2">
                 <canvas id="panelCanvas" width="295" height="200"></canvas>
             </td>
         </tr>
         <tr>
+            <td>
+                <button id="startBtn" onclick="start()">自准直仪开关</button>
+            </td>
             <td>
                 <button id="completeBtn" onclick="setEChartData()">读数完成</button>
             </td>
@@ -84,6 +90,7 @@
         <img class="loading-img" src="img/loading.gif" alt="loading">
     </div>
 </div>
+<div id="gif_div"><img id="demo"  width="950"  src="img/Straightness.gif"></div>
 
 <script src="js/three/three.js"></script>
 <script src="js/three/MTLLoader.js"></script>
@@ -92,11 +99,34 @@
 <script src="js/three/ObjectControls.js"></script>
 <script src="js/ECharts/echarts.js"></script>
 <script src="js/jquery-3.1.1.min.js"></script>
+<script src="js/layui/lay/dest/layui.all.js"></script>
 <script>
-
     'use strict';
+    function show(i) {
+        switch (i){
+            case 0:
+                document.getElementById("instructions").style.display="block";
+                document.getElementById("gif_div").style.display="none";
+                document.getElementById("main_div").style.display="none";
+                break;
+            case 1:
+                document.getElementById("instructions").style.display="none";
+                document.getElementById("main_div").style.display="block";
+                document.getElementById("gif_div").style.display="none";
+                break;
+            case 2:
+                document.getElementById("instructions").style.display="none";
+                document.getElementById("main_div").style.display="none";
+                document.getElementById("gif_div").style.display="block";
+                break;
+            default:
+                alert("indexErr");
+                break;
+        }
+    }
     let container, camera, panelCamera, scene, panelScene, renderer, panelRenderer,//绘图用
             controls, sliderControl, switchControl,//控制用
+            base, slider, offSwitch, onSwitch,
             machineRay,//开机射线
             error;//最终误差
 
@@ -128,7 +158,7 @@
     //initial panel
     panelInit();
     panelAnimate();
-
+    let isStart = false;
     function init() {
 
         container = document.getElementById('mainDiv');
@@ -163,23 +193,6 @@
         let light1 = new THREE.AmbientLight(0x555555);
         scene.add(light1);
 
-        //        let hintCanvas = document.createElement('canvas');
-//        hintCanvas.style.width = "128px";
-//        hintCanvas.style.height = "64px";
-        //        let context1 = hintCanvas.getContext('2d');
-//        context1.font = "30px Arial";
-//        context1.fillStyle = "rgba(0,0,0,1)";
-//        context1.fillText('导轨长度：5m', 0, 32);
-//        // canvas contents will be used for a texture
-        //        let texture1 = new THREE.Texture(hintCanvas);
-//        texture1.needsUpdate = true;
-        //        let material1 = new THREE.MeshBasicMaterial({map: texture1});
-//        material1.transparent = true;
-//        material1.side = THREE.DoubleSide;
-        //        let hint = new THREE.Mesh(new THREE.PlaneGeometry(hintCanvas.width, hintCanvas.height), material1);
-//        hint.position.set(0, 0, 0);
-//        scene.add(hint);
-        //开机后射线
         machineRay = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 200), new THREE.MeshBasicMaterial({
             color: 0xff0000,
             opacity: 0.9
@@ -208,57 +221,12 @@
             this.container.style.cursor = 'auto';
         });
 
-        let isStart = false;
-        switchControl.attachEvent('onclick', function () {
 
-            if (!isStart) {
+        switchControl.attachEvent('onclick', start)
 
-                isStart = !isStart;
-
-                scene.add(machineRay);
-                scene.remove(offSwitch);
-                switchControl.detach(offSwitch);
-                scene.add(onSwitch);
-                switchControl.attach(onSwitch);
-
-                sliderControl.attachEvent('onclick', function () {
-                });
-
-                sliderControl.attachEvent('mouseOver', function () {
-                    this.container.style.cursor = 'pointer';
-                });
-
-                sliderControl.attachEvent('mouseOut', function () {
-                    this.container.style.cursor = 'auto';
-                });
-
-                sliderControl.attachEvent('dragAndDrop', onMouseDrag);
-
-                sliderControl.attachEvent('mouseUp', function () {
-                    controls.enabled = true;
-                    this.container.style.cursor = 'auto';
-                });
-            }
-
-            else {
-                isStart = !isStart;
-
-                scene.remove(machineRay);
-                scene.remove(onSwitch);
-                switchControl.detach(onSwitch);
-                scene.add(offSwitch);
-                switchControl.attach(offSwitch);
-                sliderControl.detachEvent('onclick');
-                sliderControl.detachEvent('mouseOver');
-                sliderControl.detachEvent('mouseOut');
-                sliderControl.detachEvent('dragAndDrop');
-                sliderControl.attachEvent('mouseUp');
-            }
-
-        });
 
         let mtlLoader = new THREE.MTLLoader();
-        let base, slider, offSwitch, onSwitch;
+
         loadingDiv.style.display = 'flex';
         mtlLoader.load('assets/Straightness/base.mtl', function (materials) {
 
@@ -332,7 +300,53 @@
         });
         animate();
     }
+    function start() {
 
+        if (!isStart) {
+
+            isStart = !isStart;
+
+            scene.add(machineRay);
+            scene.remove(offSwitch);
+            switchControl.detach(offSwitch);
+            scene.add(onSwitch);
+            switchControl.attach(onSwitch);
+
+            sliderControl.attachEvent('onclick', function () {
+            });
+
+            sliderControl.attachEvent('mouseOver', function () {
+                this.container.style.cursor = 'pointer';
+            });
+
+            sliderControl.attachEvent('mouseOut', function () {
+                this.container.style.cursor = 'auto';
+            });
+
+            sliderControl.attachEvent('dragAndDrop', onMouseDrag);
+
+            sliderControl.attachEvent('mouseUp', function () {
+                controls.enabled = true;
+                this.container.style.cursor = 'auto';
+            });
+        }
+
+        else {
+            isStart = !isStart;
+
+            scene.remove(machineRay);
+            scene.remove(onSwitch);
+            switchControl.detach(onSwitch);
+            scene.add(offSwitch);
+            switchControl.attach(offSwitch);
+            sliderControl.detachEvent('onclick');
+            sliderControl.detachEvent('mouseOver');
+            sliderControl.detachEvent('mouseOut');
+            sliderControl.detachEvent('dragAndDrop');
+            sliderControl.attachEvent('mouseUp');
+        }
+
+    };
     function onMouseDrag() {
 
         controls.enabled = false;
@@ -690,7 +704,10 @@
             else temp = parseFloat(document.getElementById('data' + i).value);
 //            console.log(isNaN(temp)+':'+typeof temp);//type是number但isNaN检测得true？
             if (isNaN(temp)) {
-                alert('读数未完成，请检查实验步骤是否正确');
+                layer.open({
+                    title: '系统提示'
+                    ,content: '读数未完成，请检查实验步骤是否正确'
+                });
                 return;
             }
             else {
@@ -773,7 +790,6 @@
             },
             silent: true
         };
-
         option.series.data = relativeSumData;
 
         let myChart = echarts.init(eChartDiv);
@@ -788,7 +804,10 @@
                     dataArray.pop();
                     dataArray.pop();
                     dataArray.pop();
-                    alert('选点错误！请重新选择');
+                    layer.open({
+                        title: '系统提示'
+                        ,content: '选点错误！请重新选择'
+                    });
                     return;
                 }
                 k = (dataArray[3] - dataArray[1]) / (dataArray[2] - dataArray[0]);
@@ -812,7 +831,10 @@
                 if ((dataArray[4] <= dataArray[2] && dataArray[4] <= dataArray[0]) || (dataArray[4] >= dataArray[2] && dataArray[4] >= dataArray[0])) {
                     dataArray.pop();
                     dataArray.pop();
-                    alert('选点错误！请重新选择');
+                    layer.open({
+                        title: '系统提示'
+                        ,content: '选点错误！请重新选择'
+                    });
                     return;
                 }
 
@@ -850,7 +872,11 @@
                     yy[i]=dataArray[5]-k*(dataArray[4]-i);//第二条包容线
                     product=(y[i]-relativeSumData[i])*(yy[i]-relativeSumData[i]);
                     if(product>0){
-                        alert('未包容所有数据点！请重绘包容线');
+                        layer.open({
+                            title: '系统提示'
+                            ,content: '未包容所有数据点！请重绘包容线'
+                        });
+
                         return;
                     }
                 }

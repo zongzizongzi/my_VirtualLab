@@ -1,5 +1,5 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
-# 创建的文件:20.04.2017 17:34:33
+# 创建的文件:18.07.2017 16:57:15
 
 mtllib gear1.mtl
 
@@ -2206,7 +2206,7 @@ vt 2.64 0.77 0.00
 # 1005 texture coords
 
 g AST83C66836_DC_Brep
-usemtl wire_198193188
+usemtl 01___Default
 s 1
 f 1/1/1 2/2/2 3/3/2 
 f 4/4/3 5/5/4 6/6/3 

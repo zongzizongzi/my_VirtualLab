@@ -6,16 +6,18 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<div class="main-div">
-    <canvas id="mainCanvas" width="1000" height="600"></canvas>
+<div style="width: 900px;margin:0  auto;text-align: center">
+    <button class="InstBtn" onclick="show(0)">实验说明书</button><button class="InstBtn" onclick="show(1)">开始实验</button><button class="InstBtn" style="width: 33%" onclick="show(2)">虚拟实验演示</button>
+</div>
+<div id="instructions"> <embed id="instructTxt" src="pdf/3_表面粗糙度测量虚拟实验指导书%202.0.0.pdf"></embed></div>
+<div class="main-div" id="main_div" style="width: 900px">
+    <canvas id="mainCanvas" width="900" height="600"></canvas>
     <table id="mainTable">
         <tr>
             <td>
                 <canvas id="panelCanvas" width="295" height="200"></canvas>
             </td>
-            <td rowspan="2">
-                <button class="button" onclick="start()">双管显微镜开关</button>
-                注：系数E=0.63μm/格；Rz=E(∑h峰-∑h谷)/5。
+            <td>
                 <table id="roughnessTable">
                     <tr>
                         <th rowspan="2">五个波峰点/格</th>
@@ -63,8 +65,15 @@
             </td>
 
         </tr>
+        <tr>
+            <td> <button class="button" onclick="start()">双管显微镜开关</button></td>
+            <td ><p>注：系数E=0.63μm/格；Rz=E(∑h峰-∑h谷)/5。</p></td>
+        </tr>
     </table>
 </div>
+<div id="gif_div"><img id="demo"  width="950"  src="img/Roughness.gif"></div>
+
+
 <script src="js/VILibrary.js"></script>
 <script src="js/jquery-3.1.1.min.js"></script>
 <script src="js/layui/lay/dest/layui.all.js"></script>
@@ -75,6 +84,28 @@
 <script src="js/three/ObjectControls.js"></script>
 <script>
     'use strict';
+    function show(i) {
+        switch (i){
+            case 0:
+                document.getElementById("instructions").style.display="block";
+                document.getElementById("gif_div").style.display="none";
+                document.getElementById("main_div").style.display="none";
+                break;
+            case 1:
+                document.getElementById("instructions").style.display="none";
+                document.getElementById("main_div").style.display="block";
+                document.getElementById("gif_div").style.display="none";
+                break;
+            case 2:
+                document.getElementById("instructions").style.display="none";
+                document.getElementById("main_div").style.display="none";
+                document.getElementById("gif_div").style.display="block";
+                break;
+            default:
+                alert("indexErr");
+                break;
+        }
+    }
     let roughnessVI = new VILibrary.VI.RoughnessVI($('#mainCanvas'), true);
     let panelVI=new VILibrary.VI.PanelVI($('#panelCanvas'), true);
     VILibrary.InnerObjects.bindDataLine(roughnessVI.id, panelVI.id, 1, 0);
@@ -108,8 +139,9 @@
 
     }
     function start() {
-        lightOn=!lightOn;
-        roughnessVI.toggleObserver(lightOn);
+//        lightOn=!lightOn;
+        roughnessVI.onFlag=!roughnessVI.onFlag;
+        roughnessVI.toggleObserver(!roughnessVI.timer);
     }
 
 

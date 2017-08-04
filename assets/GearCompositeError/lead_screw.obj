@@ -1,5 +1,5 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
-# 创建的文件:25.04.2017 09:24:32
+# 创建的文件:18.07.2017 16:51:21
 
 mtllib lead_screw.mtl
 
@@ -375,7 +375,7 @@ vt 1.50 -0.30 0.00
 # 196 texture coords
 
 g 2_DC_Shell
-usemtl wire_202209238
+usemtl wire_163163163
 s 1
 f 1/1/1 2/2/2 3/3/2 
 f 4/4/3 5/5/4 6/6/3 
@@ -5995,7 +5995,7 @@ vt 0.40 5.99 0.00
 # 2675 texture coords
 
 g NONE_DC_Shell
-usemtl wire_180178200
+usemtl wire_163163163
 s 1
 f 97/197/70 98/198/71 99/199/71 
 f 100/200/72 101/201/73 102/202/73 
@@ -33091,7 +33091,7 @@ vt 0.02 0.05 0.00
 # 4787 texture coords
 
 g NONE_DC_Shell
-usemtl wire_202209238
+usemtl wire_163163163
 s 1
 f 2691/2872/218 2692/2873/219 2693/2874/218 
 f 2694/2875/220 2695/2876/221 2696/2877/220 

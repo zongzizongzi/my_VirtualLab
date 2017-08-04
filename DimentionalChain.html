@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>尺寸链</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="main-div" style="width: 800px">
+    <div class="title">
+        <b>尺寸链</b>
+    </div>
+    <div class="textDiv" style="width: 800px">
+        <p><b>尺寸链：</b>在机器的装配或零件的设计、加工过程中，由相互连接的尺寸形成封闭的尺寸组，称为尺寸链。</p>
+        <p><b>环：</b>尺寸链中，列入尺寸链的每一个尺寸称为环。</p>
+        <p><b>封闭环：</b>尺寸链中，在装配过程中形成的一环称为封闭环。</p>
+        <p><b>组成环：</b>尺寸链中，对封闭环有影响的全部环，称为组成环。</p>
+        <p><b>增环：</b>尺寸链中，某组成环的变动引起封闭环同向变动，则称该环为增环。</p>
+        <p><b>减环：</b>尺寸链中，某组成环的变动引起封闭环反向变动，则称该环为减环。</p>
+        <p><b>补偿环：</b>尺寸链中预先选定某一组成环，可以通过改变其大小或位置，使封闭环达到规定的要求，则称该环为补偿环。</p>
+        <br>
+        <p><b>尺寸链图的绘制：</b></p>
+    </div>
+    <div  id="text2" >
+    </div>
+    <table id="mainTable" style="height: 350px">
+        <tr>
+            <td rowspan="2" width="300px" align="left">
+                <img src="img/chain380x540.png" width="220" height="320">
+            </td>
+            <td width="340" height="150"><br>
+                <canvas id="mainCanvas" width="340" height="200"></canvas>
+            </td>
+        </tr>
+        <tr>
+            <td id="explain" width="340" height="150" style="margin-top: 20px;font: normal 20px Microsoft YaHei ;vertical-align: top"></td>
+        </tr>
+    </table>
+
+</div>
+
+<!--虚拟仪器库-->
+<script src="js/VILibrary.js"></script>
+<!--js简写方法-->
+<script src="js/jquery-3.1.1.min.js"></script>
+<!--弹出框-->
+<script src="js/layui/lay/dest/layui.all.js"></script>
+<script type="text/javascript">
+    'use strict';
+    let method="area";
+    let dimentionalChainVI = new VILibrary.VI.DimChainVI($('#mainCanvas'));
+    let step=0;
+    nextStep();
+    function nextStep() {
+        step++;
+
+        if(step>4)step=1;
+        dimentionalChainVI.setData(step);
+        switch (step){
+            case 1:document.getElementById("text2").innerHTML=' <p><button class="button" onclick="nextStep()">下一步</button>&emsp;&emsp;<b>(1)绘制相互连接的封闭尺寸线组</b></p>' +
+                '<p>&emsp;&emsp;按装配或零件图的标注，从某一尺寸开始依次画出并连接各尺寸线，形成一个封闭的尺寸线组。</p>';
+            document.getElementById("explain").innerHTML="将结构联结抽象为尺寸联结，绘制时可不严格按照尺寸的比例，但应保持各尺寸联结和大小的逻辑关系。"
+            break;
+            case 2:document.getElementById("text2").innerHTML=' <p><button class="button" onclick="nextStep()">下一步</button>&emsp;&emsp;<b>(2)绘制单向箭头</b></p>' +
+                '<p>&emsp;&emsp;从尺寸线组的任一尺寸线开始，将其一端注上箭头，再按箭头方向依次将个尺寸线注上单向箭头，形成首尾相接的单箭头尺寸链。</p>';
+            break;
+            case 3:document.getElementById("text2").innerHTML=' <p><button class="button" onclick="nextStep()">下一步</button>&emsp;&emsp;<b>(3)判别封闭环</b></p>' +
+                '<p>&emsp;&emsp;在单箭头尺寸链上，找出装配或加工过程中最后形成的环，根据封闭环的定义将其确认为封闭环，并对相应单箭头作特殊标记（加粗或着色）。</p>';
+                document.getElementById("explain").innerHTML="图中间隙A0为装配过程中最后形成的环，因此A0为封闭环，加粗标识。"
+                break;
+            case 4:document.getElementById("text2").innerHTML=' <p><button class="button" onclick="nextStep()">下一步</button>&emsp;&emsp;<b>(4)判别增减环</b></p>' +
+                '<p>&emsp;&emsp;对于直线尺寸链，箭头方向与封闭环箭头相反的组成环为增环，与封闭环箭头同向的组成环为减环。</p>';
+                document.getElementById("explain").innerHTML="A1、A2、A4与封闭环方向相同，为减环；A3与封闭环方向相反，为增环。 "
+                break;
+        }
+    }
+
+
+</script>
+
+</body>
+</html>

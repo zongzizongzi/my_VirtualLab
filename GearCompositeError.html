@@ -1,35 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
     <meta charset="UTF-8">
-    <title>齿轮径向综合误差</title>
+    <title>径向综合总误差与一齿径向综合误差测量实验</title>
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<div class="main-div">
-    <canvas id="mainCanvas" width="1000" height="500"></canvas>
-    <div class="rowFlex-div">
+<div style="width: 900px;margin:0  auto;text-align: center">
+    <button class="InstBtn" onclick="show(0)">实验说明书</button><button class="InstBtn" onclick="show(1)">开始实验</button><button class="InstBtn" style="width: 33%" onclick="show(2)">虚拟实验演示</button>
+</div>
+<div id="instructions"> <embed id="instructTxt" src="pdf/5_齿轮径向综合误差与齿径向综合误差测量虚拟实验指导书%202.0.0.pdf"></embed></div>
+<div class="main-div" id="main_div" style="width: 900px">
+    <canvas id="mainCanvas" width="900" height="500" ></canvas>
+    <div class="rowFlex-div" style="padding-top: 15px;">
         <button class="button" onclick="start()" style="font-size: 16px;">开始测量</button>
         <div style="display:inline;">
             <span class="normal-span">齿轮径向综合误差:</span>
-            <!--<input type="number" id="waterHeightInput" value="400" placeholder="0-800" class="normal-input">-->
             <input type="number" class="normal-input"> μm
         </div>
         <div style="display:inline;">
             <span class="normal-span"  >一齿径向综合误差:</span>
             <input type="number" class="normal-input"> μm
         </div >
-        <div style="position: relative;font-size: 16px;right: -150px"><br/>注：被测齿轮径向综合总偏差 F"= 37μm ，一齿径向综合偏差 f"= 11μm</div>
-        <!--<div style="display:inline;">
-            <input type="button" class="normal-btn" value="开始" onclick="start()">
-            <input type="button" class="normal-btn" value="暂停" onclick="pause()">
-            <input type="button" class="normal-btn" value="重置" onclick="reset()">
-        </div>-->
-
+        <div style="font-size: 16px;margin-left: 330px;"><div style="line-height: 10px"><br></div>注：被测齿轮径向综合总偏差 F"= 37μm ，一齿径向综合偏差 f"= 11μm</div>
+    </div>
+    <div id="eChart-div" style="padding-top: 15px">
+        <canvas id="Canvas" width="500" height="600"></canvas>
     </div>
 </div>
+<div id="gif_div"><img id="demo"  width="1200"  src="img/GearCompositeError.gif"></div>
+
 <!--虚拟仪器库-->
 <script src="js/VILibrary.js"></script>
+
+<script src="js/ECharts/echarts.js"></script>
 <!--js简写方法-->
 <script src="js/jquery-3.1.1.min.js"></script>
 <!--弹出框-->
@@ -43,19 +47,45 @@
 <script src="js/three/ObjectControls.js"></script>
 <script>
     'use strict';
+    function show(i) {
+        switch (i){
+            case 0:
+                document.getElementById("instructions").style.display="block";
+                document.getElementById("gif_div").style.display="none";
+                document.getElementById("main_div").style.display="none";
+                break;
+            case 1:
+                document.getElementById("instructions").style.display="none";
+                document.getElementById("main_div").style.display="block";
+                document.getElementById("gif_div").style.display="none";
+                break;
+            case 2:
+                document.getElementById("instructions").style.display="none";
+                document.getElementById("main_div").style.display="none";
+                document.getElementById("gif_div").style.display="block";
+                break;
+            default:
+                alert("indexErr");
+                break;
+        }
+    }
+
     let gearCompositeErrorVI = new VILibrary.VI.GearCompositeErrorVI($('#mainCanvas'), true);
-    let layerOpenFlag=false;
     function start() {
         gearCompositeErrorVI.toggleObserver(true);
     }
-    window.setInterval(function () {
-        if (gearCompositeErrorVI.timer && !layerOpenFlag) {
+    /*let flag=false;
+   window.setInterval(function () {
+        if (gearCompositeErrorVI.timer&&(!flag)) {
+            flag=true;
             openWave();
-        }
-    }, 100);
-    function openWave () {
-        if (layerOpenFlag) {
 
+        }
+        else flag=false;
+    }, 100);*/
+
+    /*function openWave () {
+        if (layerOpenFlag) {
             return
         }
         layer.open({
@@ -88,7 +118,77 @@
 
             }
         });
+    }*/
+
+    let eChartDiv = document.getElementById('eChart-div');
+
+
+    function openWave() {
+        let dataSeries=[];
+        let  myChart,option;
+        let len=gearCompositeErrorVI.errOutput.length;
+        for (let i = 0; i <=len-1; i++) {
+                dataSeries.push([i*9,gearCompositeErrorVI.errOutput[i]]);
+        }
+        let MAX = 20;
+        let MIN = -20;
+        option = {
+            title: {
+                text: '中心距变动曲线',
+                x: 'center',
+                y: 10
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: ' {c}'
+            },
+            /*toolbox: {
+                feature: {
+                    myTool1: {
+                        show: true,
+                        title: '重绘包容线',
+                        icon: 'image://img/reset.png',
+                        onclick: function () {
+                            dataArray = [];
+                            option.series.markLine = {
+                                data: []
+                            };
+                            myChart.setOption(option);
+                        }
+                    },
+                    saveAsImage: {}
+                }
+            },*/
+            grid: {
+                show: false
+            },
+            xAxis: {
+                type: 'value',
+                interval:20,
+                name: '角度',
+                min:0,
+                max:360,
+            },
+            yAxis: {
+                name: '中心距变动',
+                min: MIN,
+                max: MAX
+            },
+            series: {
+                name: '误差折线图',
+                type: 'line',
+                smooth: true,
+            },
+            animation:false
+        };
+
+        // option.series.data = sumData;
+        option.series.data =dataSeries;
+
+        myChart = echarts.init(eChartDiv);
+        myChart.setOption(option);
     }
+//    openWave();
 </script>
 
 </body>

@@ -5632,20 +5632,13 @@ VILibrary.VI = {
 
     RRToothRingVI: class  RRToothRingVI extends TemplateVI {
         constructor(VICanvas, draw3DFlag) {
-
             super(VICanvas);
-
             const _this = this;
-
-
-            let camera, scene, renderer, controls, sliderControl, testerControl, gearControl,
-                base, gear, slider, tester,testerMark,sliderMark;
-            let testerDown=true,errorArray=[22,29,40,40,47,53,56,63,64,71,77,89,84,90,101,105,113,101,104,89,66,49,43,32,28,25,21,9,9,4,-11,-21,-25,-13,-9,7,8,17,21,26];
-
-
-            let gearNo=0,error=0,sliderDown=false;
-
-
+            let camera, scene, renderer, controls, sliderControl, testerControl, gearControl,holderControl,leftControl,rightControl,
+                base, gear, slider, tester,testerMark,sliderMark,left,right;
+            let testerDown=true;
+            this.errorArray=[22,29,40,40,47,53,56,63,64,71,77,89,84,90,101,105,113,101,104,89,66,49,43,32,28,25,21,9,9,4,-11,-21,-25,-13,-9,7,8,17,21,26];
+            let gearNo=0,error=0,sliderDown=false,gearPos=false;
 
             /**
              *
@@ -5659,13 +5652,11 @@ VILibrary.VI = {
             }
 
             this.getData = function (dataType) {
-
                 if (dataType === 1) {
-
+                    error=(testerDown&&sliderDown)?_this.errorArray[gearNo]:0;
                     return error;  //输出误差
                 }
             };
-
 
             this.draw=function () {
                 if (draw3DFlag) {
@@ -5687,6 +5678,8 @@ VILibrary.VI = {
                         VILibrary.InnerObjects.loadModule('assets/RadialRunout_of_ToothRing/tester.mtl', 'assets/RadialRunout_of_ToothRing/tester.obj'),
                         VILibrary.InnerObjects.loadModule('assets/RadialRunout_of_ToothRing/testerMark.mtl', 'assets/RadialRunout_of_ToothRing/testerMark.obj'),
                         VILibrary.InnerObjects.loadModule('assets/RadialRunout_of_ToothRing/sliderMark.mtl', 'assets/RadialRunout_of_ToothRing/sliderMark.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/RadialRunout_of_ToothRing/left.mtl', 'assets/RadialRunout_of_ToothRing/left.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/RadialRunout_of_ToothRing/right.mtl', 'assets/RadialRunout_of_ToothRing/right.obj'),
                     ];
                     Promise.all(promiseArr).then(function (objArr) {
 
@@ -5697,6 +5690,8 @@ VILibrary.VI = {
                         tester = objArr[3];
                         testerMark = objArr[4];
                         sliderMark = objArr[5];
+                        left=objArr[6];
+                        right=objArr[7];
                         loadingImg.style.display = 'none';
                         RRDraw();
                     }).catch(e => console.log('RRToothRingVI: ' + e));
@@ -5816,7 +5811,6 @@ VILibrary.VI = {
             };
             this.draw();
 
-
             window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame
                 || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
             //相机、渲染、灯光、控制等初始设置
@@ -5834,10 +5828,14 @@ VILibrary.VI = {
                 tester.translateZ(-14);//测量头初始位置（测量头以转轴中点为原点）
                 tester.translateY(34);
                 base.add(gear);
-                base.add(slider,sliderMark);
+                base.add(slider,sliderMark,left,right);
                 slider.add(tester);
                 tester.add(testerMark);
                 scene.add(base);
+                // base.position.y=-10;
+                gear.rotation.z=Math.PI/2;
+                // gear.rotation.x=Math.PI*0.1;
+                gear.position.set(-80,-40,20);
 
                 let light = new THREE.AmbientLight(0x555555);
                 scene.add(light);
@@ -5879,6 +5877,51 @@ VILibrary.VI = {
                     renderer.domElement.style.cursor = 'auto';
                 });
 
+                //左支架拖动控制
+                leftControl = new ObjectControls(camera, renderer.domElement);
+                leftControl.map = plane;
+                leftControl.offsetUse = true;
+
+                leftControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                leftControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                leftControl.attachEvent('dragAndDrop', onHolderDrag);
+
+                leftControl.attachEvent('mouseUp', function () {
+
+                    controls.enabled = true;
+                    renderer.domElement.style.cursor = 'auto';
+                });
+                //右支架拖动控制
+                rightControl = new ObjectControls(camera, renderer.domElement);
+                rightControl.map = plane;
+                rightControl.offsetUse = true;
+
+                rightControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                rightControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                rightControl.attachEvent('dragAndDrop', onHolderDrag);
+
+                rightControl.attachEvent('mouseUp', function () {
+
+                    controls.enabled = true;
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
                 //测量头点击抬起、放下
                 testerControl = new ObjectControls(camera, renderer.domElement);
                 testerControl.offsetUse = true;
@@ -5899,7 +5942,7 @@ VILibrary.VI = {
                     else tester.rotateX(Math.PI/4);
                     testerDown=!testerDown;
                     sliderControl.enabled =true;
-                    error=(testerDown&&sliderDown)?errorArray[gearNo]:0;
+                    // error=(testerDown&&sliderDown)?_this.errorArray[gearNo]:0;
                 });
 
                 //齿轮点击旋转一个齿
@@ -5923,12 +5966,13 @@ VILibrary.VI = {
                 sliderControl.attach(sliderMark);
                 testerControl.attach(testerMark);
                 gearControl.attach(gear);
+                leftControl.attach(left);
+                rightControl.attach(right);
 
                 RRAnimate();
             }
 
             function onSliderDrag () {
-
                 controls.enabled = false;
                 renderer.domElement.style.cursor = 'pointer';
                 this.focused.position.x = this.previous.x;  //lock x direction
@@ -5942,15 +5986,45 @@ VILibrary.VI = {
                 }
                 slider.position.y = this.focused.position.y;
                 sliderDown=slider.position.y< -7?true:false;
-                error=(testerDown&&sliderDown)?errorArray[gearNo]:0;
+                // error=(testerDown&&sliderDown)?_this.errorArray[gearNo]:0;
+            }
+
+            function onHolderDrag() {
+                controls.enabled = false;
+                renderer.domElement.style.cursor = 'pointer';
+                this.focused.position.y = this.previous.y;  //lock x direction
+                if (this.focused.position.x < -10) {
+
+                    this.focused.position.x = -10;
+                }
+                else if (this.focused.position.x > 10) {
+
+                    this.focused.position.x = 10;
+                }
+                let focusedX=this.focused.position.x;
+                console.log(this.focused.materialLibraries[0])
+				if(this.focused.materialLibraries[0]=="left.mtl"){
+                    right.position.x=-focusedX;
+				}
+				else {
+                    left.position.x=-focusedX;
+				}
             }
 
             function onGearClick(){
-                if(!(testerDown&&sliderDown)){
-                    gear.rotateX(Math.PI/20);
-                    gearNo+=1;
-                    if(gearNo>=40)gearNo=0;
-                }
+            	if(!gearPos){
+            		gearPos=true;
+            		gear.position.set(0,0,0);
+            		gear.rotation.set(0,0,0);
+				}
+				else {
+                    if(!(testerDown&&sliderDown)){
+                        gear.rotateX(Math.PI/20);
+                        gearNo+=1;
+                        if(gearNo>=40)gearNo=0;
+                    }
+				}
+
 
             }
 
@@ -6127,10 +6201,12 @@ VILibrary.VI = {
 
             const _this = this;
 
-            let camera, scene, renderer, controls,base,gear1,gear2,handleUp,handleDown,lead_screw,onSwitch,offSwitch,slider2,lead_screwControl,handleControl,switchControl;
-            let handleDownMark=false,gearMesh=false;
-            let errorArray=[-4,-2,-7,-3,-8,-7,-12,-10,-15,-12,-14,-10,-11,-9,-11,-8,-9,-5,-6,-2,-5,0,-1,3,-1,7,5,11,10,14,12,13,9,11,8,9,5,6,2,3,0];
-            let errOutput=[];
+            let camera, scene, renderer, controls,base,gear1,gear2,handleUp,handleDown,lead_screw,onSwitch,offSwitch,slider2,lead_screwControl,
+				handleControl,switchControl,gear2Control;
+            let handleDownMark=false,gearMesh=false,gearPos=false;
+            let errorArray=[0,-2,-7,-3,-8,-7,-12,-10,-15,-12,-14,-10,-11,-9,-11,-8,-9,-5,-6,-2,-5,0,-1,3,-1,7,5,11,10,14,12,13,9,11,8,9,5,6,2,3,0];
+            this.eA=errorArray;
+            this.errOutput=[];
             _this.timer=0;
             let index=0;
 
@@ -6142,38 +6218,52 @@ VILibrary.VI = {
             this.toggleObserver = function (flag) {
 
                 if (flag) {
+                    if (!_this.timer ) {
+                        if(!gearPos)  layer.open({
+                            title: '系统提示'
+                            ,content: '未正确安装被测齿轮，请点击被测齿轮进行安装'
+                        });
+                        else if(!gearMesh){
+                            layer.open({
+                                title: '系统提示'
+                                ,content: '齿轮未正确啮合,请调整后再开始测量'
+                            });
+                        }
+                        else if(!handleDownMark)layer.open({
+                            title: '系统提示'
+                            ,content: '固定拖板未锁紧，请锁紧后再开始测量'
+                        });
+                        else {
+                            if(!index){_this.errOutput=[0];}
+                            scene.remove(offSwitch);
+                            switchControl.detach(offSwitch);
+                            scene.add(onSwitch);
+                            switchControl.attach(onSwitch);
+                            let delta =360/20/180*Math.PI  ;//一齿的弧度
+                            _this.timer = window.setInterval(function () {
+                                openWave();
+                                gear1.rotation.y -= delta * 0.5*2/3;
+                                index+=1;
+                                gear2.rotation.y += delta *0.5;//0.5个齿的弧度
 
-                    if (!_this.timer&& gearMesh && handleDownMark) {
-                    	if(!index){errOutput=[0];}
-                        scene.remove(offSwitch);
-                        switchControl.detach(offSwitch);
-                        scene.add(onSwitch);
-                        switchControl.attach(onSwitch);
-
-                    	let delta =360/20/180*Math.PI  ;//一齿的弧度
-                        _this.timer = window.setInterval(function () {
-                            errOutput[index]=errorArray[index];
-                            console.log(errOutput[index]);
-                            index+=1;
-                            //定时更新相同数据线VI的数据
-                            if (_this.dataLine) {
-
-                                VILibrary.InnerObjects.dataUpdater(_this.dataLine);
-                            }
-                            if(index>=40){
-                            	window.clearInterval(_this.timer);
-                                index=0;
-                                scene.remove(onSwitch);
-                                switchControl.detach(onSwitch);
-                                scene.add(offSwitch);
-                                switchControl.attach(offSwitch);
-                                _this.timer = 0;
-                            }
-                            gear2.rotation.y += delta *0.5;//0.5个齿的弧度
-                            gear1.rotation.y -= delta * 0.5*2/3;
-
-
-                        }, 100);
+                                _this.errOutput[index]=errorArray[index];
+                                console.log("errOutput",_this.errOutput[index]);
+                                //定时更新相同数据线VI的数据
+                                if (_this.dataLine) {
+                                    VILibrary.InnerObjects.dataUpdater(_this.dataLine);
+                                }
+                                if(index>=40){
+                                    window.clearInterval(_this.timer);
+                                    index=0;
+                                    scene.remove(onSwitch);
+                                    switchControl.detach(onSwitch);
+                                    scene.add(offSwitch);
+                                    switchControl.attach(offSwitch);
+                                    _this.timer = 0;
+                                    this.errOutput=[];
+                                }
+                            }, 100);
+                        }
                     }
                 }
 				else{
@@ -6185,13 +6275,10 @@ VILibrary.VI = {
 					_this.timer = 0;
 				}
             };
-            this.getData=function (dataType) {
-                console.log(errOutput);
-            	return errOutput;
+            this.getData=function () {
+            	return _this.errOutput;
 
             }
-
-
             this.draw=function () {
                 if (draw3DFlag) {
 
@@ -6212,7 +6299,7 @@ VILibrary.VI = {
                         VILibrary.InnerObjects.loadModule('assets/GearCompositeError/lead_screw.mtl', 'assets/GearCompositeError/lead_screw.obj'),
                         VILibrary.InnerObjects.loadModule('assets/GearCompositeError/slider2.mtl', 'assets/GearCompositeError/slider2.obj'),
                         VILibrary.InnerObjects.loadModule('assets/GearCompositeError/handle_up.mtl', 'assets/GearCompositeError/handle_up.obj'),
-                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/handle_up.mtl', 'assets/GearCompositeError/handle_down.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/GearCompositeError/handle_down.mtl', 'assets/GearCompositeError/handle_down.obj'),
                         VILibrary.InnerObjects.loadModule('assets/GearCompositeError/button-off.mtl', 'assets/GearCompositeError/button-off.obj'),
                         VILibrary.InnerObjects.loadModule('assets/GearCompositeError/button-on.mtl', 'assets/GearCompositeError/button-on.obj'),
                     ];
@@ -6242,28 +6329,24 @@ VILibrary.VI = {
             };
             this.draw();
 
-
             window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame
                 || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
             //相机、渲染、灯光、控制等初始设置
             function GCEDraw () {
                 scene = new THREE.Scene();
-
                 renderer = new THREE.WebGLRenderer({canvas: _this.container, antialias: true});
                 renderer.setClearColor(0x6495ED);
                 renderer.setSize(_this.container.clientWidth, _this.container.clientHeight);
 
                 camera = new THREE.PerspectiveCamera(45, _this.container.clientWidth / _this.container.clientHeight, 1, 1000);
-                camera.position.set(0,100,250);
+                camera.position.set(0,100,300);
                 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
                //测量头初始位置（测量头以转轴中点为原点）
-                gear2.position.x=0;
-                gear2.position.y=66;
                 gear1.position.x=-83;
                 gear1.position.y=66;
 
-
+                gear2.position.set(100,-50,80);
 
                 let light = new THREE.AmbientLight(0x555555);
                 scene.add(light);
@@ -6340,11 +6423,32 @@ VILibrary.VI = {
 
                     _this.toggleObserver(!_this.timer);
                 });
+
+                gear2Control = new ObjectControls(camera, renderer.domElement);
+                gear2Control.offsetUse = true;
+
+                gear2Control.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                gear2Control.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                gear2Control.attachEvent('onclick',function () {
+                    gear2.position.x=slider2.position.x;
+                    gear2.position.y=66;
+                    gear2.position.z=0;
+                    gearPos=true;
+                });
                 //绑定控制对象
                 scene.add(base,lead_screw,gear1,slider2,gear2,handleUp,offSwitch);
                 handleControl.attach(handleUp);
                 lead_screwControl.attach(lead_screw);
                 switchControl.attach(offSwitch);
+                gear2Control.attach(gear2);
 
                 GCEAnimate();
             }
@@ -6368,6 +6472,7 @@ VILibrary.VI = {
                 }
                 else {lead_screw.rotateX(angle);}
                 gearMesh=slider2.position.x< -20?true:false;
+                if(gearPos)gear2.position.x=slider2.position.x;
 
             }
             function onHandleClick() {
@@ -6391,7 +6496,7 @@ VILibrary.VI = {
             }
 
             function GCEAnimate() {
-                gear2.position.x=slider2.position.x;
+                // gear2.position.x=slider2.position.x;
                 handleDown.position.x=slider2.position.x;
                 handleUp.position.x=slider2.position.x;
                 offSwitch.position.x=slider2.position.x;
@@ -6413,42 +6518,47 @@ VILibrary.VI = {
 
 
             let camera, scene, renderer,
-				base, slider,button_off,button_on,machineRay,sliderST,
-				controls, sliderControl,buttonControl;
-            let onFlag=false;
+				base, slider,slider0,handwheel,cylinder,cylinder_off,button_off,button_on,machineRay,sliderST,
+				controls, sliderControl,slider0Control,buttonControl,cylinderControl;
+            let onPos=false;
+            this.onFlag=false,
 
             this.toggleObserver = function (flag) {
 
-                if (flag) {
+                if(!onPos){
+                	_this.onFlag=!_this.onFlag;
+                    layer.open({
+                        title: '系统提示'
+                        ,content: '请先点击安装被测工件，再开始测量'
+                    });
+                }
+                else {
 
-                    if (!_this.timer) {
+                    if (flag) {
                         base.remove(button_off);
                         buttonControl.detach(button_off);
                         base.add(button_on);
                         buttonControl.attach(button_on);
                         // sliderControl.enabled=true;
                         slider.add(machineRay);
-                    _this.timer = window.setInterval(function () {
+                        _this.timer = window.setInterval(function () {
 
-                        VILibrary.InnerObjects.dataUpdater(_this.dataLine);
-                    }, 100);
-
+                            VILibrary.InnerObjects.dataUpdater(_this.dataLine);
+                        }, 100);
                     }
-                }
-                else{
-                    base.remove(button_on);
-                    buttonControl.detach(button_on);
-                    base.add(button_off);
-                    buttonControl.attach(button_off);
-                    // sliderControl.enabled=false;
-                    slider.remove(machineRay);
-                    sliderST=3;
-                    setTimeout(function (){window.clearInterval(_this.timer);
-                        _this.timer = 0;},200);
+                    else{
+                        base.remove(button_on);
+                        buttonControl.detach(button_on);
+                        base.add(button_off);
+                        buttonControl.attach(button_off);
+                        // sliderControl.enabled=false;
+                        slider.remove(machineRay);
+                        sliderST=3;
+                        setTimeout(function (){window.clearInterval(_this.timer);
+                            _this.timer = 0;},200);
+                    }
+				}
 
-
-
-                }
             };
 
             /**
@@ -6463,11 +6573,13 @@ VILibrary.VI = {
             }
 
             this.getData = function (dataType) {
-                if (onFlag){
+                if (_this.onFlag){
+
                     // console.log("move",)
-                    if(-6<=slider.position.y&&slider.position.y<=(-4))sliderST=0;
-                    else if(-8<=slider.position.y&&slider.position.y<=(-2))sliderST=1;
-                    else if(-10<=slider.position.y&&slider.position.y<=0)sliderST=2;
+					let posY=slider.position.y
+                    if(-6<=posY&&posY<=(-4))sliderST=0;
+                    else if(-8<=posY&&posY<=-2)sliderST=1;
+                    else if(-10<=posY&&posY<=-0)sliderST=2;
                     else sliderST=3;
                 }
                 else sliderST=3;
@@ -6490,11 +6602,15 @@ VILibrary.VI = {
                     this.container.parentNode.appendChild(loadingImg);
 
                     let promiseArr = [
-                        VILibrary.InnerObjects.loadModule('assets/Roughness/base&slider0.mtl', 'assets/Roughness/base&slider0.obj'),
-                        // VILibrary.InnerObjects.loadModule('assets/Roughness/slider0.mtl', 'assets/Roughness/slider0.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roughness/base.mtl', 'assets/Roughness/base.obj'),
+
                         VILibrary.InnerObjects.loadModule('assets/Roughness/slider.mtl', 'assets/Roughness/slider.obj'),
                         VILibrary.InnerObjects.loadModule('assets/Roughness/button_off.mtl', 'assets/Roughness/button_off.obj'),
                         VILibrary.InnerObjects.loadModule('assets/Roughness/button_on.mtl', 'assets/Roughness/button_on.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roughness/slider0.mtl', 'assets/Roughness/slider0.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roughness/cylinder.mtl', 'assets/Roughness/cylinder.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roughness/handwheel.mtl', 'assets/Roughness/handwheel.obj'),
+                        VILibrary.InnerObjects.loadModule('assets/Roughness/cylinder_off.mtl', 'assets/Roughness/cylinder_off.obj'),
                     ];
                     Promise.all(promiseArr).then(function (objArr) {
 
@@ -6503,6 +6619,10 @@ VILibrary.VI = {
                         slider = objArr[1];
                         button_off = objArr[2];
                         button_on = objArr[3];
+                        slider0=objArr[4];
+                        cylinder=objArr[5];
+                        handwheel=objArr[6];
+                        cylinder_off=objArr[7];
                         loadingImg.style.display = 'none';
                         RoughnessDraw();
                     }).catch(e => console.log('RRToothRingVI: ' + e));
@@ -6533,22 +6653,35 @@ VILibrary.VI = {
                 renderer.setClearColor(0x6495ED);
                 renderer.setSize(_this.container.clientWidth, _this.container.clientHeight);
 
-                camera = new THREE.PerspectiveCamera(45, _this.container.clientWidth / _this.container.clientHeight, 1, 1000);
+                camera = new THREE.PerspectiveCamera(45, _this.container.clientWidth / _this.container.clientHeight, 1, 15000);
                 camera.position.set(-100,200,700);
                 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-                base.add(slider,button_off);
                 scene.add(base);
-                base.position.y=-80;
+                base.add(cylinder_off,button_off,slider0);
+                slider0.add(slider,handwheel);
+                base.position.y=-180;
                 slider.position.y=5;
+                slider0.position.y=-46;
+                // cylinder.rotateOnAxis((Math.sqrt(0.5),Math.sqrt(0.5),0),Math.PI/2);
 
-                machineRay = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5,70), new THREE.MeshBasicMaterial({
-                    color: 0xff0000,
-                    opacity: 0.9
-                }));
+                //射线
+                var material = new THREE.LineBasicMaterial( { vertexColors: THREE.VertexColors } );
+                var color1 = new THREE.Color( 0x6495ED );//顶点1的颜色
+                var color2 = new THREE.Color( 0xFF0000 );//顶点2的颜色
+                // 线的材质可以由2点的颜色决定
+                var x = new THREE.Vector3( 0,-10,0);//定义顶点的位置
+                var y = new THREE.Vector3(0,50,0);//定义顶点的位置
+                var geometry = new THREE.Geometry();//创建一个几何体
+                geometry.vertices.push(x); //vertices是用来存放几何体中的点的集合
+                geometry.vertices.push(y);
+                geometry.colors.push( color1, color2);//color是用来存放颜色的,有两个点说明这两个颜色对应两个点
+                //geometry中colors表示顶点的颜色，必须材质中vertexColors等于THREE.VertexColors 时，颜色才有效，如果vertexColors等于THREE.NoColors时，颜色就没有效果了。那么就会去取材质中color的值
+				machineRay = new THREE.Line( geometry, material, THREE.LinePieces );
                 machineRay.rotation.z = -Math.PI / 4;
                 machineRay.rotation.y =-33.8 /180 * Math.PI;
-                machineRay.position.set(8,71,5);
+                machineRay.position.set(-52,183,-7);
+
                 let light = new THREE.AmbientLight(0x555555);
                 scene.add(light);
                 let light1 = new THREE.DirectionalLight(0xffffff, 1);
@@ -6566,7 +6699,26 @@ VILibrary.VI = {
                 let plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 400),new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} ));
                 //plane.rotateY(30/180*Math.PI);
 
-                //拖动控制
+
+                /*//拖动控制
+                slider0Control = new ObjectControls(camera, renderer.domElement);
+                slider0Control.map = plane;
+                slider0Control.offsetUse = true;
+                slider0Control.attachEvent('mouseOver', function () {
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+                slider0Control.attachEvent('mouseOut', function () {
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                slider0Control.attachEvent('dragAndDrop', onSlider0Drag);
+
+                slider0Control.attachEvent('mouseUp', function () {
+                    controls.enabled = true;
+                    renderer.domElement.style.cursor = 'auto';
+                });
+*/
+				//拖动控制
                 sliderControl = new ObjectControls(camera, renderer.domElement);
                 sliderControl.map = plane;
                 sliderControl.offsetUse = true;
@@ -6589,6 +6741,25 @@ VILibrary.VI = {
                     renderer.domElement.style.cursor = 'auto';
                 });
 
+                cylinderControl= new ObjectControls(camera, renderer.domElement);
+                cylinderControl.offsetUse = true;
+
+                cylinderControl.attachEvent('mouseOver', function () {
+
+                    renderer.domElement.style.cursor = 'pointer';
+                });
+
+                cylinderControl.attachEvent('mouseOut', function () {
+
+                    renderer.domElement.style.cursor = 'auto';
+                });
+
+                cylinderControl.attachEvent('onclick',function () {
+                    base.remove(cylinder_off);
+                    base.add(cylinder);
+                    cylinderControl.detach(cylinderControl);
+                    onPos=true;
+                });
 
                 buttonControl = new ObjectControls(camera, renderer.domElement);
                 buttonControl.offsetUse = true;
@@ -6604,33 +6775,48 @@ VILibrary.VI = {
                 });
 
                 buttonControl.attachEvent('onclick',function () {
-                    onFlag=!onFlag;
-                    _this.toggleObserver(onFlag);
+                    _this.onFlag=!_this.onFlag;
+                    _this.toggleObserver(!_this.timer);
                 });
 
                 //绑定控制对象
                 sliderControl.attach(slider);
+                // slider0Control.attach(slider0);
                 buttonControl.attach(button_off);
+                cylinderControl.attach(cylinder_off);
 
                 RoughnessAnimate();
             }
 
-            function onSliderDrag () {
-
+           /* function onSlider0Drag () {
                 controls.enabled = false;
                 renderer.domElement.style.cursor = 'pointer';
                 this.focused.position.x = this.previous.x;  //lock x direction
-                if (this.focused.position.y < -14) {
+                if (this.focused.position.y < -50) {
 
-                    this.focused.position.y = -14;
+                    this.focused.position.y = -50;
                 }
-                else if (this.focused.position.y > 5) {
+                else if (this.focused.position.y > 40) {
 
-                    this.focused.position.y = 5;
+                    this.focused.position.y = 40;
                 }
-                slider.position.y = this.focused.position.y;
+                // slider0.position.y = this.focused.position.y;
+                console.log("slider0",slider0.position.y)
+            }*/
+            function onSliderDrag () {
+                controls.enabled = false;
+                renderer.domElement.style.cursor = 'pointer';
+                this.focused.position.x = this.previous.x;  //lock x direction
+                if (this.focused.position.y < -10) {
 
+                    this.focused.position.y = -10;
+                }
+                else if (this.focused.position.y > 10) {
 
+                    this.focused.position.y = 10;
+                }
+                console.log("slider",slider.position.y)
+                // if(slider.position.y<-)
             }
 
             function RoughnessAnimate() {
@@ -7127,7 +7313,7 @@ VILibrary.VI = {
             let camera,scene,renderer,
 				controls,base1Control,rotator1Control,rotator2Control,stickControl,buttonControl,
 				base1,base,axis,rotator1,rotator2,stick,onButton,offButton,
-				onFlag=false,exmStyle=0,index=0,
+				onFlag=false,exmStyle=0,index=0,offset,tolerance,result,
                 errArray1=[0,1.5,3,4.5,6,7.5,9,10.5,10.5,9,7.5,6,4.5,3,1.5,0,-1.5,-3,-1,0],
                 errArray2=[0,1,2,3,4,5,6,7,8,9,8,7,6,5,4,3,2,1,0.5,0],
                 errOutput=[0];
@@ -7157,6 +7343,8 @@ VILibrary.VI = {
                             if(axis.rotation.x>=Math.PI*2){
                                 window.clearInterval(_this.timer);
                                 document.getElementById("exmSelect").disabled=false;
+                                document.getElementById('data'+(exmStyle*4-1)).innerText =offset;
+                                document.getElementById('data'+exmStyle*4).innerText =result;
                                 axis.rotation.x=0;
                                 index=0;
                                 _this.timer = 0;
@@ -7190,13 +7378,13 @@ VILibrary.VI = {
 				if(exmStyle==1||exmStyle==2||exmStyle==3){
 					let max=Math.max.apply(Math,errOutput).toFixed(1);
                     let min=Math.min.apply(Math,errOutput).toFixed(1);
-                    let offset=(max-min).toFixed(1);
-					let tolerance=parseFloat(document.getElementById('tol'+exmStyle).innerText);
-                    let result=offset<=tolerance?"合格":"不合格";
+                    offset=(max-min).toFixed(1);
+					tolerance=parseFloat(document.getElementById('tol'+exmStyle).innerText);
+					result=offset<=tolerance?"合格":"不合格";
                     document.getElementById('data'+(exmStyle*4-3)).innerText =max;
                     document.getElementById('data'+(exmStyle*4-2)).innerText =min;
-                    document.getElementById('data'+(exmStyle*4-1)).innerText =offset;
-                    document.getElementById('data'+exmStyle*4).innerText =result;
+                    /*document.getElementById('data'+(exmStyle*4-1)).innerText =offset;
+                    document.getElementById('data'+exmStyle*4).innerText =result;*/
 
 				}
 				else errOutput=[0];
@@ -7273,21 +7461,17 @@ VILibrary.VI = {
                 renderer.setSize(_this.container.clientWidth, _this.container.clientHeight);
 
                 camera = new THREE.PerspectiveCamera(45, _this.container.clientWidth / _this.container.clientHeight, 1, 1000);
-                camera.position.set(0,50,200);
+                camera.position.set(0,0,180);
                 camera.lookAt(new THREE.Vector3(0, 0, 0));
-
 
                 scene.add(base1,base,axis,offButton);
                 base1.add(rotator1);
 				rotator1.add(stick);
 				stick.add(rotator2);
 
-                // base1.position.set(0,0,-10);
                 stick.position.set(0,0,0);
 				rotator1.position.set(50,-46.26,50);
                 rotator2.position.set(-27,58.76,-8);
-              /*  base1.position.set(0,0,-10);
-                stick.position.set(0,0,0);*/
 
                 let light = new THREE.AmbientLight(0x555555);
                 scene.add(light);
@@ -7565,7 +7749,7 @@ VILibrary.VI = {
 				xOn=false,yOn=true;
                /*  base1Control, rotator1Control, rotator2Control, stickControl, buttonControl,
                 base1, base, axis, rotator1, rotator2, stick, onButton, offButton,
-                onFlag = false, exmStyle = 0,;*/
+                _this.onFlag = false, exmStyle = 0,;*/
 			let dataOutput = [0];
 			let errOutput=[0],R=70;//基准圆半径
 			
@@ -7574,8 +7758,9 @@ VILibrary.VI = {
 
             this.toggleObserver = function (flag) {
                 if (flag) {
-
+                    console.log(xOn,yOn)
                     if (!this.timer&&xOn&&yOn) {
+
                         // if(!index){dataOutput=[0];}
                         scene.remove(offSwitch);
                         switchControl.detach(offSwitch);
@@ -7610,7 +7795,7 @@ VILibrary.VI = {
 							}
 
                             document.getElementById("a"+index).innerText=index*9;//以角度表示
-                            document.getElementById("e"+index).innerText=errOutput[index];
+                            document.getElementById("e"+index).innerText=errOutput[index].toFixed(2);
 
 
                             index++;
@@ -7626,7 +7811,6 @@ VILibrary.VI = {
                                 window.clearInterval(_this.timer);
                                 rotator.rotation.y =0;
                                     index=0;
-
                                 _this.timer = 0;
                                 dataOutput=[0];
 								errOutput=[0];
@@ -7634,7 +7818,7 @@ VILibrary.VI = {
                             }
                             //定时更新相同数据线VI的数据
 
-                        }, 10);
+                        }, 50);
                     }
                 }
                 else{
@@ -7647,7 +7831,8 @@ VILibrary.VI = {
                 }
             }
             this.getData=function(dataType){
-                return dataOutput;
+                return errOutput;
+
 			}
 
             this.draw=function () {
@@ -7721,9 +7906,6 @@ VILibrary.VI = {
                 light2.position.set(-4000, 4000, -4000);
                 scene.add(light2);
 
-
-
-
                 controls = new THREE.OrbitControls(camera, renderer.domElement);//鼠标对整个三维模型（相机）的控制
                 controls.rotateSpeed = 0.8;
                 controls.enableZoom = true;
@@ -7795,7 +7977,7 @@ VILibrary.VI = {
 
                 RoundnessAnimate();
             }
-
+            //上下移动
             function onSliderDrag() {
                 controls.enabled = false;
                 renderer.domElement.style.cursor = 'pointer';
@@ -7805,9 +7987,10 @@ VILibrary.VI = {
 				else {if (this.focused.position.y< -5) {this.focused.position.y = -5;}}
                 if (this.focused.position.y> 15) {this.focused.position.y =15;}
 
-                if(this.focused.position.y>=-1.3&&this.focused.position.y<=7)yOn=true;
+                if(this.focused.position.y>=-1.5&&this.focused.position.y<=7)yOn=true;
                 else yOn=false;
             }
+            //左右拖动
             function onTesterDrag() {
                 controls.enabled = false;
                 renderer.domElement.style.cursor = 'pointer';
@@ -7842,8 +8025,7 @@ VILibrary.VI = {
     },
 
     NyquistVI:class NyquistVI extends TemplateVI{
-		
-		
+
         constructor (VICanvas) {
             super(VICanvas);
 
@@ -7853,24 +8035,20 @@ VILibrary.VI = {
 
             this.angle=0;
             let HEIGHT=this.container.height,
-				WIDTH=this.container.width;
-				// shorter=Math.min(HEIGHT,WIDTH);
+                WIDTH=this.container.width;
+            // shorter=Math.min(HEIGHT,WIDTH);
 
-            let r=[0];
+            let e=[0],R=70,len,u1,u2;
 
+            let CENTER_X=WIDTH/2,
+                CENTER_Y=HEIGHT/2,
+                START_ANGLE = 0, // Starting point on circle
+                END_ANGLE = Math.PI*2; // End point on circle
 
-           let CENTER_X=WIDTH/2,
-               CENTER_Y=HEIGHT/2,
-               START_ANGLE = 0, // Starting point on circle
-               END_ANGLE = Math.PI*2; // End point on circle
-
-			let BGColor="rgba(200,200,200,0.6)",
-				BLACK= "rgba(0,0,0,1)",
-				GREEN ="rgba(10,200,10,1)",
-				RED="rgba(200,10,10,1)";
-
-
-
+            let BGColor="rgba(220,220,230,0.6)",
+                BLACK= "rgba(0,0,0,1)",
+                GREEN ="rgba(10,200,10,1)",
+                RED="rgba(200,10,10,1)";
 
             this.draw=function (inputR) {
                 this.ctx.textAlign = "center";//文本对齐
@@ -7884,8 +8062,8 @@ VILibrary.VI = {
                 this.ctx.fillRect(0,0,WIDTH,HEIGHT);
                 this.ctx.strokeRect(0,0,WIDTH,HEIGHT);
 
-                if(r.length>1){
-                	this.ctx.beginPath();
+                if(e.length>1){
+                    this.ctx.beginPath();
                     this.ctx.moveTo(10,CENTER_Y);
                     this.ctx.lineTo(WIDTH-10,CENTER_Y);
                     this.ctx.moveTo(CENTER_X,10);
@@ -7898,19 +8076,19 @@ VILibrary.VI = {
                     this.ctx.save();
                     this.ctx.translate(CENTER_X,CENTER_Y);//坐标系移至圆心
                     this.ctx.beginPath();
-                    let len=r.length,
+                    let len=e.length,
                         delta=Math.PI*2/40;
-                    if(r.length>=40)r[40]=r[0];
-                    this.ctx.moveTo(r[0],0);
-                    for(let i=1;i<=len;i++)
+                    if(e.length>=40)e[40]=e[0];
+                    this.ctx.moveTo(e[0]+R,0);
+                    for(let i=1;i<=len;i++)//画当前数组的Nyquist图
                     {
                         this.ctx.rotate(delta);
-                        this.ctx.lineTo(r[i],0);this.ctx.stroke();
+                        this.ctx.lineTo(e[i]+R,0);this.ctx.stroke();
                     }
                     this.ctx.closePath();
                     this.ctx.restore();
 
-                    this.ctx.beginPath();
+                    this.ctx.beginPath();//图注
                     this.ctx.moveTo(0.6*WIDTH,HEIGHT-25);
                     this.ctx.lineTo(0.7*WIDTH,HEIGHT-25);
                     this.ctx.fillStyle=BLACK;
@@ -7919,34 +8097,67 @@ VILibrary.VI = {
 
                     this.ctx.stroke();
                     this.ctx.closePath();
-				}
+                }//有数据输入时
 
                 if(inputR>0){
                     this.ctx.beginPath();
-                    this.ctx.arc(CENTER_X, CENTER_Y,inputR, START_ANGLE, END_ANGLE, false);
+                    this.ctx.strokeStyle=RED;
+                    this.ctx.arc(CENTER_X+u1, CENTER_Y+u2,inputR, START_ANGLE, END_ANGLE, false);
                     this.ctx.moveTo(0.6*WIDTH,HEIGHT-10);
                     this.ctx.lineTo(0.7*WIDTH,HEIGHT-10);
                     this.ctx.fillText("最小二乘图",0.83*WIDTH,HEIGHT-10);
-                    this.ctx.strokeStyle=RED;
+
                     this.ctx.stroke();
                     this.ctx.closePath();
                 }
-			};
-
+            };
+            this.draw();
             this.setData = function (input){
-                // let inputError = Number(Array.isArray(input) ? input[input.length - 1] : input);
-
                 if (Number.isNaN(input)) {
-
                     console.log('NyquistVI: Input value error');
                     return;
                 }
-                r=input;
-
+                e=input;
+               /* console.log(e)*/
                 this.draw();
+            };
+
+            this.square=function(){
+                u1=0,u2=0;
+                let r0=0;
+                len=e.length;
+                len--;
+                console.log(len);
+                for (let i=0; i<=len-1;i++){
+                    r0+=e[i]/len;
+                    u1+=-2/len*e[i]*Math.cos(Math.PI*2/len*i);
+                    u2+=-2/len*e[i]*Math.sin(Math.PI*2/len*i);
+                }
+
+                document.getElementById("u1").innerHTML=u1.toFixed(2);
+                document.getElementById("u2").innerHTML=u2.toFixed(2);
+                document.getElementById("r").innerHTML=(r0/1000+R).toFixed(4);
+                let deltaR=[0];
+                for (let i=0; i<=len-2;i++){//计算圆度误差
+                    let dr=e[i]+R-(r0+u1*Math.cos(Math.PI*2/len*i)+u2*Math.sin(Math.PI*2/len*i));
+                    deltaR.push(dr);
+                }
+                let f= Math.max.apply(Math,deltaR)-Math.min.apply(Math,deltaR);
+                document.getElementById("f").innerHTML=f.toFixed(2);
+                this.draw(r0+R);
+                console.log(r0)
             }
-//调用函数
-            this.draw();
+            this.area=function () {
+
+            }
+            this.outside=function () {
+
+            }
+            this.inside=function () {
+
+            }
+
+
         }
     },
 	RobotVI:class RobotVI extends TemplateVI {
@@ -8159,9 +8370,8 @@ VILibrary.VI = {
 
             let BGColor="rgba(240,240,255,0.6)",
                 BLACK= "rgba(0,0,0,1)",
-                BLUE ="rgba(10,10,100,1)",
                 RED="#ff6666",
-				GRAY="#6699ff"
+				BLUE="#6699ff"
 
             this.draw=function () {
             	 holeTol=holeOffset>=0?IT7:-IT7;
@@ -8192,7 +8402,7 @@ VILibrary.VI = {
                 this.ctx.textAlign = "left";//文本对齐
                 this.ctx.fillText("轴公差带",DELTAW*17,HEIGHT-DELTAW*2.5);
                 this.ctx.fillText("孔公差带",DELTAW*17,HEIGHT-DELTAW*4.5);
-                this.ctx.fillStyle=GRAY;
+                this.ctx.fillStyle=BLUE;
                 this.ctx.fillRect(DELTAW*15,HEIGHT-DELTAW*5,DELTAW*1.5,DELTAW);
                 this.ctx.fillStyle=RED;
                 this.ctx.fillRect(DELTAW*15,HEIGHT-DELTAW*3,DELTAW*1.5,DELTAW);
@@ -8207,7 +8417,7 @@ VILibrary.VI = {
                     this.ctx.save();
                     this.ctx.translate(0,CENTER_Y);//坐标系移至Y中心
                     //前面计算的公差带是以向上为正，而canvas中以向下为正，故以下纵坐标均取负
-                    this.ctx.fillStyle=GRAY;
+                    this.ctx.fillStyle=BLUE;
 
                     this.ctx.fillRect(holeX,holeY,rectWidth,holeH) ;  //孔公差带
                     this.ctx.fillStyle=RED;
@@ -8244,34 +8454,41 @@ VILibrary.VI = {
                 this.draw();
             }
             this.arrow=function(x1,y1,x2,y2,doubleS,s) {//第一点，第二点，是否双向箭头，箭头文字
-            	this.ctx.lineWidth=1;
-
-                this.ctx.strokeStyle=BLACK;
+                this.ctx.lineWidth=1;
                 this.ctx.fontsize=15;
+                this.ctx.textAlign="center"
                 let a=x2-x1,b=y2-y1,len=Math.sqrt(a*a+b*b),ang;
                 if(a==0){if(b<0)ang=-Math.PI/2;else ang=Math.PI/2}
-                else  ang=Math.atan(b/a);
+                ang=Math.atan(b/a);
+                if(a<0){ang+=Math.PI;}
+
+
                 this.ctx.save();
                 this.ctx.translate(x1,y1);
                 this.ctx.rotate(ang);
                 this.ctx.beginPath();
                 this.ctx.moveTo(0,0);//中心线
-				if(doubleS){
+                if(doubleS){
                     this.ctx.lineTo(10,3);
                     this.ctx.lineTo(10,-3);
                     this.ctx.lineTo(0,0);
-				}
+                }
                 this.ctx.lineTo(len,0);  this.ctx.stroke();
 
                 this.ctx. lineTo(len-10,-3);  this.ctx.stroke();
                 this.ctx. lineTo(len-10,+3);  this.ctx.stroke();
                 this.ctx. lineTo(len,0);  this.ctx.stroke();
                 // this.ctx.moveTo(len/2,10);
-				this.ctx.fillStyle=BGColor;
+                this.ctx.fillStyle=BGColor;
                 this.ctx.clearRect((len/2-s.length*this.ctx.fontsize/4),(-10-this.ctx.fontsize/2),(s.length*this.ctx.fontsize/2),(this.ctx.fontsize));
                 this.ctx.fillRect((len/2-s.length*this.ctx.fontsize/4),(-10-this.ctx.fontsize/2),(s.length*this.ctx.fontsize/2),(this.ctx.fontsize));
                 this.ctx.fillStyle=BLACK;
-                this.ctx.fillText(s,len/2,-10);
+                if(ang>=-Math.PI/2&&ang<=Math.PI/2)this.ctx.fillText(s,len/2,-10);
+                else {
+                    this.ctx.translate(len/2,0);
+                    this.ctx.rotate(Math.PI);
+                    this.ctx.fillText(s,0,10);
+                }
                 // this.ctx.stroke();
                 this.ctx.fill();
                 this.ctx.closePath();
@@ -8352,7 +8569,7 @@ VILibrary.VI = {
 
             let  methodSelected,error,
 				myChart,option,markLineOpt;
-            let data = [], sumData = [], dataSeries=[],/*relativeSumData = [], */sum = 0.0,dataArray = [];;
+            let data = [], sumData = [], dataSeries=[],sum = 0.0,dataArray = [];
 
             setEChartData();
 
@@ -8363,7 +8580,7 @@ VILibrary.VI = {
                     data: []
                 };
                 myChart.setOption(option);
-
+				/*；最小二乘法*/
                 if(methodSelected==3){
                     let a,b,sumXY=0,sumX=0,sumY=0,sumX2=0;
                     for(let i=0;i<=8;i++){
@@ -8412,12 +8629,9 @@ VILibrary.VI = {
 				}
             }
 
-            function setEChartData() {
-
-
+            function setEChartData() {/*输入数据*/
                 for (let i = 0; i < 9; i++) {
                     let temp = parseFloat(document.getElementById('data' + i).innerHTML);
-//            console.log(isNaN(temp)+':'+typeof temp);//type是number但isNaN检测得true？
                     if (isNaN(temp)) {
                         alert('读数未完成，请检查实验步骤是否正确');
                         return;
@@ -8431,15 +8645,14 @@ VILibrary.VI = {
                     }
 
                 }
-
+                /*Y轴范围*/
                 let MAX = (sumData.slice(0).sort(function (a, b) {//按大小排序
                         return a - b;
                     })[8] / 10 ).toFixed(0) * 10+10;
                 let MIN = (sumData.slice(0).sort(function (a, b) {
                         return a - b;
                     })[0] / 10 ).toFixed(0) * 10-10;
-//        if (MAX % 20 != 0)MAX += 10;
-//        if (MIN % 20 != 0)MIN -= 10;
+
 
                 option = {
                     title: {
@@ -8504,7 +8717,7 @@ VILibrary.VI = {
                 };
 
                 // option.series.data = sumData;
-                option.series.data =dataSeries
+                option.series.data =dataSeries;
 
 				myChart = echarts.init(eChartDiv);
                 myChart.setOption(option);
@@ -8512,12 +8725,13 @@ VILibrary.VI = {
 
                     switch (methodSelected){
                         case 0:alert('请选择评估方法');return;
+						/*最小区域法*/
                         case 1:{
                             if (dataArray.length > 6)   return;
                             dataArray.push(params.dataIndex);
                             dataArray.push(params.data[1]);
                             console.log(params.data[1],dataArray);
-                            if (dataArray.length == 4) {
+                            if (dataArray.length == 4) {/*两个点*/
                                 if (Math.abs(dataArray[0] - dataArray[2]) == 1) {
                                     dataArray.pop();
                                     dataArray.pop();
@@ -8542,13 +8756,13 @@ VILibrary.VI = {
                                 }];
                                 markLineOpt.data = [coords1];
                                 option.series.markLine = markLineOpt;
-                                myChart.setOption(option);
+                                myChart.setOption(option);/*第一条包容线*/
                             }
                             if (dataArray.length == 6) {
                                 if ((dataArray[4] <= dataArray[2] && dataArray[4] <= dataArray[0]) || (dataArray[4] >= dataArray[2] && dataArray[4] >= dataArray[0])) {
                                     dataArray.pop();
                                     dataArray.pop();
-                                    alert('选点错误！请重新选择');
+                                    alert('选点错误！请重新选择');/*X不在前两点之间*/
                                     return;
                                 }
                                 let x3 = 0, x4 = 8, x5 = dataArray[4],
@@ -8595,6 +8809,7 @@ VILibrary.VI = {
                             }
                             break;
                         }
+						/*；两端点法*/
                         case 2:{
                             if (dataArray.length >=4)   return;
                             dataArray.push(params.dataIndex);
@@ -8617,9 +8832,6 @@ VILibrary.VI = {
                                         coord: [dataArray[2],dataArray[3]],
                                         symbol: 'none'
                                     }];
-									/*markLineOpt.data = [coords1];
-									 option.series.markLine = markLineOpt;
-									 myChart.setOption(option);*/
 									/*计算最大偏差并绘制偏差线*/
                                     k = (dataArray[3] - dataArray[1]) / (dataArray[2] - dataArray[0]);
                                     let y=[],errorArray=[];
@@ -8675,5 +8887,280 @@ VILibrary.VI = {
             }
 
         }
-	}
+	},
+    DimChainVI:class DimChainVI extends TemplateVI {
+        constructor(VICanvas) {
+            super(VICanvas);
+            const _this = this;
+            this.name = 'DimChainVI';
+
+
+            this.ctx = this.container.getContext("2d");
+            this.ctx.font = "20px Times new roman";
+            this.ctx.textBaseline = "middle";//文字居中定位
+            this.ctx.lineWidth = 1;
+
+            let HEIGHT = this.container.height,
+                WIDTH = this.container.width;
+            let /*CENTER_X = WIDTH / 2,*/
+                CENTER_Y = HEIGHT / 2;
+            let deltaY=20,deltaX=20;
+            let step=1;
+
+            let BGColor="rgba(240,240,255,0.6)",
+                BLACK= "rgba(0,0,0,1)",
+                GREEN="green",
+                RED="#ff6666";
+
+            this.setData=function(i){
+                step=i;
+                _this.draw();
+			}
+
+
+            this.draw=function () {
+                this.ctx.clearRect(0,0,WIDTH,HEIGHT);
+                this.ctx.save();
+                this.ctx.translate(0, CENTER_Y);
+
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = BLACK;
+                this.ctx.lineWidth = 2;
+                this.ctx.moveTo(deltaX, -deltaY * 2);
+                this.ctx.lineTo(deltaX, deltaY * 2);
+                this.ctx.moveTo(deltaX * 3, -deltaY * 2);
+                this.ctx.lineTo(deltaX * 3, 0);
+                this.ctx.moveTo(deltaX * 4.5, -deltaY * 2);
+                this.ctx.lineTo(deltaX * 4.5, 0);
+                this.ctx.moveTo(deltaX * 12, -deltaY * 2);
+                this.ctx.lineTo(deltaX * 12, 0);
+                this.ctx.moveTo(deltaX * 16, -deltaY * 2);
+                this.ctx.lineTo(deltaX * 16, deltaY * 2);
+                this.ctx.stroke();
+                this.ctx.lineWidth = 1;
+
+
+
+            	switch (step){
+					case 1:
+						this.ctx.moveTo(deltaX,-deltaY);
+                        this.ctx.lineTo(deltaX*16,-deltaY);
+                        this.ctx.moveTo(deltaX,deltaY);
+                        this.ctx.lineTo(deltaX*16,deltaY);
+                        this.ctx.stroke();
+                        break;
+					case 2:
+                        this.arrow(deltaX,-deltaY,deltaX*3,-deltaY,false,"");
+                        this.arrow(deltaX*3,-deltaY,deltaX*4.5,-deltaY,false,"");
+                        this.arrow(deltaX*4.5,-deltaY,deltaX*12,-deltaY,false,"");
+                        this.arrow(deltaX*12,-deltaY,deltaX*16,-deltaY,false,"");
+                        this.arrow(deltaX*16,deltaY,deltaX*1,deltaY,false,"");
+                        /*this.arrow(0,0,deltaX*5,0,false,"0");
+                        this.arrow(0,0,deltaX*5,deltaX*5,false,"1");
+                        this.arrow(0,0,0,deltaX*5,false,"2");
+                        this.arrow(0,0,-deltaX*5,deltaX*5,false,"3");
+                        this.arrow(0,0,-deltaX*5,0,false,"4");
+                        this.arrow(0,0,-deltaX*5,-deltaX*5,false,"5");
+                        this.arrow(0,0,0,-deltaX*5,false,"6");
+                        this.arrow(0,0,deltaX*5,-deltaX*5,false,"7");*/
+                        break;
+					case 3:
+						this.ctx.lineWidth=3;
+                        this.arrow(deltaX*3,-deltaY,deltaX*4.5,-deltaY,false,"A0");
+                        this.ctx.lineWidth=1;
+                        this.arrow(deltaX,-deltaY,deltaX*3,-deltaY,false,"A4");
+                        this.ctx.clearRect(deltaX*4.5+1,-deltaY-2,10,4);
+                        this.arrow(deltaX*4.5,-deltaY,deltaX*12,-deltaY,false,"A1");
+                        this.arrow(deltaX*12,-deltaY,deltaX*16,-deltaY,false,"A2");
+                        this.arrow(deltaX*16,deltaY,deltaX*1,deltaY,false,"A3");
+                        break;
+					case 4:
+                        this.ctx.lineWidth=3;
+                        this.arrow(deltaX*3,-deltaY,deltaX*4.5,-deltaY,false,"A0");
+                        this.ctx.lineWidth=1;
+                        this.ctx.strokeStyle=GREEN;
+                        this.ctx.fillStyle=GREEN;
+                        this.arrow(deltaX,-deltaY,deltaX*3,-deltaY,false,"A4");
+                        this.ctx.clearRect(deltaX*4.5+1,-deltaY-2,10,4);
+                        this.arrow(deltaX*4.5,-deltaY,deltaX*12,-deltaY,false,"A1");
+                        this.arrow(deltaX*12,-deltaY,deltaX*16,-deltaY,false,"A2");
+                        this.ctx.strokeStyle=RED;
+                        this.ctx.fillStyle=RED;
+                        this.arrow(deltaX*16,deltaY,deltaX*1,deltaY,false,"A3");
+                        this.ctx.strokeStyle=BLACK;this.ctx.fillStyle=BLACK;
+
+                        break;
+					default:return;
+				}
+
+            	this.ctx.closePath();
+                this.ctx.restore();
+			}
+            this.draw();
+            this.arrow=function(x1,y1,x2,y2,doubleS,s) {//第一点，第二点，是否双向箭头，箭头文字
+
+                this.ctx.fontsize=8;
+                this.ctx.textAlign="center";
+                let a=x2-x1,b=y2-y1,len=Math.sqrt(a*a+b*b),ang;
+                if(a==0){if(b<0)ang=-Math.PI/2;else ang=Math.PI/2}
+                ang=Math.atan(b/a);
+                if(a<0){ang+=Math.PI;}
+
+                this.ctx.save();
+                this.ctx.translate(x1,y1);
+                this.ctx.rotate(ang);
+                this.ctx.beginPath();
+                this.ctx.moveTo(0,0);//中心线
+                if(doubleS){
+                    this.ctx.lineTo(10,3);
+                    this.ctx.lineTo(10,-3);
+                    this.ctx.lineTo(0,0);
+                }
+                this.ctx.lineTo(len,0);  this.ctx.stroke();
+
+                this.ctx. lineTo(len-10,-3);  this.ctx.stroke();
+                this.ctx. lineTo(len-10,+3);  this.ctx.stroke();
+                this.ctx. lineTo(len,0);  this.ctx.stroke();
+                this.ctx.fill();
+                this.ctx.fillStyle=BGColor;
+                this.ctx.clearRect((len/2-s.length*this.ctx.fontsize/4),(-10-this.ctx.fontsize/2),(s.length*this.ctx.fontsize/2),(this.ctx.fontsize));
+                this.ctx.fillRect((len/2-s.length*this.ctx.fontsize/4),(-10-this.ctx.fontsize/2),(s.length*this.ctx.fontsize/2),(this.ctx.fontsize));
+                this.ctx.fillStyle=BLACK;
+                this.ctx.lineWidth=1;
+                if(ang>=-Math.PI/2&&ang<=Math.PI/2)this.ctx.fillText(s,len/2,-20);
+                else {
+                    this.ctx.translate(len/2,0);
+                    this.ctx.rotate(Math.PI);
+                    this.ctx.fillText(s,0,20);
+				}
+                this.ctx.closePath();
+                this.ctx.restore();
+            }
+        }
+    },
+    RoundnessEvalVI:class RoundnessEvalVI extends TemplateVI {
+        constructor (VICanvas) {
+            super(VICanvas);
+
+            const _this = this;
+            this.name = 'NyquistVI';
+            this.ctx = this.container.getContext("2d");
+
+            this.angle=0;
+            let HEIGHT=this.container.height,
+                WIDTH=this.container.width;
+            // shorter=Math.min(HEIGHT,WIDTH);
+
+            let r=[0];
+
+            let CENTER_X=WIDTH/2,
+                CENTER_Y=HEIGHT/2,
+                START_ANGLE = 0, // Starting point on circle
+                END_ANGLE = Math.PI*2; // End point on circle
+
+            let BGColor="rgba(200,200,200,0.6)",
+                BLACK= "rgba(0,0,0,1)",
+                GREEN ="rgba(10,200,10,1)",
+                RED="rgba(200,10,10,1)";
+
+            this.draw=function (inputR) {
+                this.ctx.textAlign = "center";//文本对齐
+                this.ctx.font="10px Times new roman";
+                this.ctx.textBaseline="middle";//文字居中定位
+
+                this.ctx.clearRect(0,0,WIDTH,HEIGHT);//清空画布
+
+                this.ctx.fillStyle=BGColor;
+                this.ctx.strokeStyle=BLACK;
+                this.ctx.fillRect(0,0,WIDTH,HEIGHT);
+                this.ctx.strokeRect(0,0,WIDTH,HEIGHT);
+
+                if(r.length>1){
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(10,CENTER_Y);
+                    this.ctx.lineTo(WIDTH-10,CENTER_Y);
+                    this.ctx.moveTo(CENTER_X,10);
+                    this.ctx.lineTo(CENTER_X,HEIGHT-10);
+                    this.ctx.strokeStyle=GREEN;
+                    this.ctx.stroke();
+                    this.ctx.closePath();
+
+
+                    this.ctx.save();
+                    this.ctx.translate(CENTER_X,CENTER_Y);//坐标系移至圆心
+                    this.ctx.beginPath();
+                    let len=r.length,
+                        delta=Math.PI*2/40;
+                    if(r.length>=40)r[40]=r[0];
+                    this.ctx.moveTo(r[0],0);
+                    for(let i=1;i<=len;i++)//画当前数组的Nyquist图
+                    {
+                        this.ctx.rotate(delta);
+                        this.ctx.lineTo(r[i],0);this.ctx.stroke();
+                    }
+                    this.ctx.closePath();
+                    this.ctx.restore();
+
+                    this.ctx.beginPath();//图注
+                    this.ctx.moveTo(0.6*WIDTH,HEIGHT-25);
+                    this.ctx.lineTo(0.7*WIDTH,HEIGHT-25);
+                    this.ctx.fillStyle=BLACK;
+                    this.ctx.fillText("极坐标图",0.8*WIDTH,HEIGHT-25);
+                    this.ctx.fillText("误差放大1000倍",0.8*WIDTH,20);
+
+                    this.ctx.stroke();
+                    this.ctx.closePath();
+                }//有数据输入时
+
+                if(inputR>0){
+                    this.ctx.beginPath();
+                    this.ctx.strokeStyle=RED;
+                    this.ctx.arc(CENTER_X, CENTER_Y,inputR, START_ANGLE, END_ANGLE, false);
+                    this.ctx.moveTo(0.6*WIDTH,HEIGHT-10);
+                    this.ctx.lineTo(0.7*WIDTH,HEIGHT-10);
+                    this.ctx.fillText("最小二乘图",0.83*WIDTH,HEIGHT-10);
+
+                    this.ctx.stroke();
+                    this.ctx.closePath();
+                }
+            };
+
+            this.setData = function (input){
+                if (Number.isNaN(input)) {
+                    console.log('NyquistVI: Input value error');
+                    return;
+                }
+                r=input;
+                console.log(r)
+                this.draw();
+            };
+            let u1=0,u2=0,r0=0,R=70,len,deltaR=[0];
+            this.square=function(){
+            	len=r.length;
+            	len--;
+            	console.log(len);
+                for (let i=0; i<=len-1;i++){
+                    r0+=r[i]/len;
+                    u1+=-2/len*r[i]*Math.cos(Math.PI*2/len*i);
+                    u2+=-2/len*r[i]*Math.sin(Math.PI*2/len*i);
+                }
+                r0+=r0+R;
+                document.getElementById("u1").innerHTML=u1.toFixed(2);
+                document.getElementById("u2").innerHTML=u2.toFixed(2);
+                document.getElementById("r").innerHTML=r0.toFixed(2);
+                for (let i=0; i<=len-2;i++){//计算圆度误差
+                    let dr=r[i]-(r0+u1*Math.cos(Math.PI*2/len*i)+u2*Math.sin(Math.PI*2/len*i));
+                    deltaR.push(dr);
+                }
+                let f= Math.max.apply(Math,deltaR)-Math.min.apply(Math,deltaR);
+                document.getElementById("f").innerHTML=f.toFixed(2);
+                this.draw(r0);
+                console.log(r0)
+			}
+//调用函数
+            this.draw();
+        }
+    },
+
+
 };
