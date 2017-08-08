@@ -115,7 +115,14 @@ html {
     text-align: center;
     line-height: 30px;
 }
-
+#main_div{
+    width: 100%;
+    height: 450px;
+}
+#mainCanvas{
+    width: 100%;
+    height: 100%;
+}
 #eChart-div {
     width: 1000px;
     height: 400px;
@@ -376,12 +383,12 @@ html {
     width: 6%;
     height: 33px;
 }
-#flow_table {
+/*#flow_table {
     overflow-y: auto;
     position:relative;
-    /**/width: 500px;
+    !**!width: 500px;
     height: 250px;
-}
+}*/
 .button {
     background: #eee ;
     padding: 5px 10px 6px;
@@ -424,12 +431,26 @@ html {
 #text2 p{
     padding: 5px;
 }
+#index_div{
+    width: 100%;
+    height: 40px;
+    margin:0  auto;
+    text-align: center
+}
 #instructions{
-    width:900px ;
-    height:800px;
+    width:1000px ;
+    bottom: 10px;
+    top: 40px;
+    left: 50%;
+    margin-left: -500px;
+    position: absolute;
     display: none;
-    margin: auto;
 
+}
+#instructTxt{
+    width: 100%;
+    height: 100%;
+    margin: auto;
 }
 .InstBtn{
     font-size: 18px;
@@ -450,11 +471,8 @@ html {
 }
 #demo{
 margin: auto;
-}
-#instructTxt{
     width: 100%;
-    height: 100%;
-    margin: auto;
 }
+
 
 

@@ -23,97 +23,98 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<div style="width: 900px;margin:0  auto;text-align: center">
-    <button class="InstBtn" style="width: 33%" onclick="show(0)">实验说明书</button><button class="InstBtn" style="width: 33%" onclick="show(1)">开始实验</button><button class="InstBtn" style="width: 33%" onclick="show(2)">虚拟实验演示</button>
+<div class="main-div">
+    <div id="index_div">
+        <button class="InstBtn" onclick="show(0)">实验说明书</button><button class="InstBtn" onclick="show(1)">开始实验</button><button class="InstBtn" onclick="show(2)">虚拟实验演示</button>
+    </div>
+    <div id="instructions"> <embed id="instructTxt" src="pdf/6_圆度误差测量实验指导书%202.0.0.htm"></embed></div>
+    <div  id="main_div" >
+        <canvas id="mainCanvas" height="450" ></canvas>
+        <table id="mainTable" width="1000px">
+            <tr >
+                <td style="font-size: 20px"> 实验数据：</td>
+                <td style="font-size: 20px">极坐标图</td>
+            </tr>
+            <tr>
+                <td >
+                    <div id="flow_table" style="text-align: center">
+                        <table id="roundnessData" style="margin: auto">
+                            <thead >
+                            <tr>
+                                <th >序号</th>
+                                <th>角度坐标(°)</th>
+                                <th>相对矢径误差△Ri(μm)</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            <tr>
+                                <td>0</td>
+                                <td class="exm_data" id="a0"></td>
+                                <td class="exm_data" id="e0"></td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td class="exm_data" id="a1"></td>
+                                <td class="exm_data" id="e1"></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td class="exm_data" id="a2"></td>
+                                <td class="exm_data" id="e2"></td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td class="exm_data" id="a3"></td>
+                                <td class="exm_data" id="e3"></td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td class="exm_data" id="a4"></td>
+                                <td class="exm_data" id="e4"></td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td class="exm_data" id="a5"></td>
+                                <td class="exm_data" id="e5"></td>
+                            </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                </td>
+                <td>
+                    <canvas id="myDial" width="250" height="200"></canvas><br/>
+                    <button class="button" onclick="start()">开始测量</button>
+                    <button class="button" onclick="calcu()">最小二乘法计算圆度误差</button>
+                </td>
+            </tr>
+            <tr style="height: 20px"></tr>
+            <tr> <td style="font-size: 20px;text-align:left;"> 计算结果:</td></tr>
+            <tr>
+                <table id="MessageTable">
+
+
+                    <tr>
+                        <td>u<sub>1</sub>(μm)</td>
+                        <td>u<sub>2</sub>(μm)</td>
+                        <td>R<sub>LS</sub>(mm)</td>
+                        <td>圆度误差(μm)</td>
+                    </tr>
+                    <tr style="height: 40px">
+                        <td id="u1"> </td>
+                        <td id="u2"> </td>
+                        <td id="r"> </td>
+                        <td id="f"> </td>
+                    </tr>
+                </table>
+            </tr>
+        </table>
+    </div>
+    <div id="gif_div"><img id="demo" src="img/Roundness.gif"></div>
 </div>
-<div id="instructions"> <embed id="instructTxt" src="pdf/6_圆度误差测量实验指导书%202.0.0.pdf"></embed></div>
-<div class="main-div" id="main_div" style="width: 900px">
-    <canvas id="mainCanvas" width="900" height="450" ></canvas>
-    <table id="mainTable">
-        <tr >
-            <td style="font-size: 20px"> 实验数据：</td>
-            <td></td>
-            <td style="font-size: 20px">极坐标图</td>
-        </tr>
-        <tr>
-            <td >
-                <div id="flow_table" >
-                    <table id="roundnessData">
-                        <thead >
-                        <tr>
-                            <th >序号</th>
-                            <th>角度坐标(°)</th>
-                            <th>相对矢径误差△Ri(μm)</th>
-                        </tr>
-                        </thead>
 
-                        <tbody>
-                        <tr>
-                            <td>0</td>
-                            <td class="exm_data" id="a0"></td>
-                            <td class="exm_data" id="e0"></td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td class="exm_data" id="a1"></td>
-                            <td class="exm_data" id="e1"></td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td class="exm_data" id="a2"></td>
-                            <td class="exm_data" id="e2"></td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td class="exm_data" id="a3"></td>
-                            <td class="exm_data" id="e3"></td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td class="exm_data" id="a4"></td>
-                            <td class="exm_data" id="e4"></td>
-                        </tr>
-                        <tr>
-                            <td>5</td>
-                            <td class="exm_data" id="a5"></td>
-                            <td class="exm_data" id="e5"></td>
-                        </tr>
-                        </tbody>
-
-                    </table>
-                </div>
-
-            </td>
-            <td><div style="width: 20px"></div></td>
-            <td>
-                <canvas id="myDial" width="250" height="200"></canvas><br/>
-                <button class="button" onclick="start()">开始测量</button>
-                <button class="button" onclick="calcu()">最小二乘法计算圆度误差</button>
-            </td>
-        </tr>
-        <tr style="height: 20px"></tr>
-        <tr> <td style="font-size: 20px;text-align:left;"> 计算结果:</td></tr>
-        <tr>
-            <table id="MessageTable">
-
-                
-                <tr>
-                    <td>u<sub>1</sub>(μm)</td>
-                    <td>u<sub>2</sub>(μm)</td>
-                    <td>R<sub>LS</sub>(mm)</td>
-                    <td>圆度误差(μm)</td>
-                </tr>
-                <tr style="height: 40px">
-                   <td id="u1"> </td>
-                    <td id="u2"> </td>
-                    <td id="r"> </td>
-                    <td id="f"> </td>
-                </tr>
-            </table>
-        </tr>
-    </table>
-</div>
-<div id="gif_div"><img id="demo"  width="950"  src="img/Roundness.gif"></div>
 <!--虚拟仪器库-->
 <script src="js/VILibrary.js"></script>
 <!--js简写方法-->

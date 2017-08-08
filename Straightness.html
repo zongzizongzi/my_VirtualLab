@@ -8,89 +8,92 @@
 
 </head>
 <body>
-<div style="width:1000px;margin:0  auto;text-align: center">
-    <button class="InstBtn" onclick="show(0)">实验说明书</button><button class="InstBtn" onclick="show(1)">开始实验</button><button class="InstBtn" style="width: 33%" onclick="show(2)">虚拟实验演示</button>
-</div>
-<div id="instructions"> <embed id="instructTxt" src="pdf/2_导轨直线度测量虚拟实验指导书%202.0.0.pdf"></embed></div>
-<div class="main-div" id="main_div">
-    <canvas id="mainCanvas" width="1000" height="400"></canvas>
-    <table id="mainTable">
-        <tr>
-            <td rowspan="2">
-                <table id="dataTable">
-                    <tr>
-                        <th>测点序号</th>
-                        <td>0</td>
-                        <td>1</td>
-                        <td>2</td>
-                        <td>3</td>
-                        <td>4</td>
-                        <td>5</td>
-                        <td>6</td>
-                        <td>7</td>
-                        <td>8</td>
-                    </tr>
-                    <tr>
-                        <th>读数</th>
-                        <td  id="data0">0</td>
-                        <td><input id="data1" type="number" class="data-input"></td>
-                        <td><input id="data2" type="number" class="data-input"></td>
-                        <td><input id="data3" type="number" class="data-input"></td>
-                        <td><input id="data4" type="number" class="data-input"></td>
-                        <td><input id="data5" type="number" class="data-input"></td>
-                        <td><input id="data6" type="number" class="data-input"></td>
-                        <td><input id="data7" type="number" class="data-input"></td>
-                        <td><input id="data8" type="number" class="data-input"></td>
-                    </tr>
-                    <tr>
-                        <th>直接累加值</th>
-                        <td id="sumData0">0</td>
-                        <td id="sumData1"></td>
-                        <td id="sumData2"></td>
-                        <td id="sumData3"></td>
-                        <td id="sumData4"></td>
-                        <td id="sumData5"></td>
-                        <td id="sumData6"></td>
-                        <td id="sumData7"></td>
-                        <td id="sumData8"></td>
-                    </tr>
-                    <tr>
-                        <th>相对累加值</th>
-                        <td id="relativeSumData0">0</td>
-                        <td id="relativeSumData1"></td>
-                        <td id="relativeSumData2"></td>
-                        <td id="relativeSumData3"></td>
-                        <td id="relativeSumData4"></td>
-                        <td id="relativeSumData5"></td>
-                        <td id="relativeSumData6"></td>
-                        <td id="relativeSumData7"></td>
-                        <td id="relativeSumData8"></td>
-                    </tr>
-                    <tr>
-                        <th>测得误差</th>
-                        <td id="error" colspan="9"></td>
-                    </tr>
-                </table>
-            </td>
-            <td colspan="2">
-                <canvas id="panelCanvas" width="295" height="200"></canvas>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <button id="startBtn" onclick="start()">自准直仪开关</button>
-            </td>
-            <td>
-                <button id="completeBtn" onclick="setEChartData()">读数完成</button>
-            </td>
-        </tr>
-    </table>
-    <div id="eChart-div"></div>
-    <div id="loadingDiv" class="loading-div">
-        <img class="loading-img" src="img/loading.gif" alt="loading">
+<div class="main-div">
+    <div id="index_div">
+        <button class="InstBtn" onclick="show(0)">实验说明书</button><button class="InstBtn" onclick="show(1)">开始实验</button><button class="InstBtn"  onclick="show(2)">虚拟实验演示</button>
     </div>
+    <div id="instructions"> <embed id="instructTxt" src="pdf/2_导轨直线度测量虚拟实验指导书%202.0.0.htm"></embed></div>
+    <div id="main_div">
+        <canvas id="mainCanvas" width="1000" height="400"></canvas>
+        <table id="mainTable">
+            <tr>
+                <td rowspan="2">
+                    <table id="dataTable">
+                        <tr>
+                            <th>测点序号</th>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>4</td>
+                            <td>5</td>
+                            <td>6</td>
+                            <td>7</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <th>读数</th>
+                            <td  id="data0">0</td>
+                            <td><input id="data1" type="number" class="data-input"></td>
+                            <td><input id="data2" type="number" class="data-input"></td>
+                            <td><input id="data3" type="number" class="data-input"></td>
+                            <td><input id="data4" type="number" class="data-input"></td>
+                            <td><input id="data5" type="number" class="data-input"></td>
+                            <td><input id="data6" type="number" class="data-input"></td>
+                            <td><input id="data7" type="number" class="data-input"></td>
+                            <td><input id="data8" type="number" class="data-input"></td>
+                        </tr>
+                        <tr>
+                            <th>直接累加值</th>
+                            <td id="sumData0">0</td>
+                            <td id="sumData1"></td>
+                            <td id="sumData2"></td>
+                            <td id="sumData3"></td>
+                            <td id="sumData4"></td>
+                            <td id="sumData5"></td>
+                            <td id="sumData6"></td>
+                            <td id="sumData7"></td>
+                            <td id="sumData8"></td>
+                        </tr>
+                        <tr>
+                            <th>相对累加值</th>
+                            <td id="relativeSumData0">0</td>
+                            <td id="relativeSumData1"></td>
+                            <td id="relativeSumData2"></td>
+                            <td id="relativeSumData3"></td>
+                            <td id="relativeSumData4"></td>
+                            <td id="relativeSumData5"></td>
+                            <td id="relativeSumData6"></td>
+                            <td id="relativeSumData7"></td>
+                            <td id="relativeSumData8"></td>
+                        </tr>
+                        <tr>
+                            <th>测得误差</th>
+                            <td id="error" colspan="9"></td>
+                        </tr>
+                    </table>
+                </td>
+                <td colspan="2">
+                    <canvas id="panelCanvas" width="295" height="200"></canvas>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button id="startBtn" onclick="start()">自准直仪开关</button>
+                </td>
+                <td>
+                    <button id="completeBtn" onclick="setEChartData()">读数完成</button>
+                </td>
+            </tr>
+        </table>
+        <div id="eChart-div"></div>
+        <div id="loadingDiv" class="loading-div">
+            <img class="loading-img" src="img/loading.gif" alt="loading">
+        </div>
+    </div>
+    <div id="gif_div"><img id="demo"   src="img/Straightness.gif"></div>
 </div>
-<div id="gif_div"><img id="demo"  width="950"  src="img/Straightness.gif"></div>
+
 
 <script src="js/three/three.js"></script>
 <script src="js/three/MTLLoader.js"></script>

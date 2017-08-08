@@ -6,169 +6,172 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<div style="width: 900px;margin:0  auto;text-align: center">
-    <button class="InstBtn" onclick="show(0)">实验说明书</button><button class="InstBtn" onclick="show(1)">开始实验</button><button class="InstBtn" style="width: 33%" onclick="show(2)">虚拟实验演示</button>
-</div>
-<div id="instructions"> <embed id="instructTxt" src="pdf/4_齿圈径向跳动测量虚拟实验指导书%202.0.0.pdf"></embed></div>
-<div class="main-div" id="main_div" style="width: 900px">
-    <canvas id="mainCanvas" width="900" height="450" style="padding-bottom: 10px"></canvas>
-    <table id="mainTable" >
-        <tr>
-        <td colspan="3">
-            <canvas id="myDial" width="250" height="250"></canvas><br/>
-        </td>
-        <td width="20px"></td>
-        <td rowspan="2"><!--合并行-->
-            <table id="ToothRingTable">
+<div class="main-div">
+    <div>
+        <button class="InstBtn" onclick="show(0)">实验说明书</button><button class="InstBtn" onclick="show(1)">开始实验</button><button class="InstBtn" onclick="show(2)">虚拟实验演示</button>
+    </div>
+    <div id="instructions"> <embed id="instructTxt" src="pdf/4_齿圈径向跳动测量虚拟实验指导书%202.0.0.htm"></embed></div>
+    <div class="main-div" id="main_div">
+        <canvas id="mainCanvas" height="450" style="padding-bottom: 10px"></canvas>
+        <table id="mainTable" width="1000px">
             <tr>
-                <th>齿序</th>
-                <td>1</td>
-                <td>2</td>
-                <td>3</td>
-                <td>4</td>
-                <td>5</td>
-                <td>6</td>
-                <td>7</td>
-                <td>8</td>
-                <td>9</td>
-                <td>10</td>
+                <td colspan="3">
+                    <canvas id="myDial" width="250" height="250" style="padding-left: 20px;padding-right: 20px"></canvas><br/>
+                </td>
+                <td width="20px"></td>
+                <td rowspan="2"><!--合并行-->
+                    <table id="ToothRingTable">
+                        <tr>
+                            <th>齿序</th>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>4</td>
+                            <td>5</td>
+                            <td>6</td>
+                            <td>7</td>
+                            <td>8</td>
+                            <td>9</td>
+                            <td>10</td>
+                        </tr>
+                        <tr>
+                            <th>读数(μm)</th>
+                            <td><input id="data1" type="number" class="data-input"></td>
+                            <td><input id="data2" type="number" class="data-input"></td>
+                            <td><input id="data3" type="number" class="data-input"></td>
+                            <td><input id="data4" type="number" class="data-input"></td>
+                            <td><input id="data5" type="number" class="data-input"></td>
+                            <td><input id="data6" type="number" class="data-input"></td>
+                            <td><input id="data7" type="number" class="data-input"></td>
+                            <td><input id="data8" type="number" class="data-input"></td>
+                            <td><input id="data9" type="number" class="data-input"></td>
+                            <td><input id="data10" type="number" class="data-input"></td>
+                        </tr>
+                        <tr>
+                            <th>齿序</th>
+                            <td>11</td>
+                            <td>12</td>
+                            <td>13</td>
+                            <td>14</td>
+                            <td>15</td>
+                            <td>16</td>
+                            <td>17</td>
+                            <td>18</td>
+                            <td>19</td>
+                            <td>20</td>
+                        </tr>
+                        <tr>
+                            <th>读数(μm)</th>
+                            <td><input id="data11" type="number" class="data-input"></td>
+                            <td><input id="data12" type="number" class="data-input"></td>
+                            <td><input id="data13" type="number" class="data-input"></td>
+                            <td><input id="data14" type="number" class="data-input"></td>
+                            <td><input id="data15" type="number" class="data-input"></td>
+                            <td><input id="data16" type="number" class="data-input"></td>
+                            <td><input id="data17" type="number" class="data-input"></td>
+                            <td><input id="data18" type="number" class="data-input"></td>
+                            <td><input id="data19" type="number" class="data-input"></td>
+                            <td><input id="data20" type="number" class="data-input"></td>
+
+                        </tr>
+                        <tr>
+                            <th>齿序</th>
+                            <td>21</td>
+                            <td>22</td>
+                            <td>23</td>
+                            <td>24</td>
+                            <td>25</td>
+                            <td>26</td>
+                            <td>27</td>
+                            <td>28</td>
+                            <td>29</td>
+                            <td>30</td>
+                        </tr>
+                        <tr>
+                            <th>读数(μm)</th>
+                            <td><input id="data21" type="number" class="data-input"></td>
+                            <td><input id="data22" type="number" class="data-input"></td>
+                            <td><input id="data23" type="number" class="data-input"></td>
+                            <td><input id="data24" type="number" class="data-input"></td>
+                            <td><input id="data25" type="number" class="data-input"></td>
+                            <td><input id="data26" type="number" class="data-input"></td>
+                            <td><input id="data27" type="number" class="data-input"></td>
+                            <td><input id="data28" type="number" class="data-input"></td>
+                            <td><input id="data29" type="number" class="data-input"></td>
+                            <td><input id="data30" type="number" class="data-input"></td>
+                        </tr>
+                        <tr>
+                            <th>齿序</th>
+                            <td>31</td>
+                            <td>32</td>
+                            <td>33</td>
+                            <td>34</td>
+                            <td>35</td>
+                            <td>36</td>
+                            <td>37</td>
+                            <td>38</td>
+                            <td>39</td>
+                            <td>40</td>
+                        </tr>
+                        <tr>
+                            <th>读数(μm)</th>
+                            <td><input id="data31" type="number" class="data-input"></td>
+                            <td><input id="data32" type="number" class="data-input"></td>
+                            <td><input id="data33" type="number" class="data-input"></td>
+                            <td><input id="data34" type="number" class="data-input"></td>
+                            <td><input id="data35" type="number" class="data-input"></td>
+                            <td><input id="data36" type="number" class="data-input"></td>
+                            <td><input id="data37" type="number" class="data-input"></td>
+                            <td><input id="data38" type="number" class="data-input"></td>
+                            <td><input id="data39" type="number" class="data-input"></td>
+                            <td><input id="data40" type="number" class="data-input"></td>
+                        </tr>
+                        <tr>
+                            <th>测得误差</th>
+                            <td id="error" colspan="10"></td><!--合并列-->
+                        </tr>
+                        <tr>
+                            <th>实验结论</th>
+                            <td id="conclusion" colspan="10"></td><!--合并列-->
+                        </tr>
+                    </table>
+                </td>
             </tr>
             <tr>
-                <th>读数(μm)</th>
-                <td><input id="data1" type="number" class="data-input"></td>
-                <td><input id="data2" type="number" class="data-input"></td>
-                <td><input id="data3" type="number" class="data-input"></td>
-                <td><input id="data4" type="number" class="data-input"></td>
-                <td><input id="data5" type="number" class="data-input"></td>
-                <td><input id="data6" type="number" class="data-input"></td>
-                <td><input id="data7" type="number" class="data-input"></td>
-                <td><input id="data8" type="number" class="data-input"></td>
-                <td><input id="data9" type="number" class="data-input"></td>
-                <td><input id="data10" type="number" class="data-input"></td>
+                <td><button id="clearNum" class="button" onclick="clearNum()" >清零</button></td>
+                <td><button id="completeBtn" class="button"  onclick="setEChartData()" >读数完成</button></td>
+                <td><button id="resetBtn" class="button"  onclick="reset()">重置</button></td>
+            </tr>
+            <tr style="height: 20px"></tr>
+            <tr>
+                <!-- <td colspan="3"style="font-size: 20px; vertical-align:top;text-align:center;">
+
+                 </td>
+                 <td></td>
+                 <td>
+                     模数m=4；齿数Z=40；压力角α=20°；齿轮精度=10；径向跳动公差Fr=140μm。
+                     &lt;!&ndash;<table id="MessageTable">
+                     <tr>
+                         <td>模数m</td><td>齿数Z</td><td>压力角α</td><td>齿轮精度</td><td>径向跳动公差Fr（μm）</td>
+                     </tr>
+                     <tr>
+                         <td>4</td><td>40</td><td>20°</td><td>10</td><td>140</td>
+                     </tr>
+                 </table>&ndash;&gt;
+                 </td>-->
+                <td colspan="5"style="font-size: 17px; vertical-align:top;text-align:center;">
+                    被测齿轮基本参数：模数m=4；齿数Z=40；压力角α=20°；齿轮精度=10；径向跳动公差Fr=140μm。
+                </td>
             </tr>
             <tr>
-                <th>齿序</th>
-                <td>11</td>
-                <td>12</td>
-                <td>13</td>
-                <td>14</td>
-                <td>15</td>
-                <td>16</td>
-                <td>17</td>
-                <td>18</td>
-                <td>19</td>
-                <td>20</td>
-            </tr>
-            <tr>
-                <th>读数(μm)</th>
-                <td><input id="data11" type="number" class="data-input"></td>
-                <td><input id="data12" type="number" class="data-input"></td>
-                <td><input id="data13" type="number" class="data-input"></td>
-                <td><input id="data14" type="number" class="data-input"></td>
-                <td><input id="data15" type="number" class="data-input"></td>
-                <td><input id="data16" type="number" class="data-input"></td>
-                <td><input id="data17" type="number" class="data-input"></td>
-                <td><input id="data18" type="number" class="data-input"></td>
-                <td><input id="data19" type="number" class="data-input"></td>
-                <td><input id="data20" type="number" class="data-input"></td>
 
             </tr>
-            <tr>
-                <th>齿序</th>
-                <td>21</td>
-                <td>22</td>
-                <td>23</td>
-                <td>24</td>
-                <td>25</td>
-                <td>26</td>
-                <td>27</td>
-                <td>28</td>
-                <td>29</td>
-                <td>30</td>
-            </tr>
-            <tr>
-                <th>读数(μm)</th>
-                <td><input id="data21" type="number" class="data-input"></td>
-                <td><input id="data22" type="number" class="data-input"></td>
-                <td><input id="data23" type="number" class="data-input"></td>
-                <td><input id="data24" type="number" class="data-input"></td>
-                <td><input id="data25" type="number" class="data-input"></td>
-                <td><input id="data26" type="number" class="data-input"></td>
-                <td><input id="data27" type="number" class="data-input"></td>
-                <td><input id="data28" type="number" class="data-input"></td>
-                <td><input id="data29" type="number" class="data-input"></td>
-                <td><input id="data30" type="number" class="data-input"></td>
-            </tr>
-            <tr>
-                <th>齿序</th>
-                <td>31</td>
-                <td>32</td>
-                <td>33</td>
-                <td>34</td>
-                <td>35</td>
-                <td>36</td>
-                <td>37</td>
-                <td>38</td>
-                <td>39</td>
-                <td>40</td>
-            </tr>
-            <tr>
-                <th>读数(μm)</th>
-                <td><input id="data31" type="number" class="data-input"></td>
-                <td><input id="data32" type="number" class="data-input"></td>
-                <td><input id="data33" type="number" class="data-input"></td>
-                <td><input id="data34" type="number" class="data-input"></td>
-                <td><input id="data35" type="number" class="data-input"></td>
-                <td><input id="data36" type="number" class="data-input"></td>
-                <td><input id="data37" type="number" class="data-input"></td>
-                <td><input id="data38" type="number" class="data-input"></td>
-                <td><input id="data39" type="number" class="data-input"></td>
-                <td><input id="data40" type="number" class="data-input"></td>
-            </tr>
-            <tr>
-                    <th>测得误差</th>
-                    <td id="error" colspan="10"></td><!--合并列-->
-            </tr>
-                <tr>
-                    <th>实验结论</th>
-                    <td id="conclusion" colspan="10"></td><!--合并列-->
-                </tr>
+
         </table>
-        </td>
-        </tr>
-        <tr>
-            <td><button id="clearNum" class="button" onclick="clearNum()" >清零</button></td>
-            <td><button id="completeBtn" class="button"  onclick="setEChartData()" >读数完成</button></td>
-            <td><button id="resetBtn" class="button"  onclick="reset()">重置</button></td>
-        </tr>
-        <tr style="height: 20px"></tr>
-        <tr>
-           <!-- <td colspan="3"style="font-size: 20px; vertical-align:top;text-align:center;">
-
-            </td>
-            <td></td>
-            <td>
-                模数m=4；齿数Z=40；压力角α=20°；齿轮精度=10；径向跳动公差Fr=140μm。
-                &lt;!&ndash;<table id="MessageTable">
-                <tr>
-                    <td>模数m</td><td>齿数Z</td><td>压力角α</td><td>齿轮精度</td><td>径向跳动公差Fr（μm）</td>
-                </tr>
-                <tr>
-                    <td>4</td><td>40</td><td>20°</td><td>10</td><td>140</td>
-                </tr>
-            </table>&ndash;&gt;
-            </td>-->
-            <td colspan="5"style="font-size: 17px; vertical-align:top;text-align:center;">
-            被测齿轮基本参数：模数m=4；齿数Z=40；压力角α=20°；齿轮精度=10；径向跳动公差Fr=140μm。
-            </td>
-        </tr>
-        <tr>
-
-        </tr>
-
-    </table>
+    </div>
+    <div id="gif_div"><img id="demo"  src="img/RR_ToothRing.gif"></div>
 </div>
-<div id="gif_div"><img id="demo"  width="950"  src="img/RR_ToothRing.gif"></div>
+
 
 
     <!--虚拟仪器库-->

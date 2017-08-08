@@ -6070,7 +6070,7 @@ VILibrary.VI = {
                 if(150>this.MAX_NUMBER&&this.MAX_NUMBER>=50)lineNUM=5;
                 else if(this.MAX_NUMBER<50)lineNUM=0.5;
                 else lineNUM=10;
-                console.log("lineNUM",lineNUM);
+                // console.log("lineNUM",lineNUM);
                 this.ctx.clearRect(0,0,this.container.width,this.container.height);//清空画布
                 //画指针
                 this.rotateAngle=angle;
@@ -8321,6 +8321,13 @@ VILibrary.VI = {
                 controls.update();
                 renderer.render(scene, camera);
             }
+            kinematicsEquation();
+            function kinematicsEquation() {
+				let a2=270,a3=70,d4=302,
+					aa2=-Math.PI/2,aa4=-Math.PI/2,aa5=Math.PI/2,aa6=-Math.PI/2;
+                var a = math.matrix([1, 4, 9, 16, 25]);
+                console.log(a);
+            }
 
 
         }
@@ -9148,7 +9155,7 @@ VILibrary.VI = {
                 document.getElementById("u1").innerHTML=u1.toFixed(2);
                 document.getElementById("u2").innerHTML=u2.toFixed(2);
                 document.getElementById("r").innerHTML=r0.toFixed(2);
-                for (let i=0; i<=len-2;i++){//计算圆度误差
+                for (let i=0; i<=len-2;i++){
                     let dr=r[i]-(r0+u1*Math.cos(Math.PI*2/len*i)+u2*Math.sin(Math.PI*2/len*i));
                     deltaR.push(dr);
                 }
@@ -9157,7 +9164,6 @@ VILibrary.VI = {
                 this.draw(r0);
                 console.log(r0)
 			}
-//调用函数
             this.draw();
         }
     },

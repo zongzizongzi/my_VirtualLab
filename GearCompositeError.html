@@ -6,29 +6,31 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<div style="width: 900px;margin:0  auto;text-align: center">
-    <button class="InstBtn" onclick="show(0)">实验说明书</button><button class="InstBtn" onclick="show(1)">开始实验</button><button class="InstBtn" style="width: 33%" onclick="show(2)">虚拟实验演示</button>
-</div>
-<div id="instructions"> <embed id="instructTxt" src="pdf/5_齿轮径向综合误差与齿径向综合误差测量虚拟实验指导书%202.0.0.pdf"></embed></div>
-<div class="main-div" id="main_div" style="width: 900px">
-    <canvas id="mainCanvas" width="900" height="500" ></canvas>
-    <div class="rowFlex-div" style="padding-top: 15px;">
-        <button class="button" onclick="start()" style="font-size: 16px;">开始测量</button>
-        <div style="display:inline;">
-            <span class="normal-span">齿轮径向综合误差:</span>
-            <input type="number" class="normal-input"> μm
+<div class="main-div">
+    <div id="index_div">
+        <button class="InstBtn" onclick="show(0)">实验说明书</button><button class="InstBtn" onclick="show(1)">开始实验</button><button class="InstBtn"  onclick="show(2)">虚拟实验演示</button>
+    </div>
+    <div id="instructions"> <embed id="instructTxt" src="pdf/5_齿轮径向综合误差与齿径向综合误差测量虚拟实验指导书%202.0.0.htm"></embed></div>
+    <div id="main_div">
+        <canvas id="mainCanvas" height="500" ></canvas>
+        <div class="rowFlex-div" style="padding-top: 15px;">
+            <button class="button" onclick="start()" style="font-size: 16px;">开始测量</button>
+            <div style="display:inline;">
+                <span class="normal-span">齿轮径向综合误差:</span>
+                <input type="number" class="normal-input"> μm
+            </div>
+            <div style="display:inline;">
+                <span class="normal-span"  >一齿径向综合误差:</span>
+                <input type="number" class="normal-input"> μm
+            </div >
+            <div style="font-size: 16px;margin-left: 330px;"><div style="line-height: 10px"><br></div>注：被测齿轮径向综合总偏差 F"= 37μm ，一齿径向综合偏差 f"= 11μm</div>
         </div>
-        <div style="display:inline;">
-            <span class="normal-span"  >一齿径向综合误差:</span>
-            <input type="number" class="normal-input"> μm
-        </div >
-        <div style="font-size: 16px;margin-left: 330px;"><div style="line-height: 10px"><br></div>注：被测齿轮径向综合总偏差 F"= 37μm ，一齿径向综合偏差 f"= 11μm</div>
+        <div id="eChart-div" style="padding-top: 15px">
+            <canvas id="Canvas" width="500" height="600"></canvas>
+        </div>
     </div>
-    <div id="eChart-div" style="padding-top: 15px">
-        <canvas id="Canvas" width="500" height="600"></canvas>
-    </div>
+    <div id="gif_div"><img id="demo"  width="1200"  src="img/GearCompositeError.gif"></div>
 </div>
-<div id="gif_div"><img id="demo"  width="1200"  src="img/GearCompositeError.gif"></div>
 
 <!--虚拟仪器库-->
 <script src="js/VILibrary.js"></script>
